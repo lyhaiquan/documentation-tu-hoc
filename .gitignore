@@ -1,0 +1,14 @@
+# Danh sách cho phép: bỏ qua mọi thứ, chỉ nhận các loại tệp nhỏ do mình viết.
+*
+!*/
+!.gitignore
+!*.html
+!*.md
+!*.py
+!*.json
+!*.ino
+!*.txt
+# Không bao giờ nhận: kho sách của bên thứ ba và các thư mục chứa sách/tệp lỗi
+_repo-technical-books/
+_Trung-lap/
+_File-loi/

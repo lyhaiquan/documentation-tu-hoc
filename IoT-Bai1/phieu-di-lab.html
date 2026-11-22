@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Phiếu đi lab Bài 1</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f1f3f5; --surface:#ffffff; --ink:#161a1f; --muted:#5b6673;
+  --line:#dce0e6; --accent:#0d6b5a; --accent-soft:#e3f1ee;
+  --warn:#a8560a; --warn-soft:#fdf1e3; --code-bg:#eef1f4;
+  --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151a; --surface:#191e25; --ink:#e4e8ed; --muted:#8b97a5;
+    --line:#2a313b; --accent:#4bbfa5; --accent-soft:#16302b;
+    --warn:#d9963f; --warn-soft:#33260f; --code-bg:#141920;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151a; --surface:#191e25; --ink:#e4e8ed; --muted:#8b97a5;
+  --line:#2a313b; --accent:#4bbfa5; --accent-soft:#16302b;
+  --warn:#d9963f; --warn-soft:#33260f; --code-bg:#141920;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding:30px 20px 70px;
+  display:flex;flex-direction:column;gap:26px}
+code{font-family:var(--mono);font-size:.87em;background:var(--code-bg);
+  padding:1px 5px;border-radius:3px}
+
+header{border-bottom:2px solid var(--ink);padding-bottom:15px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+h1{margin:7px 0 6px;font-size:clamp(22px,3.4vw,31px);font-weight:600;
+  letter-spacing:-.018em}
+.sub{color:var(--muted);font-size:14px;margin:0;max-width:66ch}
+
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  overflow:hidden}
+.phase-h{padding:13px 18px;border-bottom:1px solid var(--line);
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.phase-h .n{font-family:var(--mono);font-size:11.5px;font-weight:600;
+  color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:3px}
+.phase-h h2{margin:0;font-size:17px;font-weight:600;letter-spacing:-.012em}
+.phase-h .t{margin-left:auto;font-family:var(--mono);font-size:11.5px;
+  color:var(--muted);border:1px solid var(--line);padding:2px 8px;border-radius:3px}
+.phase-b{padding:16px 18px}
+
+ol.steps{margin:0;padding-left:0;list-style:none;counter-reset:s}
+ol.steps>li{counter-increment:s;position:relative;padding-left:32px;
+  margin-bottom:11px;font-size:14.5px}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:1px;
+  width:21px;height:21px;border-radius:50%;background:var(--accent-soft);
+  color:var(--accent);font-family:var(--mono);font-size:11.5px;font-weight:600;
+  display:flex;align-items:center;justify-content:center}
+ol.steps>li:last-child{margin-bottom:0}
+ol.steps b{font-weight:600}
+
+.write{background:var(--accent-soft);border-radius:5px;padding:11px 14px;
+  margin:9px 0 4px;font-size:14px}
+.write .tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--accent);font-weight:600;display:block;
+  margin-bottom:5px}
+.write i{font-style:normal;color:var(--muted);letter-spacing:.06em}
+
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:10px 0}
+th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);font-weight:600;padding:7px 9px;
+  border-bottom:1px solid var(--line)}
+td{padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.fill td{height:30px}
+.fill td:first-child{font-family:var(--mono);color:var(--muted)}
+
+.tip{background:var(--warn-soft);border-left:3px solid var(--warn);
+  border-radius:0 5px 5px 0;padding:11px 14px;font-size:13.5px;margin-top:14px}
+.tip b{font-weight:600}
+
+.chk{list-style:none;padding:0;margin:0;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:7px 18px}
+.chk li{font-size:14px;display:flex;gap:9px;align-items:flex-start}
+.chk li::before{content:"";flex:none;width:13px;height:13px;margin-top:5px;
+  border:1.5px solid var(--muted);border-radius:2px}
+
+footer{font-size:13.5px;color:var(--muted);border-top:1px solid var(--line);
+  padding-top:15px;max-width:74ch}
+
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .wrap{max-width:none;padding:0;gap:14px}
+  .phase{border:1px solid #bbb;break-inside:avoid}
+  .write{background:#fff;border:1px solid #bbb}
+  .tip{background:#fff;border-left:3px solid #888}
+  .phase-h .n,ol.steps>li::before{background:#eee;color:#000}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Bài thí nghiệm số 1 · phiếu mang theo</div>
+  <h1>Trình tự buổi thực hành</h1>
+  <p class="sub">Làm theo thứ tự, tick từng ô. Mỗi chỗ cần ghi vào báo cáo đều có sẵn
+  câu mẫu — bạn chỉ điền số đo thật của mình vào chỗ chấm.</p>
+</header>
+
+<!-- CHUAN BI -->
+<section class="phase">
+  <div class="phase-h"><span class="n">MANG THEO</span>
+    <h2>Chuẩn bị trước khi đi</h2></div>
+  <div class="phase-b">
+    <ul class="chk">
+      <li><b>Thước kẻ hoặc thước dây</b> — thiếu là không làm được Bảng 1.5</li>
+      <li>Vật cản: bìa cứng hoặc cuốn sách nhỏ</li>
+      <li>Tài liệu thí nghiệm đã in</li>
+      <li>Bút, bút chì</li>
+      <li>USB chứa 3 file code, hoặc mở sẵn trên điện thoại</li>
+      <li>Điện thoại để chụp màn hình Serial Monitor</li>
+    </ul>
+    <div class="tip"><b>Thước là thứ hay quên nhất.</b> Bước 5 bắt xác định khoảng
+    cách nhỏ nhất và lớn nhất đo được — không có thước thì không biết vật cản đang
+    cách bao xa để đối chiếu.</div>
+  </div>
+</section>
+
+<!-- BUOC 0 -->
+<section class="phase">
+  <div class="phase-h"><span class="n">BƯỚC 0</span>
+    <h2>Khởi động — làm một lần đầu buổi</h2>
+    <span class="t">≈ 5 phút</span></div>
+  <div class="phase-b">
+    <ol class="steps">
+      <li>Cắm dây nguồn AC 220V cho KIT, <b>bật công tắc nguồn</b>.</li>
+      <li>Nối cáp USB giữa máy tính và cổng USB trên KIT.</li>
+      <li>Mở <b>Arduino IDE</b>.</li>
+      <li><b>Tools → Board → ESP32 Arduino → ESP32 Dev Module</b></li>
+      <li><b>Tools → Port →</b> chọn cổng COM đang hiện. <b>Ghi lại số hiệu</b> —
+      báo cáo có thể hỏi.</li>
+      <li><b>Tools → Manage Libraries</b> → gõ <code>DHT sensor library</code>,
+      kiểm tra đã cài chưa. Chưa thì cài, kéo theo <i>Adafruit Unified Sensor</i>.</li>
+    </ol>
+    <div class="tip"><b>Không thấy cổng COM nào?</b> Đổi cáp USB trước tiên — nhiều
+    cáp chỉ có dây sạc, không có dây dữ liệu. Vẫn không được thì báo thầy, máy thiếu
+    driver CH340.</div>
+  </div>
+</section>
+
+<!-- PHAN 1 -->
+<section class="phase">
+  <div class="phase-h"><span class="n">PHẦN 1</span>
+    <h2>Ví dụ khởi động — nháy LED</h2>
+    <span class="t">≈ 7 phút</span></div>
+  <div class="phase-b">
+    <ol class="steps">
+      <li>Nối một dây từ giắc <b>IO13</b> sang giắc <b>L1</b> trên KIT.</li>
+      <li>Gõ hoặc dán chương trình nháy LED. Giữ nguyên <code>delay(1000)</code>
+      cả hai chỗ.</li>
+      <li>Bấm <b>✓</b> (Compile), rồi <b>→</b> (Upload). Chờ tới khi hiện
+      <code>Done uploading</code>.</li>
+      <li>Nhìn đèn L1 — sáng 1 giây, tắt 1 giây.</li>
+      <li>Mở <b>Serial Monitor</b> (Ctrl+Shift+M), chọn <b>115200</b> ở ô baud.</li>
+    </ol>
+
+    <div class="write"><span class="tag">Ghi vào báo cáo</span>
+      Tần số nháy của đèn LED là <b>0,5 Hz</b>. Giải thích: mỗi chu kỳ gồm 1 giây
+      sáng cộng 1 giây tắt, nên chu kỳ T = 2 giây; tần số f = 1/T = 1/2 = 0,5 Hz.
+      Nếu rút ngắn hai lệnh <code>delay</code> xuống 500 ms thì chu kỳ còn 1 giây
+      và tần số tăng lên 1 Hz.
+    </div>
+  </div>
+</section>
+
+<!-- PHAN 2 -->
+<section class="phase">
+  <div class="phase-h"><span class="n">PHẦN 2</span>
+    <h2>Mục 3.1 — cảm biến DHT11</h2>
+    <span class="t">≈ 20 phút</span></div>
+  <div class="phase-b">
+    <ol class="steps">
+      <li>Rút dây LED. Nối: <b>DATA → IO04</b>, <b>VCC → 5V</b>,
+      <b>GND → GND</b>.</li>
+      <li>Dán chương trình DHT. <b>Đổi <code>DHT22</code> thành <code>DHT11</code></b>
+      — quên bước này là màn hình ra toàn <code>nan</code>.</li>
+      <li>Compile → Upload → mở Serial Monitor ở 115200.</li>
+      <li>Chờ vài lần đọc cho số ổn định, rồi bắt đầu ghi Bảng 1.2.</li>
+    </ol>
+
+    <p style="margin:14px 0 4px;font-weight:600;font-size:14.5px">
+      Cách lấy 5 lần đo cho khác nhau</p>
+    <p style="margin:0 0 6px;font-size:14px;color:var(--muted)">
+      Đừng chép 5 dòng giống hệt. Làm theo kịch bản này thì vừa có 5 số liệu khác
+      nhau, vừa có chuyện để viết nhận xét:</p>
+    <table>
+      <thead><tr><th>Lần</th><th>Làm gì</th><th>Kỳ vọng</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Để yên, đọc số phòng thí nghiệm</td><td>Giá trị nền</td></tr>
+        <tr><td>2</td><td>Đợi 30 giây, đọc lại</td><td>Gần giống lần 1</td></tr>
+        <tr><td>3</td><td><b>Hà hơi</b> vào cảm biến khoảng 5 giây</td>
+          <td>%RH tăng vọt, °C nhích lên</td></tr>
+        <tr><td>4</td><td>Ngừng hà hơi, đọc ngay</td><td>%RH còn cao</td></tr>
+        <tr><td>5</td><td>Đợi 1 phút, đọc lại</td><td>Từ từ về gần giá trị nền</td></tr>
+      </tbody>
+    </table>
+
+    <table class="fill">
+      <thead><tr><th>Lần đo</th><th>Nhiệt độ °C</th><th>Nhiệt độ °F</th>
+        <th>Độ ẩm %RH</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td></td><td></td><td></td></tr>
+        <tr><td>2</td><td></td><td></td><td></td></tr>
+        <tr><td>3</td><td></td><td></td><td></td></tr>
+        <tr><td>4</td><td></td><td></td><td></td></tr>
+        <tr><td>5</td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+
+    <div class="write"><span class="tag">Nhận xét Bước 3 — điền số của bạn</span>
+      Ở điều kiện phòng thí nghiệm, cảm biến cho nhiệt độ khoảng <i>……</i> °C và
+      độ ẩm khoảng <i>……</i> %RH, số đọc ổn định giữa các lần. Khi hà hơi vào cảm
+      biến, độ ẩm tăng nhanh lên <i>……</i> %RH còn nhiệt độ chỉ nhích nhẹ. Khi ngừng
+      tác động, độ ẩm <b>giảm chậm hơn nhiều so với lúc tăng</b>, phải mất khoảng
+      <i>……</i> giây mới trở về giá trị ban đầu. Nguyên nhân là phần tử đo độ ẩm
+      hoạt động theo nguyên lý điện dung, hơi nước cần thời gian khuếch tán ra khỏi
+      lớp điện môi; tài liệu ghi thời gian đáp ứng trung bình của DHT11 là 2 giây.
+      Ngoài ra số đọc chỉ có phần nguyên, phù hợp với độ phân giải thực tế của DHT11.
+    </div>
+
+    <p style="margin:16px 0 4px;font-weight:600;font-size:14.5px">Bước 4 — đổi chân
+      và đổi tốc độ serial</p>
+    <ol class="steps">
+      <li>Đổi <code>#define DHTPIN 4</code> thành <code>16</code>,
+      <b>và chuyển dây</b> từ giắc IO04 sang IO16. Upload lại.</li>
+      <li>Thử cố tình chỉ đổi code mà <b>không</b> chuyển dây — xem kết quả.</li>
+      <li>Đổi <code>Serial.begin(115200)</code> thành <code>9600</code>, upload,
+      nhưng <b>giữ nguyên ô baud 115200</b> trên Serial Monitor.</li>
+      <li>Sau đó chỉnh ô baud về 9600 cho khớp.</li>
+    </ol>
+
+    <div class="write"><span class="tag">Nhận xét Bước 4</span>
+      Khi chuyển chân DATA từ IO04 sang IO16 và sửa lại khai báo trong chương trình
+      cho khớp, cảm biến vẫn đọc bình thường. Điều này cho thấy các chân GPIO của
+      ESP32 là chân đa dụng, chức năng do phần mềm quy định chứ không cố định theo
+      phần cứng. Ngược lại, nếu chỉ sửa chương trình mà quên chuyển dây thì chương
+      trình báo lỗi không đọc được cảm biến, vì chân được khai báo không có tín hiệu
+      nào. Cần lưu ý một số chân không dùng được cho mục đích này: GPIO 6–11 nối với
+      bộ nhớ flash bên trong, GPIO 34–39 chỉ nhận tín hiệu vào nên không dùng cho
+      giao tiếp hai chiều như One-Wire.
+      <br><br>
+      Khi đổi tốc độ cổng serial trong chương trình xuống 9600 mà vẫn để Serial
+      Monitor ở 115200, màn hình hiện ra ký tự vô nghĩa. Sau khi chỉnh ô tốc độ về
+      đúng 9600 thì dữ liệu hiển thị lại bình thường. Nguyên nhân là UART truyền bất
+      đồng bộ, không có dây xung nhịp riêng, nên hai bên bắt buộc phải thống nhất
+      trước cùng một tốc độ baud thì mới lấy mẫu bit đúng vị trí.
+    </div>
+
+    <div class="write"><span class="tag">Câu tự luận</span>
+      Nguyên lý One-Wire — chép từ file <code>tra-loi-one-wire-i2c.html</code>.
+    </div>
+  </div>
+</section>
+
+<!-- PHAN 3 -->
+<section class="phase">
+  <div class="phase-h"><span class="n">PHẦN 3</span>
+    <h2>Mục 3.2 — cảm biến siêu âm US-015</h2>
+    <span class="t">≈ 30 phút</span></div>
+  <div class="phase-b">
+    <ol class="steps">
+      <li>Rút dây DHT. Nối: <b>TRIGGER → IO02</b>, <b>ECHO → IO04</b>,
+      <b>VCC → 5V</b>, <b>GND → GND</b>.</li>
+      <li>Dán chương trình siêu âm. Không cần thư viện.</li>
+      <li>Compile → Upload → Serial Monitor 115200.</li>
+      <li>Dùng thước đặt vật cản lần lượt ở <b>10, 30, 50, 100 cm</b>, mỗi mốc đọc
+      vài lần rồi so với số trên màn hình.</li>
+    </ol>
+
+    <table class="fill">
+      <thead><tr><th>Thước đo</th><th>Cảm biến báo</th><th>Chênh lệch</th></tr></thead>
+      <tbody>
+        <tr><td>10 cm</td><td></td><td></td></tr>
+        <tr><td>30 cm</td><td></td><td></td></tr>
+        <tr><td>50 cm</td><td></td><td></td></tr>
+        <tr><td>100 cm</td><td></td><td></td></tr>
+      </tbody>
+    </table>
+
+    <div class="write"><span class="tag">Nhận xét Bước 3</span>
+      Khi thay đổi khoảng cách của vật cản, giá trị thời gian đo được trên chân ECHO
+      và giá trị khoảng cách tính ra thay đổi tỉ lệ thuận với nhau, đúng như công
+      thức. So với thước, sai lệch nằm trong khoảng <i>……</i> cm. Khi hướng vật cản
+      nghiêng đi hoặc dùng vật mềm, kết quả kém ổn định hơn vì sóng siêu âm bị tán
+      xạ hoặc hấp thụ thay vì phản hồi thẳng về đầu thu.
+    </div>
+
+    <div class="write"><span class="tag">Bước 4 — giải thích mã nguồn và công thức</span>
+      Chương trình phát một xung mức cao dài 10 µs vào chân TRIGGER để ra lệnh cho
+      cảm biến phát sóng. Sau đó hàm <code>pulseIn()</code> đo độ rộng xung mức cao
+      trả về trên chân ECHO; độ rộng này chính là thời gian sóng siêu âm đi từ cảm
+      biến tới vật cản và phản hồi trở lại. Khoảng cách được tính theo công thức
+      d = t × v ÷ 2, trong đó phải chia đôi vì thời gian đo được bao gồm cả lượt đi
+      và lượt về của sóng.
+      <br><br>
+      Nói độ chính xác của cảm biến tùy thuộc việc hiệu chỉnh tốc độ sóng siêu âm là
+      vì vận tốc âm trong không khí phụ thuộc nhiệt độ theo công thức
+      v = 331,3 + 0,606 × T (m/s): ở 0 °C sóng đi 331 m/s, còn ở 40 °C đi tới 355 m/s.
+      Nếu chương trình lấy cứng một giá trị 340 m/s, mọi phép đo đều lệch cùng một
+      chiều và cùng một tỉ lệ, tức là <b>sai số hệ thống</b>, đo lại nhiều lần cũng
+      không loại bỏ được. Chỉ khi đưa nhiệt độ môi trường vào công thức tính vận tốc
+      thì sai số này mới được khắc phục.
+    </div>
+
+    <p style="margin:16px 0 4px;font-weight:600;font-size:14.5px">Bước 5 — đo vùng mù</p>
+    <ol class="steps">
+      <li>Đưa vật cản từ xa <b>tiến dần lại gần</b> cảm biến. Tới lúc số bắt đầu
+      nhảy loạn hoặc báo hết giờ, dừng lại và đo bằng thước → đó là
+      <b>khoảng cách nhỏ nhất</b>.</li>
+      <li>Đưa vật cản <b>lùi xa dần</b>. Tới lúc mất tín hiệu, đo lại → đó là
+      <b>khoảng cách lớn nhất</b>.</li>
+    </ol>
+
+    <table class="fill">
+      <thead><tr><th>Đại lượng</th><th>Kết quả đo</th></tr></thead>
+      <tbody>
+        <tr><td>Khoảng cách nhỏ nhất</td><td></td></tr>
+        <tr><td>Khoảng cách lớn nhất</td><td></td></tr>
+        <tr><td>Vùng mù</td><td></td></tr>
+      </tbody>
+    </table>
+
+    <div class="write"><span class="tag">Nhận xét Bước 5</span>
+      Kết quả thực nghiệm: khoảng cách nhỏ nhất đo được là <i>……</i> cm, khoảng cách
+      lớn nhất là <i>……</i> cm. Vùng mù là vùng nằm ngoài hai giới hạn này, tức dưới
+      <i>……</i> cm và trên <i>……</i> cm. Giá trị đo được phù hợp với tầm đo 2 cm đến
+      2,5 m ghi trong tài liệu.
+      <br><br>
+      Vùng mù ở phía gần hình thành do sau khi phát, bản gốm áp điện của bộ phát vẫn
+      còn rung dư thêm một khoảng thời gian ngắn; trong lúc đó đầu thu không phân
+      biệt được sóng phản hồi với chính dao động của bộ phát, nên không đo được. Giới
+      hạn ở phía xa hình thành do sóng siêu âm suy hao dần theo quãng đường, tới một
+      khoảng cách nhất định thì tín hiệu phản hồi quá yếu, chân ECHO không lên mức
+      cao và phép đo hết thời gian chờ.
+    </div>
+
+    <div class="write"><span class="tag">Nhận xét Bước 6</span>
+      Đổi chân TRIGGER và ECHO sang cặp chân khác rồi sửa lại khai báo trong chương
+      trình, cảm biến vẫn hoạt động bình thường — kết luận giống Bước 4 của mục 3.1.
+      Việc đổi tốc độ cổng serial cũng cho kết quả tương tự: chỉ khi tốc độ khai báo
+      trong chương trình trùng với tốc độ chọn trên Serial Monitor thì dữ liệu mới
+      hiển thị đúng.
+    </div>
+
+    <div class="write"><span class="tag">Câu tự luận</span>
+      Nguyên lý I2C — chép từ file <code>tra-loi-one-wire-i2c.html</code>.
+      Nhớ: I2C trên KIT là đường nối màn hình LCD 20x4, không phải của cảm biến siêu âm.
+    </div>
+  </div>
+</section>
+
+<!-- SU CO -->
+<section class="phase">
+  <div class="phase-h"><span class="n">SỰ CỐ</span>
+    <h2>Gặp lỗi thì xử lý thế nào</h2></div>
+  <div class="phase-b">
+    <table>
+      <thead><tr><th>Hiện tượng</th><th>Nguyên nhân thường gặp</th></tr></thead>
+      <tbody>
+        <tr><td>Không có cổng COM</td><td>Cáp USB chỉ có dây sạc; hoặc máy thiếu
+          driver CH340</td></tr>
+        <tr><td>Serial ra ký tự rác</td><td>Ô baud không khớp
+          <code>Serial.begin()</code></td></tr>
+        <tr><td>DHT ra <code>nan</code></td><td>Quên đổi về <code>DHT11</code>;
+          dây DATA lỏng; cắm nhầm chân; lấy nguồn 3V3 thay vì 5V</td></tr>
+        <tr><td>Siêu âm luôn báo hết giờ</td><td>Nhầm chân TRIG với ECHO;
+          quên nối GND chung</td></tr>
+        <tr><td>Upload báo lỗi kết nối</td><td>Giữ nút BOOT trên bo lúc đang
+          "Connecting…", thả khi thấy chạy</td></tr>
+        <tr><td>Số nhảy loạn không lý do</td><td>Thiếu dây GND chung — lỗi im lặng
+          khó tìm nhất</td></tr>
+      </tbody>
+    </table>
+    <div class="tip"><b>Mẹo:</b> mỗi khi màn hình ra kết quả đẹp, chụp ảnh lại ngay.
+    Về nhà ghi báo cáo mà thiếu số thì còn ảnh để tra, không phải quay lại phòng lab.</div>
+  </div>
+</section>
+
+<footer>
+  Tổng thời gian ước chừng 60–70 phút. Phần khó nhất không phải code mà là kiên nhẫn
+  ghi đủ số liệu — hai bảng và sáu chỗ nhận xét. Hai câu tự luận và toàn bộ phần giải
+  thích công thức đã soạn sẵn, chỉ việc chép.
+</footer>
+</div>
+</body>
+</html>

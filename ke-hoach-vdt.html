@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kế hoạch VDT — bản có liên kết sách</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap">
+<style>
+:root{
+  --bg:#EEF1F5;--surface:#FFFFFF;--surface-2:#F7F9FB;
+  --ink:#141D29;--ink-2:#33445A;--muted:#66788F;
+  --line:#D5DCE5;--line-2:#E6EBF1;
+  --accent:#1D5C99;--accent-soft:#E3EDF6;
+  --done:#0D7A69;--done-soft:#DDF0EC;
+  --warn:#A9591A;--warn-soft:#F6EADF;
+  --shadow:0 1px 2px rgba(20,29,41,.06),0 4px 14px rgba(20,29,41,.05);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0C1219;--surface:#141C26;--surface-2:#1A232F;
+  --ink:#E6ECF3;--ink-2:#B7C4D2;--muted:#8496A9;
+  --line:#253141;--line-2:#1E2833;
+  --accent:#63A9E6;--accent-soft:#16293B;
+  --done:#3FC1A9;--done-soft:#102C29;
+  --warn:#DE9950;--warn-soft:#2E2318;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);
+}}
+:root[data-theme="dark"]{
+  --bg:#0C1219;--surface:#141C26;--surface-2:#1A232F;
+  --ink:#E6ECF3;--ink-2:#B7C4D2;--muted:#8496A9;
+  --line:#253141;--line-2:#1E2833;
+  --accent:#63A9E6;--accent-soft:#16293B;
+  --done:#3FC1A9;--done-soft:#102C29;
+  --warn:#DE9950;--warn-soft:#2E2318;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Serif",Georgia,serif;font-size:16px;line-height:1.6;margin:0;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1020px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3,h4,.ui{font-family:"IBM Plex Sans","Segoe UI",system-ui,sans-serif}
+code,kbd,.mono{font-family:"IBM Plex Mono",Consolas,monospace}
+a{color:var(--accent)}
+
+header{padding:40px 0 24px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:"IBM Plex Sans",sans-serif;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.12;margin:0 0 12px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+.lede{font-size:16.5px;color:var(--ink-2);margin:0;max-width:64ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chip{font-family:"IBM Plex Sans",sans-serif;font-size:12.5px;font-weight:500;padding:5px 11px;border:1px solid var(--line);border-radius:999px;color:var(--ink-2);background:var(--surface)}
+.chip b{color:var(--ink);font-weight:600}
+
+.overall{margin-top:24px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.overall .num{font-family:"IBM Plex Sans",sans-serif;font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;color:var(--accent)}
+.overall .lbl{font-family:"IBM Plex Sans",sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+.bar{flex:1;min-width:180px;height:8px;background:var(--line-2);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .35s ease}
+.btn{font-family:"IBM Plex Sans",sans-serif;font-size:13px;font-weight:500;padding:7px 13px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink-2);cursor:pointer}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.note{margin:26px 0;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:8px;padding:16px 18px}
+.note.blue{border-left-color:var(--accent)}
+.note h4{margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--warn)}
+.note.blue h4{color:var(--accent)}
+.note p{margin:0 0 8px;font-size:15px;color:var(--ink-2)}
+.note p:last-child{margin-bottom:0}
+.note ol,.note ul{margin:8px 0 0;padding-left:20px;font-size:15px;color:var(--ink-2)}
+.note li{margin-bottom:5px}
+
+.week{margin-top:38px;scroll-margin-top:12px}
+.whead{background:var(--surface);border:1px solid var(--line);border-radius:10px 10px 0 0;padding:18px 20px;border-bottom:none}
+.wtop{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.wnum{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;letter-spacing:.1em;color:var(--accent);background:var(--accent-soft);padding:3px 9px;border-radius:5px;white-space:nowrap}
+.wtitle{font-size:21px;font-weight:600;margin:0;letter-spacing:-.01em;flex:1;min-width:200px}
+.wpct{font-family:"IBM Plex Sans",sans-serif;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted)}
+.wbar{height:4px;background:var(--line-2);border-radius:99px;margin-top:12px;overflow:hidden}
+.wbar>i{display:block;height:100%;width:0;background:var(--done);border-radius:99px;transition:width .35s ease}
+.wfacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-2)}
+.fact{font-family:"IBM Plex Sans",sans-serif;font-size:13.5px;color:var(--ink-2)}
+.fact span{display:block;font-size:11px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+
+.days{background:var(--surface);border:1px solid var(--line);border-radius:0 0 10px 10px;box-shadow:var(--shadow);overflow:hidden}
+.day{display:flex;gap:14px;padding:16px 20px;border-top:1px solid var(--line-2);transition:background .15s}
+.day:first-child{border-top:none}
+.day:hover{background:var(--surface-2)}
+.day.is-done{background:var(--done-soft)}
+.day.is-done .dtitle{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.day input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:none;width:20px;height:20px;margin:2px 0 0;border:1.5px solid var(--line);border-radius:5px;background:var(--surface);cursor:pointer;position:relative}
+.day input[type=checkbox]:hover{border-color:var(--accent)}
+.day input[type=checkbox]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.day input[type=checkbox]:checked{background:var(--done);border-color:var(--done)}
+.day input[type=checkbox]:checked::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(43deg)}
+.dbody{flex:1;min-width:0}
+.dhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.dnum{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap;letter-spacing:.03em}
+.dtitle{font-family:"IBM Plex Sans",sans-serif;font-size:16px;font-weight:600;color:var(--ink);flex:1;min-width:160px;cursor:pointer}
+.dlines{margin-top:10px;display:grid;gap:7px}
+.dline{display:flex;gap:10px;font-size:14.5px;color:var(--ink-2);line-height:1.5}
+.dkey{font-family:"IBM Plex Sans",sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex:none;width:64px;padding-top:3px}
+.dline.goal .dkey{color:var(--done)}
+.dline.goal{color:var(--ink)}
+.dval code{font-size:13px;background:var(--surface-2);border:1px solid var(--line-2);padding:1px 5px;border-radius:4px;color:var(--ink);white-space:nowrap}
+
+/* reading links */
+.refs{display:flex;flex-direction:column;gap:5px}
+.ref{
+  display:flex;align-items:baseline;gap:9px;text-decoration:none;
+  font-family:"IBM Plex Sans",sans-serif;font-size:13.5px;
+  padding:6px 10px;border:1px solid var(--line-2);border-radius:6px;
+  background:var(--surface-2);color:var(--ink);transition:border-color .15s,background .15s
+}
+.ref:hover{border-color:var(--accent);background:var(--accent-soft)}
+.ref:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.ref .src{font-weight:600;color:var(--accent);white-space:nowrap;flex:none}
+.ref .loc{flex:1;min-width:0;color:var(--ink-2)}
+.ref .pg{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap;flex:none}
+.ref.ext .src{color:var(--warn)}
+.ref.ext:hover{border-color:var(--warn);background:var(--warn-soft)}
+
+.res{margin-top:44px}
+.res h2{font-size:23px;margin:0 0 6px;letter-spacing:-.01em}
+.res>p{color:var(--ink-2);margin:0 0 18px;max-width:64ch}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-family:"IBM Plex Sans",sans-serif;font-size:14px;min-width:540px}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line-2);vertical-align:top}
+th{font-size:11px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+td .tag{display:inline-block;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:4px}
+.tag.local{background:var(--accent-soft);color:var(--accent)}
+.tag.web{background:var(--warn-soft);color:var(--warn)}
+footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);font-family:"IBM Plex Sans",sans-serif;font-size:13px;color:var(--muted)}
+@media (max-width:620px){.dkey{width:100%;padding-top:0}.dline{flex-direction:column;gap:3px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Viettel Digital Talent · hướng Cloud / DevOps</p>
+  <h1>Kế hoạch VDT — bản có liên kết sách</h1>
+  <p class="lede">Bấm vào bất kỳ dòng tài liệu nào để mở đúng trang cần đọc. Sách trên máy mở thẳng file PDF tại trang đã chỉ định; tài liệu web mở trang chính thức. Tiến độ lưu trên trình duyệt này.</p>
+  <div class="meta">
+    <span class="chip"><b>56</b> ngày</span>
+    <span class="chip"><b>7</b> cuốn liên kết trực tiếp</span>
+    <span class="chip">Gốc: <b>D:\Documentation</b></span>
+  </div>
+  <div class="overall">
+    <div><div class="num"><span id="pct">0</span>%</div><div class="lbl">Hoàn thành</div></div>
+    <div class="bar"><i id="obar"></i></div>
+    <button class="btn" id="reset" type="button">Xoá tiến độ</button>
+  </div>
+</header>
+
+<div class="note blue">
+  <h4>Dự án xuyên suốt</h4>
+  <p>Cả 8 tuần dồn vào <strong>một dự án duy nhất</strong>, mỗi tuần bồi thêm một lớp. Đây là thứ bạn mở ra cho người phỏng vấn xem.</p>
+  <ol>
+    <li><strong>Tuần 3</strong> — service Go nhỏ (<code>/healthz</code>, <code>/metrics</code>), đóng gói bằng Docker</li>
+    <li><strong>Tuần 4–5</strong> — deploy lên cluster <code>kind</code>: Deployment, Service, Ingress, ConfigMap, probe</li>
+    <li><strong>Tuần 6</strong> — pipeline CI/CD tự build image và deploy khi push</li>
+    <li><strong>Tuần 7</strong> — Prometheus, Grafana, hạ tầng bằng Terraform</li>
+    <li><strong>Tuần 8</strong> — README, sơ đồ kiến trúc, luyện kể lại</li>
+  </ol>
+</div>
+
+<div class="note">
+  <h4>Ba luật bất di bất dịch</h4>
+  <ul>
+    <li><strong>Không mở File Explorer</strong> trong lúc học. Mọi thao tác file làm bằng lệnh.</li>
+    <li><strong>Git bằng dòng lệnh</strong>, không dùng GitHub Desktop hay nút Git trong IDE.</li>
+    <li><strong>Ngày nào cũng commit</strong>, kể cả ngày chỉ đọc — commit ghi chú.</li>
+  </ul>
+</div>
+
+<main id="weeks"></main>
+
+<section class="res">
+  <h2>Nguồn tài liệu</h2>
+  <p>Sách <span class="tag local">Máy</span> mở trực tiếp tại trang cần đọc. Phần công cụ dùng tài liệu chính thức vì sách in ra là lạc hậu.</p>
+  <div class="tablewrap">
+    <table><thead><tr><th>Tài liệu</th><th>Dùng cho</th><th>Vị trí</th></tr></thead><tbody id="restable"></tbody></table>
+  </div>
+</section>
+
+<footer>
+  <p>Số trang là <strong>trang thật trong file PDF</strong>, lấy từ mục lục nhúng trong chính file của bạn — không phải số trang in trên giấy. Nếu bạn đổi tên hoặc di chuyển file, liên kết sẽ hỏng; báo lại để cập nhật đường dẫn.</p>
+</footer>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+var ROOT="file:///D:/Documentation/";
+var BOOKS={
+ K8S:{f:"Kubernetes/Kubernetes Up and Running - 3rd Ed 2022 (Early Release).pdf",n:"K8s Up &amp; Running"},
+ GO:{f:"Go/Learning Go 1st Ed 2021 (Jon Bodner).pdf",n:"Learning Go"},
+ CNGO:{f:"Go/Cloud Native Go 1st Ed 2021 (Matthew Titmus).pdf",n:"Cloud Native Go"},
+ DSGO:{f:"Go/Distributed Services with Go (Travis Jeffery).pdf",n:"Distributed Services"},
+ OSTEP:{f:"OS-Linux-Networking/Operating Systems - Three Easy Pieces.pdf",n:"OSTEP"},
+ TCPIP:{f:"OS-Linux-Networking/Stevens W.R. - TCP IP Illustrated, Vol.1, The Protocols.pdf",n:"TCP/IP Illustrated"},
+ DDIA:{f:"System-Design-Architecture/Designing Data-Intensive Applications (Kleppmann).pdf",n:"DDIA"}
+};
+function B(k,p,t){return{b:k,p:p,t:t};}
+function W(n,u,t){return{n:n,u:u,t:t};}
+
+var TLCL="https://linuxcommand.org/tlcl.php",
+    BAN="https://overthewire.org/wargames/bandit/",
+    GIT="https://git-scm.com/book/en/v2",
+    MS="https://missing.csail.mit.edu/",
+    TOUR="https://go.dev/tour/",
+    EGO="https://go.dev/doc/effective_go",
+    GEN="https://go.dev/doc/tutorial/generics",
+    DOC="https://docs.docker.com/get-started/",
+    DFILE="https://docs.docker.com/reference/dockerfile/",
+    DBUILD="https://docs.docker.com/build/",
+    DCOMP="https://docs.docker.com/compose/",
+    K8C="https://kubernetes.io/docs/concepts/",
+    K8CHEAT="https://kubernetes.io/docs/reference/kubectl/cheatsheet/",
+    K8POD="https://kubernetes.io/docs/concepts/workloads/pods/",
+    K8SVC="https://kubernetes.io/docs/concepts/services-networking/service/",
+    K8CM="https://kubernetes.io/docs/concepts/configuration/configmap/",
+    K8ING="https://kubernetes.io/docs/concepts/services-networking/ingress/",
+    K8VOL="https://kubernetes.io/docs/concepts/storage/",
+    K8RBAC="https://kubernetes.io/docs/reference/access-authn-authz/rbac/",
+    K8DBG="https://kubernetes.io/docs/tasks/debug/debug-application/",
+    K8DNS="https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/",
+    KIND="https://kind.sigs.k8s.io/docs/user/quick-start/",
+    GHA="https://docs.github.com/en/actions",
+    TF="https://developer.hashicorp.com/terraform/tutorials",
+    PROM="https://prometheus.io/docs/introduction/overview/",
+    PROMQL="https://prometheus.io/docs/prometheus/latest/querying/basics/",
+    PROMGO="https://prometheus.io/docs/guides/go-application/",
+    GRAF="https://grafana.com/docs/grafana/latest/";
+
+var WEEKS=[
+{n:1,title:"Linux: từ giao diện sang dòng lệnh",goal:"Gõ lệnh thành phản xạ, bỏ hẳn chuột",go:"Tour of Go trọn bộ, 45 phút/ngày",out:"Tự viết được một shell script chạy được",days:[
+ {t:"Shell là gì, điều hướng hệ thống",
+  refs:[W("TLCL",TLCL,"Phần 1 · ch.1–3 — What is the Shell, Navigation, Exploring the System"),W("Bandit",BAN,"Màn 0 → 3"),W("Tour of Go",TOUR,"Basics: Packages, Variables, Functions")],
+  d:"Mở <code>wsl</code>. Luyện <code>pwd cd ls</code> với <code>-l -a -h</code>",
+  g:"Di chuyển và xem nội dung file mà không mở Explorer lần nào"},
+ {t:"Thao tác file và thư mục",
+  refs:[W("TLCL",TLCL,"Phần 1 · ch.4–5 — Manipulating Files and Directories, Working with Commands"),W("Bandit",BAN,"Màn 4 → 6"),W("Tour of Go",TOUR,"Flow control: for, if, switch, defer")],
+  d:"<code>mkdir cp mv rm ln</code>, wildcard, <code>type which man</code>",
+  g:"Dựng cây thư mục 3 tầng và copy chọn lọc bằng wildcard"},
+ {t:"Redirect và pipe — tư duy cốt lõi của Unix",
+  refs:[W("TLCL",TLCL,"Phần 1 · ch.6–7 — Redirection, Seeing the World as the Shell Sees It"),W("Bandit",BAN,"Màn 7 → 9"),W("Tour of Go",TOUR,"More types: structs, slices, maps")],
+  d:"<code>&gt; &gt;&gt; 2&gt;&amp;1 |</code>, <code>sort uniq wc head tail tee</code>",
+  g:"Ghép chuỗi 3 lệnh qua pipe để đếm dòng lặp trong một file"},
+ {t:"Phân quyền và người dùng",
+  refs:[W("TLCL",TLCL,"Phần 1 · ch.9 — Permissions"),W("Bandit",BAN,"Màn 10 → 12"),W("Tour of Go",TOUR,"Methods and interfaces")],
+  d:"<code>chmod chown umask sudo</code>, đọc <code>/etc/passwd</code>",
+  g:"Giải thích <code>rwxr-xr--</code> và <code>755</code> không cần tra"},
+ {t:"Tiến trình",
+  refs:[W("TLCL",TLCL,"Phần 1 · ch.10 — Processes"),W("Tour of Go",TOUR,"Generics + bắt đầu Concurrency")],
+  d:"<code>ps aux</code>, <code>top</code>, <code>kill</code> với signal, <code>jobs fg bg nohup</code>",
+  g:"Chạy nền một tiến trình, tìm lại PID rồi kết thúc bằng đúng signal"},
+ {t:"Biến môi trường và trình soạn thảo",
+  refs:[W("TLCL",TLCL,"Phần 2 · ch.11–12 — The Environment, A Gentle Introduction to vi"),W("Bandit",BAN,"Màn 13 → 15"),W("Tour of Go",TOUR,"Concurrency: goroutines, channels")],
+  d:"<code>PATH</code>, <code>export</code>, <code>.bashrc</code>. Sửa được file bằng vi",
+  g:"Thêm alias vào <code>.bashrc</code> và sửa file bằng vi không hoảng"},
+ {t:"Ôn tuần 1 và script đầu tiên",
+  refs:[W("TLCL",TLCL,"Xem lại chương nào còn lấn cấn"),W("Effective Go",EGO,"Đọc lướt để nắm phong cách Go")],
+  d:"Viết script nén thư mục kèm ngày tháng vào tên file",
+  g:"Script chạy được, có shebang, có quyền thực thi, xử lý tham số"}
+]},
+
+{n:2,title:"Linux nâng cao và Git",goal:"Tìm, lọc, xử lý dữ liệu bằng dòng lệnh — và quản lý code",go:"Learning Go ch.1–4",out:"Repo Git có nhánh, lịch sử sạch, đã push lên GitHub",days:[
+ {t:"Tìm kiếm file",
+  refs:[W("TLCL",TLCL,"Phần 3 · ch.17 — Searching for Files"),W("Bandit",BAN,"Màn 16 → 18"),B("GO",21,"ch.1 — Setting Up Your Go Environment")],
+  d:"<code>find</code> với <code>-name -type -size -mtime -exec</code>, <code>xargs</code>",
+  g:"Tìm file theo nhiều điều kiện kết hợp và xử lý hàng loạt bằng <code>-exec</code>"},
+ {t:"Biểu thức chính quy và xử lý text",
+  refs:[W("TLCL",TLCL,"Phần 3 · ch.19–20 — Regular Expressions, Text Processing"),W("Bandit",BAN,"Màn 19 → 21"),B("GO",37,"ch.2 — Primitive Types and Declarations")],
+  d:"<code>grep -E -r -v</code>, <code>sed</code>, <code>cut sort uniq tr</code>",
+  g:"Lọc log lấy đúng dòng cần và đếm theo nhóm"},
+ {t:"Gói phần mềm và ổ đĩa",
+  refs:[W("TLCL",TLCL,"Phần 3 · ch.14–15 — Package Management, Storage Media"),B("GO",55,"ch.3 — Composite Types")],
+  d:"<code>apt</code>, <code>dpkg</code>, <code>df du lsblk</code>. Cài <code>tldr jq tree</code>",
+  g:"Cài được công cụ mới và biết ổ nào đang đầy"},
+ {t:"Mạng ở mức dòng lệnh",
+  refs:[W("TLCL",TLCL,"Phần 3 · ch.16 — Networking"),B("GO",81,"ch.4 — Blocks, Shadows, and Control Structures")],
+  d:"<code>curl wget ping dig ss traceroute</code>. Gọi API rồi lọc bằng <code>jq</code>",
+  g:"Kiểm tra được cổng nào đang mở và phân giải tên miền bằng <code>dig</code>"},
+ {t:"systemd — nơi TLCL không dạy",
+  refs:[W("man",MS,"Missing Semester bài 5 — Command-line environment"),W("man systemctl","https://www.freedesktop.org/software/systemd/man/systemctl.html","Tài liệu chính thức systemctl")],
+  d:"<code>systemctl status start enable</code>, <code>journalctl -u -f --since</code>. Viết một unit file",
+  g:"Dựng được service tự khởi động và đọc log của nó"},
+ {t:"Git nền tảng",
+  refs:[W("Pro Git",GIT,"ch.1–2 — Getting Started, Git Basics")],
+  d:"<code>init add commit status diff log</code>. Ba vùng: working, staging, repository. Push lên GitHub",
+  g:"Vẽ được sơ đồ 3 vùng và giải thích <code>git add</code> làm gì"},
+ {t:"Nhánh và hợp nhất",
+  refs:[W("Pro Git",GIT,"ch.3 — Git Branching"),W("Missing Semester",MS,"Bài 6 — Version Control (Git)")],
+  d:"<code>branch checkout merge rebase stash reset revert</code>. Tự tạo xung đột rồi giải quyết",
+  g:"Giải thích khác nhau giữa <code>merge</code> và <code>rebase</code>, và khi nào không nên rebase"}
+]},
+
+{n:3,title:"Docker và dịch vụ Go đầu tiên",goal:"Đóng gói được phần mềm — nền của mọi thứ phía sau",go:"Learning Go ch.5–7",out:"Service Go chạy trong container, image dưới 20 MB",days:[
+ {t:"Container thật ra là gì",
+  refs:[W("Docker",DOC,"Get started — khái niệm, chạy container đầu tiên"),B("OSTEP",46,"ch.4 — The Abstraction: The Process"),B("OSTEP",58,"ch.5 — Interlude: Process API (fork, exec, wait)"),B("GO",107,"ch.5 — Functions")],
+  d:"<code>docker run ps images pull</code>. Chạy nginx, vào trong bằng <code>exec -it</code>",
+  g:"Giải thích container khác máy ảo chỗ nào, ở mức process và namespace"},
+ {t:"Service Go và Dockerfile đầu tiên",
+  refs:[W("Docker",DFILE,"Dockerfile reference — FROM, COPY, RUN, CMD, EXPOSE"),B("GO",127,"ch.6 — Pointers")],
+  d:"HTTP server Go có <code>/</code> và <code>/healthz</code>. Build, chạy, map cổng",
+  g:"<code>curl localhost:8080/healthz</code> trả 200 từ trong container"},
+ {t:"Layer và cache",
+  refs:[W("Docker",DBUILD,"Build — cache, layer, .dockerignore"),B("GO",149,"ch.7 — Types, Methods, and Interfaces")],
+  d:"Đảo thứ tự lệnh trong Dockerfile, đo lại thời gian build. <code>docker history</code>",
+  g:"Sửa code mà build lại chỉ mất vài giây nhờ cache đúng chỗ"},
+ {t:"Multi-stage build",
+  refs:[W("Docker",DBUILD,"Build → Multi-stage builds"),B("GO",161,"ch.7 § A Quick Lesson on Interfaces"),B("GO",166,"ch.7 § Accept Interfaces, Return Structs")],
+  d:"Tách stage build và runtime. Base <code>scratch</code> hoặc <code>distroless</code>",
+  g:"Image giảm xuống dưới 20 MB, vẫn chạy đúng"},
+ {t:"Dữ liệu và cấu hình",
+  refs:[W("Docker","https://docs.docker.com/engine/storage/","Storage — volumes, bind mounts"),B("GO",175,"ch.7 § Implicit Interfaces Make Dependency Injection Easier")],
+  d:"Volume, bind mount, biến môi trường, <code>--env-file</code>",
+  g:"Đổi cấu hình mà không cần build lại image"},
+ {t:"Mạng và Docker Compose",
+  refs:[W("Docker",DCOMP,"Compose — nhiều service trong một file"),W("Docker","https://docs.docker.com/engine/network/","Networking — bridge, service name resolution")],
+  d:"<code>compose.yaml</code> ghép service Go + Postgres, gọi nhau bằng tên",
+  g:"<code>docker compose up</code> dựng cả hai và chúng nói chuyện được"},
+ {t:"Ôn tuần 3 và hoàn thiện đóng gói",
+  refs:[W("Docker",DFILE,"Xem lại: HEALTHCHECK, USER, ARG")],
+  d:"Dọn Dockerfile, thêm <code>.dockerignore</code>, non-root user, healthcheck. Push lên registry",
+  g:"Người khác <code>docker run</code> image của bạn là chạy được ngay"}
+]},
+
+{n:4,title:"Kubernetes: phần lõi",goal:"Hiểu và triển khai được khối cơ bản của K8s",go:"Learning Go ch.8–9",out:"Service Go chạy trên cluster kind, gọi được từ máy",days:[
+ {t:"Khái niệm và dựng cluster",
+  refs:[B("K8S",24,"ch.1 — Creating and Running Containers"),B("K8S",40,"ch.2 — Deploying a Kubernetes Cluster"),W("kind",KIND,"Quick start — dựng cluster cục bộ"),B("GO",181,"ch.8 — Errors")],
+  d:"Cài <code>kind</code> và <code>kubectl</code>. Dựng cluster một node",
+  g:"<code>kubectl get nodes</code> trả về Ready"},
+ {t:"Làm chủ kubectl",
+  refs:[B("K8S",55,"ch.3 — Common kubectl Commands"),W("K8s docs",K8CHEAT,"kubectl cheat sheet"),B("GO",188,"ch.8 § Wrapping Errors")],
+  d:"<code>get describe logs exec apply delete</code>, <code>-o yaml</code>, context. Bật autocomplete",
+  g:"Tra được thông tin bất kỳ tài nguyên nào không cần Google"},
+ {t:"Pod",
+  refs:[B("K8S",69,"ch.4 — Pods"),W("K8s docs",K8POD,"Concepts → Workloads → Pods"),B("GO",190,"ch.8 § Is and As")],
+  d:"Viết pod manifest tay. Multi-container, init container, liveness và readiness probe",
+  g:"Pod service Go chạy, probe hoạt động, đọc được log"},
+ {t:"Label và annotation",
+  refs:[B("K8S",96,"ch.5 — Labels and Annotations"),B("GO",197,"ch.9 — Modules, Packages, and Imports")],
+  d:"Gắn label, lọc bằng <code>-l</code>, label selector",
+  g:"Hiểu vì sao selector là cơ chế nối mọi thứ trong K8s"},
+ {t:"Service và khám phá dịch vụ",
+  refs:[B("K8S",4,"ch.6 — Service Discovery ⚠ nằm ở ĐẦU file, không phải giữa"),W("K8s docs",K8SVC,"Concepts → Services, Load Balancing")],
+  d:"ClusterIP, NodePort, LoadBalancer. DNS trong cluster. <code>port-forward</code>",
+  g:"Gọi được service từ pod khác bằng tên DNS"},
+ {t:"ReplicaSet và Deployment",
+  refs:[B("K8S",124,"ch.8 — ReplicaSets"),B("K8S",139,"ch.9 — Deployments")],
+  d:"Scale, rolling update, rollback. <code>kubectl rollout status undo</code>",
+  g:"Cập nhật phiên bản không downtime, rồi rollback về bản cũ"},
+ {t:"Ôn tuần 4 — dự án lên cluster",
+  refs:[W("K8s docs",K8C,"Concepts — xem lại phần nào còn mơ hồ")],
+  d:"Deployment + Service cho service Go. Manifest lưu trong repo Git",
+  g:"<code>kubectl apply -f k8s/</code> là dựng xong toàn bộ ứng dụng"}
+]},
+
+{n:5,title:"Kubernetes: vận hành và xử lý sự cố",goal:"Không chỉ deploy được, mà sửa được khi hỏng",go:"Learning Go ch.11 và ch.13",out:"Ứng dụng đầy đủ cấu hình, lưu trữ, bảo mật, và bạn debug được",days:[
+ {t:"ConfigMap và Secret",
+  refs:[W("K8s docs",K8CM,"Concepts → Configuration → ConfigMaps &amp; Secrets ⚠ sách Early Release thiếu phần này"),B("GO",253,"ch.11 — The Standard Library")],
+  d:"Nạp cấu hình qua biến môi trường và qua volume. Giới hạn của Secret",
+  g:"Đổi cấu hình mà không build lại image, không sửa Deployment"},
+ {t:"Ingress",
+  refs:[B("K8S",108,"ch.7 — HTTP Load Balancing with Ingress"),W("K8s docs",K8ING,"Concepts → Ingress")],
+  d:"Cài ingress-nginx trên kind. Định tuyến theo path và theo host",
+  g:"Truy cập service qua tên miền cục bộ thay vì <code>port-forward</code>"},
+ {t:"Lưu trữ",
+  refs:[B("K8S",190,"ch.12 — Integrating Storage Solutions"),W("K8s docs",K8VOL,"Concepts → Storage: Volumes, PV, PVC, StorageClass")],
+  d:"Volume, PV, PVC, StorageClass. StatefulSet khác Deployment ở đâu",
+  g:"Postgres có dữ liệu sống sót qua việc xoá và tạo lại pod"},
+ {t:"DaemonSet, Job, CronJob",
+  refs:[B("K8S",162,"ch.10 — DaemonSets"),B("K8S",174,"ch.11 — Jobs"),B("GO",291,"ch.13 — Writing Tests")],
+  d:"Tác vụ một lần và định kỳ. DaemonSet cho agent trên mọi node",
+  g:"Nói được khi nào dùng Job, khi nào dùng Deployment"},
+ {t:"RBAC và bảo mật pod",
+  refs:[B("K8S",225,"ch.14 — Securing Pods"),W("K8s docs",K8RBAC,"Reference → RBAC Authorization"),B("GO",298,"ch.13 § Table Tests")],
+  d:"ServiceAccount, Role, RoleBinding. securityContext, non-root, resource limit",
+  g:"ServiceAccount chỉ đọc được pod trong đúng một namespace"},
+ {t:"Xử lý sự cố — ngày quan trọng nhất tuần",
+  refs:[W("K8s docs",K8DBG,"Tasks → Monitoring &amp; Debugging → Debug Running Pods"),B("GO",311,"ch.13 § httptest")],
+  d:"Tự gây rồi tự sửa: <code>CrashLoopBackOff</code>, <code>ImagePullBackOff</code>, <code>OOMKilled</code>, <code>Pending</code>, probe sai. Dùng <code>describe</code>, <code>logs --previous</code>, <code>get events</code>",
+  g:"Có quy trình chẩn đoán riêng: thấy pod lỗi là biết gõ gì trước, gõ gì sau"},
+ {t:"Ôn tuần 5 — dự án hoàn chỉnh trên K8s",
+  refs:[W("K8s docs",K8C,"Concepts — rà lại toàn bộ")],
+  d:"Ghép hết: Deployment, Service, Ingress, ConfigMap, Secret, PVC, probe, resource limit",
+  g:"Xoá sạch cluster rồi dựng lại từ manifest, ứng dụng chạy y nguyên"}
+]},
+
+{n:6,title:"CI/CD và đồng thời trong Go",goal:"Máy tự build và deploy thay bạn",go:"Learning Go ch.10 và ch.12 — trọng tâm tuần này",out:"Push lên main là tự động deploy lên cluster",days:[
+ {t:"Git nâng cao và quy trình làm việc nhóm",
+  refs:[W("Pro Git",GIT,"ch.5 — Distributed Git; ch.6 — GitHub"),W("Pro Git",GIT,"ch.7 § Rewriting History (rebase tương tác)")],
+  d:"Rebase tương tác, cherry-pick, tag. Trunk-based và Git flow. Pull request",
+  g:"Dọn lịch sử commit lộn xộn thành chuỗi sạch trước khi merge"},
+ {t:"CI là gì và pipeline đầu tiên",
+  refs:[W("GitHub Actions",GHA,"Quickstart — workflow, job, step, runner, trigger"),B("GO",223,"ch.10 § When to Use Concurrency")],
+  d:"Pipeline chạy <code>go vet</code> mỗi lần push",
+  g:"Push commit lỗi cú pháp và thấy CI báo đỏ"},
+ {t:"Kiểm thử tự động trong pipeline",
+  refs:[B("GO",291,"ch.13 — Writing Tests (đọc lại kỹ)"),B("GO",300,"ch.13 § Checking Your Code Coverage"),W("GitHub Actions",GHA,"Building and testing Go")],
+  d:"Unit test cho handler. <code>go test -race -cover</code> trong CI. Cache module",
+  g:"Test đỏ thì pipeline dừng, không cho merge"},
+ {t:"Build và đẩy image trong pipeline",
+  refs:[W("GitHub Actions",GHA,"Publishing Docker images; Encrypted secrets"),B("GO",315,"ch.13 § Finding Concurrency Problems with the Race Checker")],
+  d:"Build image, tag theo commit SHA, push lên registry. Secret cho đăng nhập",
+  g:"Mỗi commit sinh image có tag truy vết được về đúng commit đó"},
+ {t:"CD — tự động triển khai",
+  refs:[W("GitHub Actions",GHA,"Deployment — environments, protection rules"),W("K8s docs",K8C,"Concepts → Workloads → Deployments (rolling update)")],
+  d:"Bước deploy cập nhật image tag và <code>kubectl apply</code>. Tách môi trường staging",
+  g:"Push lên main là ứng dụng trên cluster tự đổi phiên bản"},
+ {t:"Goroutine và channel",
+  refs:[B("GO",225,"ch.10 § Goroutines"),B("GO",226,"ch.10 § Channels"),B("GO",229,"ch.10 § select"),B("GO",232,"ch.10 § Concurrency Practices and Patterns"),B("GO",247,"ch.10 § When to Use Mutexes Instead of Channels")],
+  d:"Viết worker pool. Chạy <code>-race</code> để bắt data race",
+  g:"Worker pool xử lý song song mà không có data race"},
+ {t:"context và tắt êm",
+  refs:[B("GO",275,"ch.12 § What Is the Context?"),B("GO",278,"ch.12 § Cancellation"),B("GO",281,"ch.12 § Timers"),B("GO",283,"ch.12 § Handling Context Cancellation in Your Own Code")],
+  d:"<code>WithTimeout</code>, <code>WithCancel</code>. Graceful shutdown khi nhận SIGTERM — đúng thứ K8s gửi khi xoá pod",
+  g:"Xoá pod mà request đang chạy vẫn xử lý xong, không đứt giữa chừng"}
+]},
+
+{n:7,title:"Hạ tầng khai báo và quan sát hệ thống",goal:"Hạ tầng viết bằng code, hệ thống nhìn thấy được",go:"Cloud Native Go ch.4, 9, 11",out:"Terraform dựng hạ tầng, Grafana hiện metrics của service Go",days:[
+ {t:"Terraform: tư duy khai báo",
+  refs:[W("Terraform",TF,"Get started — HCL, provider, resource, init/plan/apply"),B("CNGO",25,"ch.1 — What Is a \u201CCloud Native\u201D Application?")],
+  d:"<code>init plan apply destroy</code>. Hiểu file state dùng làm gì",
+  g:"Giải thích vì sao <code>plan</code> tồn tại và vì sao state là thứ quý nhất"},
+ {t:"Biến, output, và quản lý tài nguyên",
+  refs:[W("Terraform","https://developer.hashicorp.com/terraform/language","Configuration language — variables, outputs, locals, data"),B("CNGO",93,"ch.4 — Cloud Native Patterns")],
+  d:"Dùng provider Docker hoặc Kubernetes. Phụ thuộc ngầm và tường minh",
+  g:"Dựng lại tài nguyên tuần 3 bằng Terraform thay vì lệnh tay"},
+ {t:"Module và quy trình làm việc",
+  refs:[W("Terraform","https://developer.hashicorp.com/terraform/language/modules","Modules — tái sử dụng"),B("CNGO",99,"ch.4 § Stability Patterns"),B("CNGO",114,"ch.4 § Concurrency Patterns")],
+  d:"Tách module tái dùng. Remote state, workspace, <code>fmt</code> và <code>validate</code> trong CI",
+  g:"Một module dùng lại được cho cả staging và production"},
+ {t:"Prometheus: mô hình dữ liệu",
+  refs:[W("Prometheus",PROM,"Concepts — data model, metric types, jobs &amp; instances"),B("CNGO",365,"ch.11 — Observability"),B("CNGO",368,"ch.11 § The Three Pillars of Observability")],
+  d:"Counter, gauge, histogram, summary. Label. Cơ chế pull và scrape config",
+  g:"Nói được khi nào dùng counter, khi nào dùng gauge"},
+ {t:"Gắn metrics vào service Go",
+  refs:[W("Prometheus",PROMGO,"Instrumenting a Go application"),B("CNGO",391,"ch.11 § Metrics")],
+  d:"<code>/metrics</code> thật. Đếm request, đo độ trễ bằng histogram. Deploy và scrape",
+  g:"Prometheus thấy target của bạn ở trạng thái UP và có dữ liệu"},
+ {t:"PromQL và Grafana",
+  refs:[W("Prometheus",PROMQL,"Querying basics — rate, sum, by, histogram_quantile"),W("Grafana",GRAF,"Dashboards &amp; panels")],
+  d:"Dashboard: tỷ lệ request, tỷ lệ lỗi, độ trễ p95",
+  g:"Dashboard trả lời được: hệ thống có khoẻ không, chậm ở đâu"},
+ {t:"Ôn tuần 7 — ghép toàn bộ",
+  refs:[B("CNGO",287,"ch.9 — Resilience"),B("CNGO",297,"ch.9 § Play It Again: Retrying Requests"),B("CNGO",316,"ch.9 § Healthy Health Checks")],
+  d:"Terraform dựng nền, CI/CD deploy ứng dụng, Prometheus và Grafana giám sát",
+  g:"Từ máy trắng đến hệ thống chạy đầy đủ chỉ bằng lệnh, không thao tác tay"}
+]},
+
+{n:8,title:"Nền lý thuyết và chuẩn bị phỏng vấn",goal:"Giải thích được vì sao, không chỉ làm được",go:"Distributed Services with Go — đọc lấy ý tưởng kiến trúc",out:"Dự án có README tử tế, kể lại mạch lạc trong 5 phút",days:[
+ {t:"Viết tài liệu cho dự án",
+  refs:[B("DSGO",195,"ch.10 — Deploy Applications with Kubernetes Locally"),B("DSGO",220,"ch.11 — Deploy Applications with Kubernetes to the Cloud")],
+  d:"README: vấn đề, kiến trúc, cách chạy, quyết định thiết kế và lý do. Vẽ sơ đồ",
+  g:"Người lạ đọc README là dựng lại được dự án, không cần hỏi bạn"},
+ {t:"Mạng: IP, ARP, ICMP",
+  refs:[B("TCPIP",69,"§3.2 IP Header"),B("TCPIP",74,"§3.3 IP Routing"),B("TCPIP",79,"§3.4–3.5 Subnet Addressing &amp; Mask"),B("TCPIP",96,"§4.2–4.3 ARP: An Example, ARP Cache"),B("TCPIP",124,"§6.2 ICMP Message Types")],
+  d:"Đối chiếu với thực tế: <code>ip addr</code>, <code>ip route</code>, <code>arp -a</code>, <code>ping</code>, <code>traceroute</code>",
+  g:"Đọc được bảng định tuyến và giải thích gói tin đi qua đâu"},
+ {t:"TCP: bắt tay, trạng thái, truyền lại",
+  refs:[B("TCPIP",347,"§17.3 TCP Header"),B("TCPIP",354,"§18.2 Connection Establishment and Termination"),B("TCPIP",366,"§18.6 TCP State Transition Diagram"),B("TCPIP",444,"§21.3 Round-Trip Time Measurement"),B("TCPIP",456,"§21.6 Congestion Avoidance Algorithm")],
+  d:"Ba bước bắt tay, bốn bước đóng, TIME_WAIT. Xem thật bằng <code>ss -tan</code>",
+  g:"Giải thích TIME_WAIT là gì và vì sao gây cạn cổng khi tải cao"},
+ {t:"DNS — nguyên nhân sự cố phổ biến nhất",
+  refs:[B("TCPIP",292,"§14.2 DNS Basics"),B("TCPIP",308,"§14.6 Resource Records"),B("TCPIP",311,"§14.7 Caching"),W("K8s docs",K8DNS,"DNS for Services and Pods — CoreDNS trong cluster")],
+  d:"Phân giải đệ quy, bản ghi, TTL. <code>dig</code> từ trong pod",
+  g:"Chẩn đoán được service không gọi được nhau do DNS hay do selector sai"},
+ {t:"Nền hệ phân tán",
+  refs:[B("DDIA",28,"ch.1 § Reliability"),B("DDIA",32,"ch.1 § Scalability"),B("DDIA",50,"ch.2 § Relational Model Versus Document Model"),B("DDIA",92,"ch.3 § Data Structures That Power Your Database"),B("DDIA",134,"ch.4 § Formats for Encoding Data")],
+  d:"Ghi chú lại đánh đổi của từng lựa chọn",
+  g:"Phân biệt B-tree và LSM-tree, nói được cái nào hợp việc gì"},
+ {t:"Nhân bản và phân mảnh",
+  refs:[B("DDIA",174,"ch.5 § Leaders and Followers"),B("DDIA",183,"ch.5 § Problems with Replication Lag"),B("DDIA",223,"ch.6 § Partitioning of Key-Value Data"),B("DDIA",231,"ch.6 § Rebalancing Partitions"),B("DDIA",236,"ch.6 § Request Routing")],
+  d:"Vẽ sơ đồ phân mảnh cho một bài toán cụ thể",
+  g:"Thiết kế được sơ đồ phân mảnh và giải thích đánh đổi"},
+ {t:"Ôn tổng và luyện phỏng vấn",
+  refs:[W("Xem lại",MS,"Ghi chú 8 tuần + Missing Semester bài 5 (ssh, tmux, dotfiles)")],
+  d:"Trả lời thành tiếng: container khác VM ra sao; pod lỗi thì làm gì; CI/CD hoạt động thế nào; vì sao chọn kiến trúc này. Kể dự án trong 5 phút",
+  g:"Nói trôi chảy, không đọc script, trả lời được câu hỏi đào sâu"}
+]}
+];
+
+var RES=[
+ ["The Linux Command Line — William Shotts","Tuần 1–2","web",TLCL],
+ ["OverTheWire: Bandit","Tuần 1–2","web",BAN],
+ ["Pro Git — Chacon &amp; Straub","Tuần 2, 6","web",GIT],
+ ["MIT Missing Semester","Bổ trợ tuần 1–2, 6, 8","web",MS],
+ ["Docker documentation","Tuần 3","web",DOC],
+ ["Kubernetes documentation","Tuần 4–5","web",K8C],
+ ["Terraform tutorials","Tuần 7","web",TF],
+ ["Prometheus documentation","Tuần 7","web",PROM],
+ ["Kubernetes Up &amp; Running, 3rd Ed","Tuần 4–5","K8S",1],
+ ["Learning Go, 1st Ed — Jon Bodner","Tuần 2–6","GO",1],
+ ["Cloud Native Go — Matthew Titmus","Tuần 7","CNGO",1],
+ ["Distributed Services with Go","Tuần 8","DSGO",1],
+ ["OSTEP","Tuần 3","OSTEP",42],
+ ["TCP/IP Illustrated Vol.1 — Stevens","Tuần 8","TCPIP",21],
+ ["Designing Data-Intensive Applications","Tuần 8","DDIA",23]
+];
+
+function bookHref(k,p){return ROOT+encodeURI(BOOKS[k].f)+"#page="+p;}
+
+var KEY="vdt-plan-local";
+var done={};
+try{done=JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){done={};}
+
+var total=0;WEEKS.forEach(function(w){total+=w.days.length;});
+var host=document.getElementById("weeks"),frag=document.createDocumentFragment(),idx=0;
+
+WEEKS.forEach(function(w){
+  var sec=document.createElement("section");sec.className="week";sec.id="tuan-"+w.n;
+  var head=document.createElement("div");head.className="whead";
+  head.innerHTML='<div class="wtop"><span class="wnum">TUẦN '+w.n+'</span><h2 class="wtitle">'+w.title+
+    '</h2><span class="wpct" data-wpct="'+w.n+'">0/'+w.days.length+'</span></div>'+
+    '<div class="wbar"><i data-wbar="'+w.n+'"></i></div><div class="wfacts">'+
+    '<div class="fact"><span>Mục tiêu</span>'+w.goal+'</div>'+
+    '<div class="fact"><span>Go song song</span>'+w.go+'</div>'+
+    '<div class="fact"><span>Kết quả cuối tuần</span>'+w.out+'</div></div>';
+  sec.appendChild(head);
+
+  var list=document.createElement("div");list.className="days";
+  w.days.forEach(function(d){
+    idx++;var id="d"+idx;
+    var refsHtml=d.refs.map(function(r){
+      if(r.b){
+        return '<a class="ref" href="'+bookHref(r.b,r.p)+'" target="_blank" rel="noopener"><span class="src">'+
+               BOOKS[r.b].n+'</span><span class="loc">'+r.t+
+               '</span><span class="pg">tr. '+r.p+' ↗</span></a>';
+      }
+      return '<a class="ref ext" href="'+r.u+'" target="_blank" rel="noopener"><span class="src">'+r.n+
+             '</span><span class="loc">'+r.t+'</span><span class="pg">web ↗</span></a>';
+    }).join("");
+    var row=document.createElement("div");
+    row.className="day"+(done[id]?" is-done":"");
+    row.dataset.id=id;row.dataset.week=w.n;
+    row.innerHTML='<input type="checkbox" id="'+id+'"'+(done[id]?" checked":"")+
+      ' aria-label="Ngày '+idx+'"><div class="dbody"><div class="dhead">'+
+      '<span class="dnum">NGÀY '+idx+'</span><label class="dtitle" for="'+id+'">'+d.t+'</label></div>'+
+      '<div class="dlines">'+
+      '<div class="dline"><span class="dkey">Đọc</span><span class="dval refs">'+refsHtml+'</span></div>'+
+      '<div class="dline"><span class="dkey">Gõ</span><span class="dval">'+d.d+'</span></div>'+
+      '<div class="dline goal"><span class="dkey">Xong khi</span><span class="dval">'+d.g+'</span></div>'+
+      '</div></div>';
+    list.appendChild(row);
+  });
+  sec.appendChild(list);frag.appendChild(sec);
+});
+host.appendChild(frag);
+
+var tb=document.getElementById("restable");
+RES.forEach(function(r){
+  var tr=document.createElement("tr"),loc;
+  if(r[2]==="web"){loc='<span class="tag web">Web</span> <a href="'+r[3]+'" target="_blank" rel="noopener">Mở trang</a>';}
+  else{loc='<span class="tag local">Máy</span> <a href="'+bookHref(r[2],r[3])+'" target="_blank" rel="noopener">Mở sách ↗</a>';}
+  tr.innerHTML="<td>"+r[0]+"</td><td>"+r[1]+"</td><td>"+loc+"</td>";
+  tb.appendChild(tr);
+});
+
+function refresh(){
+  var n=0;
+  WEEKS.forEach(function(w){
+    var c=document.querySelectorAll('.day[data-week="'+w.n+'"].is-done').length;n+=c;
+    var a=document.querySelector('[data-wpct="'+w.n+'"]'),b=document.querySelector('[data-wbar="'+w.n+'"]');
+    if(a)a.textContent=c+"/"+w.days.length;
+    if(b)b.style.width=(c/w.days.length*100)+"%";
+  });
+  var p=Math.round(n/total*100);
+  document.getElementById("pct").textContent=p;
+  document.getElementById("obar").style.width=p+"%";
+}
+refresh();
+
+host.addEventListener("change",function(e){
+  var box=e.target;if(!box.matches('input[type=checkbox]'))return;
+  var row=box.closest(".day");
+  done[row.dataset.id]=box.checked;
+  if(!box.checked)delete done[row.dataset.id];
+  row.classList.toggle("is-done",box.checked);
+  refresh();
+  try{localStorage.setItem(KEY,JSON.stringify(done));}catch(e){}
+});
+
+document.getElementById("reset").addEventListener("click",function(){
+  if(!confirm("Xoá toàn bộ tiến độ đã tick?"))return;
+  done={};try{localStorage.removeItem(KEY);}catch(e){}
+  document.querySelectorAll('.day').forEach(function(r){
+    r.classList.remove("is-done");r.querySelector("input").checked=false;
+  });
+  refresh();
+});
+})();
+</script>
+</body>
+</html>

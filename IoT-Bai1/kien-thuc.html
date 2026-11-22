@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bản đồ kiến thức Bài 1</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f1f3f5; --surface:#ffffff; --ink:#161a1f; --muted:#5b6673;
+  --line:#dce0e6; --accent:#0d6b5a; --accent-soft:#e3f1ee;
+  --warn:#a8560a; --warn-soft:#fdf1e3; --code-bg:#eef1f4;
+  --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151a; --surface:#191e25; --ink:#e4e8ed; --muted:#8b97a5;
+    --line:#2a313b; --accent:#4bbfa5; --accent-soft:#16302b;
+    --warn:#d9963f; --warn-soft:#33260f; --code-bg:#141920;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151a; --surface:#191e25; --ink:#e4e8ed; --muted:#8b97a5;
+  --line:#2a313b; --accent:#4bbfa5; --accent-soft:#16302b;
+  --warn:#d9963f; --warn-soft:#33260f; --code-bg:#141920;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:30px 20px 70px;
+  display:flex;flex-direction:column;gap:30px}
+code,.mono{font-family:var(--mono);font-size:.88em}
+code{background:var(--code-bg);padding:1px 5px;border-radius:3px}
+
+header{border-bottom:2px solid var(--ink);padding-bottom:16px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+h1{margin:7px 0 6px;font-size:clamp(23px,3.6vw,33px);font-weight:600;
+  letter-spacing:-.018em;text-wrap:balance}
+.sub{color:var(--muted);font-size:14.5px;max-width:66ch;margin:0}
+
+/* muc luc */
+.toc{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  padding:16px 18px}
+.toc h2{margin:0 0 10px;font-size:12px;font-family:var(--mono);
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.toc ol{margin:0;padding:0;list-style:none;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:7px 20px}
+.toc a{color:var(--ink);text-decoration:none;font-size:13.5px;
+  display:flex;gap:9px;align-items:baseline}
+.toc a:hover{color:var(--accent)}
+.toc .k{font-family:var(--mono);font-size:11.5px;font-weight:600;
+  color:var(--accent);min-width:16px}
+
+/* nhom */
+.group{scroll-margin-top:16px}
+.group-h{display:flex;align-items:baseline;gap:12px;margin-bottom:4px;
+  padding-bottom:9px;border-bottom:1px solid var(--line)}
+.group-h .k{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--accent)}
+.group-h h2{margin:0;font-size:19px;font-weight:600;letter-spacing:-.012em}
+.group-h .cnt{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.group-lead{color:var(--muted);font-size:13.5px;margin:10px 0 16px;max-width:70ch}
+
+.units{display:flex;flex-direction:column;gap:12px}
+.unit{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  padding:15px 17px}
+.unit-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:9px}
+.unit-h .n{font-family:var(--mono);font-size:11.5px;font-weight:600;
+  color:var(--accent);background:var(--accent-soft);padding:2px 7px;border-radius:3px}
+.unit-h h3{margin:0;font-size:15.5px;font-weight:600;letter-spacing:-.008em}
+.where{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted);
+  border:1px solid var(--line);padding:2px 7px;border-radius:3px;white-space:nowrap}
+.unit p{margin:0 0 8px;font-size:14px}
+.unit p:last-child{margin-bottom:0}
+.unit b.lb{font-weight:600;color:var(--accent)}
+.unit ul{margin:6px 0 8px;padding-left:20px;font-size:13.5px;color:var(--muted)}
+.unit li{margin-bottom:3px}
+.unit li b{color:var(--ink);font-weight:500}
+
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin:4px 0 0}
+.tbl th{text-align:left;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  font-weight:600;padding:7px 10px;border-bottom:1px solid var(--line)}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td:first-child{font-weight:500;white-space:nowrap}
+.tbl .mono{font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);
+  border-radius:6px}
+
+.flag{background:var(--warn-soft);border-left:3px solid var(--warn);
+  border-radius:0 5px 5px 0;padding:12px 15px;font-size:13.5px}
+.flag h3{margin:0 0 6px;font-size:14.5px;font-weight:600}
+.flag p{margin:0 0 7px}
+.flag p:last-child{margin-bottom:0}
+.flag .q{font-style:italic;color:var(--muted)}
+
+.path{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  padding:16px 18px;font-family:var(--mono);font-size:12.5px;overflow-x:auto;
+  line-height:1.9;color:var(--muted)}
+.path b{color:var(--ink);font-weight:600}
+.path .ar{color:var(--accent);font-weight:600}
+
+footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);
+  padding-top:15px;max-width:76ch}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Học viện CN Bưu chính Viễn thông · Bài thí nghiệm số 1</div>
+  <h1>Bản đồ kiến thức — Cảm biến &amp; ESP32</h1>
+  <p class="sub">Mọi khái niệm bài thí nghiệm đụng tới, kèm vai trò cụ thể của nó
+  trong hai mục thực hành 3.1 và 3.2. Đọc theo thứ tự A → G là đi từ hệ thống
+  xuống chi tiết.</p>
+</header>
+
+<nav class="toc">
+  <h2>Bảy nhóm kiến thức</h2>
+  <ol>
+    <li><a href="#a"><span class="k">A</span> Hệ thống IoT &amp; vị trí của bài</a></li>
+    <li><a href="#b"><span class="k">B</span> Phần cứng: vi điều khiển, GPIO, điện áp</a></li>
+    <li><a href="#c"><span class="k">C</span> Giao thức truyền tin</a></li>
+    <li><a href="#d"><span class="k">D</span> Nguyên lý hai cảm biến</a></li>
+    <li><a href="#e"><span class="k">E</span> Đo lường: sai số, dải, hiệu chuẩn</a></li>
+    <li><a href="#f"><span class="k">F</span> Lập trình nhúng</a></li>
+    <li><a href="#g"><span class="k">G</span> Công cụ — lý thuyết &amp; vai trò</a></li>
+  </ol>
+</nav>
+
+<!-- ================= A ================= -->
+<section class="group" id="a">
+  <div class="group-h"><span class="k">A</span><h2>Hệ thống IoT &amp; vị trí của bài</h2>
+    <span class="cnt">3 đơn vị</span></div>
+  <p class="group-lead">Trả lời câu hỏi "bài này nằm ở đâu trong môn học" — bài 1
+  chỉ chạm vào tầng thấp nhất, chưa có mạng, chưa có đám mây.</p>
+
+  <div class="units">
+    <article class="unit">
+      <div class="unit-h"><span class="n">A1</span><h3>Kiến trúc IoT ba tầng</h3>
+        <span class="where">Chương 1–2 lý thuyết</span></div>
+      <p><b class="lb">Khái niệm.</b> Một hệ IoT chia làm ba tầng:
+      <b>tầng nhận thức</b> (perception — cảm biến, cơ cấu chấp hành),
+      <b>tầng mạng</b> (network — truyền dữ liệu lên hệ thống), và
+      <b>tầng ứng dụng</b> (application — xử lý, hiển thị, ra quyết định).</p>
+      <p><b class="lb">Vai trò trong bài.</b> Bài 1 làm trọn <b>tầng nhận thức</b>
+      và một mẩu nhỏ của tầng mạng (đường UART về máy tính). WiFi của ESP32 chưa
+      dùng — đó là các bài sau. Biết điều này để không nhầm phạm vi khi viết báo cáo.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">A2</span><h3>Cảm biến và cơ cấu chấp hành</h3>
+        <span class="where">Toàn bài</span></div>
+      <p><b class="lb">Khái niệm.</b> <b>Cảm biến</b> (sensor) biến một đại lượng
+      vật lý thành tín hiệu điện — hệ thống <i>đọc</i> thế giới.
+      <b>Cơ cấu chấp hành</b> (actuator) làm ngược lại, biến tín hiệu điện thành
+      tác động vật lý — hệ thống <i>tác động</i> lên thế giới.</p>
+      <p><b class="lb">Vai trò trong bài.</b> DHT11 và US-015 là cảm biến; đèn LED
+      trong ví dụ khởi động là cơ cấu chấp hành. KIT còn có động cơ bước, động cơ
+      một chiều, đèn 220V qua Triac — cũng là cơ cấu chấp hành nhưng bài 1 không dùng.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">A3</span><h3>Chuỗi biến đổi tín hiệu</h3>
+        <span class="where">Nền cho mục 3.1 và 3.2</span></div>
+      <p><b class="lb">Khái niệm.</b> Mọi phép đo đều đi qua một chuỗi:
+      <b>đại lượng vật lý → bộ chuyển đổi (transducer) → tín hiệu điện tương tự →
+      số hóa → giá trị số</b>. Chỗ đặt bước số hóa quyết định cách lập trình.</p>
+      <p><b class="lb">Vai trò trong bài.</b> Đây là điểm khác nhau cốt lõi giữa
+      hai cảm biến của bài, và là ý hay để mở đầu báo cáo:</p>
+      <ul>
+        <li><b>DHT11</b> số hóa <i>bên trong</i> cảm biến (có ADC và bộ tiền xử lý),
+        xuất ra dãy bit → vi điều khiển chỉ việc đọc, không phải tính.</li>
+        <li><b>US-015</b> không số hóa gì cả, chỉ xuất một <i>xung có độ rộng
+        tỉ lệ thời gian</i> → vi điều khiển phải tự đo thời gian và tự tính khoảng cách.</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<!-- ================= B ================= -->
+<section class="group" id="b">
+  <div class="group-h"><span class="k">B</span><h2>Phần cứng: vi điều khiển, GPIO, điện áp</h2>
+    <span class="cnt">5 đơn vị</span></div>
+  <p class="group-lead">Phần môn học ghi là "Kỹ thuật vi xử lý và kiến trúc máy tính"
+  trong mục Yêu cầu.</p>
+
+  <div class="units">
+    <article class="unit">
+      <div class="unit-h"><span class="n">B1</span><h3>Vi điều khiển vs vi xử lý</h3>
+        <span class="where">Mục 2.1</span></div>
+      <p><b class="lb">Khái niệm.</b> <b>Vi xử lý</b> (microprocessor) chỉ có CPU,
+      cần RAM, ROM, ngoại vi gắn ngoài. <b>Vi điều khiển</b> (microcontroller) gói
+      CPU + bộ nhớ + ngoại vi vào một chip, chạy được ngay khi cấp nguồn, không cần
+      hệ điều hành.</p>
+      <p><b class="lb">Vai trò trong bài.</b> ESP32-WROOM-32 là vi điều khiển: hai
+      nhân Tensilica LX6 tới 240 MHz, 520 KB SRAM, 448 KB ROM, kèm sẵn WiFi,
+      Bluetooth, ADC, PWM, I2C, SPI, UART. Chính vì mọi thứ nằm trong chip nên chương
+      trình của bạn là <i>toàn bộ</i> phần mềm đang chạy trên đó — không có tiến trình
+      nào khác, không có scheduler. Đó là lý do <code>loop()</code> chạy vô hạn mà
+      không cần lo treo máy.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">B2</span><h3>GPIO và mức logic</h3>
+        <span class="where">Cả 3 phần thực hành</span></div>
+      <p><b class="lb">Khái niệm.</b> <b>GPIO</b> (General Purpose Input/Output) là
+      chân số đa dụng, phần mềm cấu hình làm lối vào hoặc lối ra.
+      <b>Mức logic</b>: điện áp gần 0 V là mức thấp (LOW / bit 0), gần điện áp nguồn
+      là mức cao (HIGH / bit 1). ESP32 dùng mức cao <b>3,3 V</b>.</p>
+      <p><b class="lb">Vai trò trong bài.</b> Ba lệnh <code>pinMode()</code>,
+      <code>digitalWrite()</code>, <code>digitalRead()</code> là toàn bộ cách bài này
+      nói chuyện với thế giới. Nháy LED = ghi HIGH/LOW ra IO13. Kích siêu âm = ghi
+      HIGH 10 µs ra IO2. Đọc echo = đọc mức chân IO4.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">B3</span><h3>Tương thích điện áp 3,3 V / 5 V</h3>
+        <span class="where">Mục 3.2 · làm ở nhà</span></div>
+      <p><b class="lb">Khái niệm.</b> Chân GPIO chỉ chịu được điện áp tối đa bằng
+      điện áp nguồn của nó. Đưa 5 V vào chân 3,3 V làm dòng chảy ngược qua diode bảo
+      vệ và phá chân theo thời gian. Cách xử lý phổ biến nhất là <b>mạch chia áp</b>
+      bằng hai điện trở: <code>Vra = Vvào × R2/(R1+R2)</code>.</p>
+      <p><b class="lb">Vai trò trong bài.</b> DHT11 và US-015 đều ăn nguồn 5 V.
+      Chân ECHO của US-015 xuất mức cao 5 V vào chân IO4 của ESP32. Trên KIT của
+      trường mạch này đã có sẵn nên bạn không thấy; tự lắp ở nhà thì phải tự chia áp
+      (1 kΩ + 2 kΩ) hoặc dùng bản HC-SR04P chạy 3,3 V.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">B4</span><h3>ADC và DAC</h3>
+        <span class="where">Khối Analog của KIT</span></div>
+      <p><b class="lb">Khái niệm.</b> <b>ADC</b> (Analog-to-Digital Converter) biến
+      điện áp liên tục thành số nguyên. ESP32 có ADC <b>12 bit</b>, 16 kênh: dải
+      0–3,3 V được chia thành 2¹² = 4096 mức, nên độ phân giải ≈ 0,8 mV.
+      <b>DAC</b> làm chiều ngược lại, ESP32 có 2 kênh 8 bit.</p>
+      <p><b class="lb">Vai trò trong bài.</b> Bài 1 <i>không</i> dùng ADC — cả hai cảm
+      biến đều giao tiếp số. Nhưng KIT có khối Analog với biến trở 0–3,3 V dành riêng
+      cho chức năng này, và ADC là khái niệm bắt buộc để hiểu vì sao DHT11 phải có bộ
+      chuyển đổi tương tự–số bên trong (đơn vị A3).</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">B5</span><h3>Ngoại vi khác của ESP32</h3>
+        <span class="where">Đọc hiểu mục 2.1</span></div>
+      <p><b class="lb">Khái niệm &amp; vai trò.</b> Tài liệu liệt kê một loạt ngoại vi;
+      bài 1 không dùng nhưng nên biết tên để không bỡ ngỡ ở các bài sau:</p>
+      <ul>
+        <li><b>PWM</b> — băm xung điều chỉnh công suất trung bình, dùng điều khiển
+        tốc độ động cơ và độ sáng LED (16 kênh).</li>
+        <li><b>Cảm biến Hall tích hợp</b> — đo từ trường, dùng đọc encoder động cơ.</li>
+        <li><b>Touch sensor</b> (10 chân) — đo điện dung ngón tay.</li>
+        <li><b>RTC + Deep-sleep</b> — bộ nhớ và đồng hồ vẫn sống khi chip ngủ, nền
+        tảng của thiết bị IoT chạy pin.</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<!-- ================= C ================= -->
+<section class="group" id="c">
+  <div class="group-h"><span class="k">C</span><h2>Giao thức truyền tin</h2>
+    <span class="cnt">4 đơn vị</span></div>
+  <p class="group-lead">Bài thí nghiệm hỏi thẳng hai câu lý thuyết: nguyên lý
+  One-Wire và nguyên lý I2C. Đây là phần chấm điểm nặng nhất của báo cáo.</p>
+
+  <div class="units">
+    <article class="unit">
+      <div class="unit-h"><span class="n">C1</span><h3>UART / Serial</h3>
+        <span class="where">Cả 3 phần · Serial Monitor</span></div>
+      <p><b class="lb">Khái niệm.</b> Truyền nối tiếp <b>bất đồng bộ</b>: không có dây
+      xung nhịp, hai bên phải hẹn trước <b>tốc độ baud</b> (số bit/giây). Khung một
+      byte gồm bit khởi đầu (start), 8 bit dữ liệu, tùy chọn bit chẵn lẻ, rồi bit kết
+      thúc (stop). Hai dây TX và RX bắt chéo nhau.</p>
+      <p><b class="lb">Vai trò trong bài.</b> Đây là đường duy nhất đưa số đo từ ESP32
+      về màn hình máy tính. <code>Serial.begin(115200)</code> đặt tốc độ; con số này
+      phải khớp với ô chọn tốc độ ở góc Serial Monitor, lệch là ra ký tự rác. Chính vì
+      thế bài có Bước "đổi tốc độ cổng serial rồi đọc lại" — để bạn thấy hậu quả của
+      việc hai bên không hẹn cùng baud.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">C2</span><h3>One-Wire — giao thức của DHT11</h3>
+        <span class="where">Mục 3.1 · câu hỏi lý thuyết</span></div>
+      <p><b class="lb">Khái niệm.</b> Chỉ <b>một dây dữ liệu</b> vừa gửi vừa nhận
+      (bán song công), có điện trở kéo lên; thiết bị nào muốn phát thì kéo dây xuống
+      thấp. Không có dây xung nhịp, nên <b>thông tin nằm ở độ dài xung</b>. Trình tự
+      của DHT11:</p>
+      <ul>
+        <li>Vi điều khiển kéo dây xuống thấp <b>≥ 18 ms</b> để đánh thức cảm biến,
+        rồi thả dây.</li>
+        <li>DHT11 đáp lại: <b>80 µs thấp + 80 µs cao</b> — tín hiệu "tôi có mặt".</li>
+        <li>Truyền <b>40 bit</b> = 5 byte: phần nguyên độ ẩm, phần lẻ độ ẩm,
+        phần nguyên nhiệt độ, phần lẻ nhiệt độ, và byte <b>tổng kiểm tra</b>.</li>
+        <li>Mỗi bit mở đầu bằng 50 µs mức thấp, rồi độ dài mức cao quyết định giá trị:
+        <b>~26–28 µs là bit 0</b>, <b>~70 µs là bit 1</b>.</li>
+        <li>Byte cuối = tổng 4 byte đầu; lệch thì bỏ lần đọc đó.</li>
+      </ul>
+      <p><b class="lb">Vai trò trong bài.</b> Thư viện <code>DHT.h</code> làm hết
+      trình tự trên, bạn chỉ gọi <code>dht.readTemperature()</code>. Nhưng câu hỏi
+      trong báo cáo hỏi đúng cái thư viện che đi — nên phải nắm được năm gạch đầu dòng
+      trên. Đây cũng là lý do DHT11 <b>chỉ lấy mẫu tối đa 1 Hz</b>: một lần bắt tay
+      mất vài mili giây và phần tử ẩm cần thời gian ổn định.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">C3</span><h3>I2C</h3>
+        <span class="where">Câu hỏi cuối bài · LCD 20x4</span></div>
+      <p><b class="lb">Khái niệm.</b> Bus <b>hai dây</b>: <b>SDA</b> (dữ liệu) và
+      <b>SCL</b> (xung nhịp), cả hai kiểu cực máng hở nên bắt buộc có điện trở kéo lên.
+      Một <b>chủ</b> (master) phát xung nhịp và điều phối; nhiều <b>tớ</b> (slave)
+      cùng nằm trên một cặp dây, phân biệt bằng <b>địa chỉ 7 bit</b>.</p>
+      <ul>
+        <li><b>START</b>: SDA rơi xuống trong lúc SCL đang cao. <b>STOP</b>: SDA lên
+        trong lúc SCL đang cao.</li>
+        <li>Master gửi 7 bit địa chỉ + 1 bit đọc/ghi; slave đúng địa chỉ kéo SDA xuống
+        báo <b>ACK</b>.</li>
+        <li>Mỗi byte truyền xong đều phải có một bit ACK/NACK.</li>
+        <li>Tốc độ chuẩn 100 kbit/s, chế độ nhanh 400 kbit/s.</li>
+      </ul>
+      <p><b class="lb">Vai trò trong bài.</b> Trên KIT, I2C là đường nối tới
+      <b>màn hình LCD 20x4</b> (qua module mở rộng chân PCF8574, địa chỉ thường 0x27
+      hoặc 0x3F). Bài 1 không lập trình LCD, nhưng câu hỏi cuối vẫn bắt trình bày
+      nguyên lý I2C — hỏi kiến thức chung, không phải hỏi về US-015 (xem phần cảnh báo
+      cuối trang).</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">C4</span><h3>Giao tiếp Trigger/Echo</h3>
+        <span class="where">Mục 3.2</span></div>
+      <p><b class="lb">Khái niệm.</b> Không phải bus, không có địa chỉ, không có khung
+      dữ liệu — chỉ là <b>hai chân điều khiển bằng xung</b>. Vi điều khiển phát một
+      xung ngắn vào chân TRIGGER để ra lệnh "đo đi"; cảm biến trả lời bằng một xung
+      mức cao trên chân ECHO mà <b>độ rộng tỉ lệ với thời gian sóng đi và về</b>.
+      Kiểu mã hóa này gọi là điều chế độ rộng xung.</p>
+      <p><b class="lb">Vai trò trong bài.</b> Toàn bộ mục 3.2 xoay quanh việc đo độ
+      rộng xung đó. Nó cũng giải thích vì sao code siêu âm không cần thư viện nào cả,
+      trong khi DHT11 thì cần: ở đây không có giao thức để cài đặt, chỉ có đồng hồ để
+      bấm.</p>
+    </article>
+  </div>
+</section>
+
+<!-- ================= D ================= -->
+<section class="group" id="d">
+  <div class="group-h"><span class="k">D</span><h2>Nguyên lý hai cảm biến</h2>
+    <span class="cnt">4 đơn vị</span></div>
+  <p class="group-lead">Phần "cấu tạo và nguyên tắc hoạt động" mà mục 2.2 của tài liệu
+  yêu cầu đọc trước ở nhà.</p>
+
+  <div class="units">
+    <article class="unit">
+      <div class="unit-h"><span class="n">D1</span><h3>Đo độ ẩm bằng tụ điện</h3>
+        <span class="where">Mục 3.1</span></div>
+      <p><b class="lb">Khái niệm.</b> Một tụ điện có hai bản cực, giữa chúng là lớp
+      vật liệu hút ẩm làm chất điện môi. Hơi nước bị hút vào lớp này làm
+      <b>hằng số điện môi thay đổi</b>, kéo theo điện dung thay đổi. Mạch bên trong đo
+      điện dung rồi quy ra <b>%RH</b> — độ ẩm tương đối, tức tỉ lệ phần trăm giữa lượng
+      hơi nước đang có và lượng tối đa không khí chứa được ở nhiệt độ đó.</p>
+      <p><b class="lb">Vai trò trong bài.</b> Giải thích vì sao chỉ số độ ẩm
+      <i>chậm</i> — cần thời gian để hơi ẩm khuếch tán vào lớp điện môi, tài liệu ghi
+      "tốc độ cảm nhận trung bình 2 s". Ở Bước 3, khi hà hơi vào cảm biến thì %RH tăng
+      vọt rồi tụt xuống rất từ từ; đó là hiện tượng cần ghi nhận xét.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">D2</span><h3>Đo nhiệt độ bằng điện trở nhiệt</h3>
+        <span class="where">Mục 3.1</span></div>
+      <p><b class="lb">Khái niệm.</b> <b>Thermistor</b> là điện trở có giá trị phụ
+      thuộc mạnh vào nhiệt độ. Loại NTC (hệ số âm) càng nóng điện trở càng giảm. Mạch
+      chia áp biến điện trở thành điện áp, ADC bên trong DHT11 biến điện áp thành số.</p>
+      <p><b class="lb">Vai trò trong bài.</b> Là nửa còn lại của DHT11. Nhớ thông số
+      để đối chiếu khi làm Bảng 1.2: dải <b>0–50 °C, sai số ±2 °C</b>. Nhiệt độ phòng
+      thí nghiệm luôn nằm giữa dải nên số đọc sẽ ổn định — nếu thấy nhảy loạn thì là
+      lỗi dây hoặc lỗi nguồn, không phải cảm biến hỏng.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">D3</span><h3>Sóng siêu âm và đo thời gian bay</h3>
+        <span class="where">Mục 3.2 · Bước 4</span></div>
+      <p><b class="lb">Khái niệm.</b> <b>Siêu âm</b> là sóng cơ có tần số
+      <b>trên 20 kHz</b> — trên ngưỡng nghe của tai người; US-015 làm việc quanh 40 kHz.
+      Bộ phát và bộ thu đều là <b>gốm áp điện</b>: cấp điện thì gốm rung tạo ra sóng,
+      ngược lại sóng đập vào làm gốm rung và sinh ra điện. Phương pháp đo gọi là
+      <b>thời gian bay</b> (time of flight):</p>
+      <div class="path"><b>d</b> <span class="ar">=</span> t<sub>echo</sub>
+        <span class="ar">×</span> v <span class="ar">÷</span> 2 &nbsp;&nbsp;
+        <span class="ar">với</span> &nbsp; v(m/s) <span class="ar">=</span>
+        331,3 <span class="ar">+</span> 0,606 <span class="ar">×</span> T(°C)</div>
+      <p style="margin-top:10px"><b class="lb">Vai trò trong bài.</b> Chia đôi vì thời
+      gian đo được là cả lượt đi <i>và</i> lượt về — tài liệu nhắc riêng ý này. Vận tốc
+      phụ thuộc nhiệt độ chính là lời giải cho câu hỏi Bước 4 "tại sao độ chính xác tùy
+      thuộc việc hiệu chỉnh vận tốc": ở 0 °C sóng đi 331 m/s, ở 40 °C đi 355 m/s —
+      lấy cứng 340 m/s thì sai số hệ thống lên tới khoảng 3 %.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">D4</span><h3>Vùng mù, góc phát, bề mặt phản xạ</h3>
+        <span class="where">Mục 3.2 · Bước 5</span></div>
+      <p><b class="lb">Khái niệm.</b> Ba giới hạn vật lý của mọi cảm biến siêu âm:</p>
+      <ul>
+        <li><b>Vùng mù gần</b> — sau khi phát, bản gốm còn <i>rung dư</i> vài trăm µs;
+        trong khoảng đó đầu thu không phân biệt được sóng phản hồi với chính tiếng rung
+        của mình. Đó là lý do có ngưỡng dưới 2 cm.</li>
+        <li><b>Giới hạn xa</b> — sóng suy hao theo quãng đường, quá 2,5 m thì tín hiệu
+        về quá yếu, chân ECHO không lên mức cao và phép đo hết giờ.</li>
+        <li><b>Góc phát</b> nhỏ hơn 15° — ngoài hình nón đó cảm biến không thấy. Bề mặt
+        mềm, xốp, hoặc nghiêng sẽ hấp thụ hay hắt sóng đi hướng khác, cho kết quả sai.</li>
+      </ul>
+      <p><b class="lb">Vai trò trong bài.</b> Bước 5 bắt xác định thực nghiệm khoảng
+      cách nhỏ nhất và lớn nhất đo được — chính là đo hai giới hạn đầu. Ghi kèm giải
+      thích "rung dư của bộ phát" và "suy hao theo quãng đường" là đủ ý.</p>
+    </article>
+  </div>
+</section>
+
+<!-- ================= E ================= -->
+<section class="group" id="e">
+  <div class="group-h"><span class="k">E</span><h2>Đo lường: sai số, dải, hiệu chuẩn</h2>
+    <span class="cnt">3 đơn vị</span></div>
+  <p class="group-lead">Ngôn ngữ để viết phần nhận xét sao cho ra dáng kỹ thuật thay vì
+  "em thấy số nó nhảy".</p>
+
+  <div class="units">
+    <article class="unit">
+      <div class="unit-h"><span class="n">E1</span><h3>Độ phân giải ≠ độ chính xác</h3>
+        <span class="where">Bảng 1.2 &amp; 1.5</span></div>
+      <p><b class="lb">Khái niệm.</b> <b>Độ phân giải</b> là bước nhảy nhỏ nhất thiết bị
+      hiển thị được. <b>Độ chính xác</b> (sai số) là mức lệch so với giá trị thật. Một
+      thiết bị có thể hiện số rất mịn mà vẫn sai nhiều.</p>
+      <p><b class="lb">Vai trò trong bài.</b> Ví dụ sống động ngay trong tài liệu:
+      DHT11 ghi "độ phân giải 16 bit" nhưng sai số tận <b>±2 °C và ±5 %RH</b>, và thực
+      tế xuất ra số nguyên. US-015 phân giải tới 0,5 mm nhưng độ chính xác chỉ
+      0,1 cm ±1 %. Khi ghi Bảng 1.2, đừng chép 5 lần đo giống hệt nhau — chênh lệch
+      giữa các lần chính là thứ minh họa khái niệm này.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">E2</span><h3>Dải đo và tốc độ lấy mẫu</h3>
+        <span class="where">Bảng 1.3 · code</span></div>
+      <p><b class="lb">Khái niệm.</b> <b>Dải đo</b> là khoảng giá trị cảm biến còn làm
+      việc đúng; ra ngoài dải thì số đọc vô nghĩa chứ không phải "hơi sai".
+      <b>Tốc độ lấy mẫu</b> là số phép đo tối đa mỗi giây.</p>
+      <p><b class="lb">Vai trò trong bài.</b> DHT11: 0–50 °C, 20–95 %RH, tối đa 1 Hz →
+      vì thế trong code phải có <code>delay(2000)</code>, đọc dày hơn sẽ ra giá trị cũ
+      hoặc lỗi. US-015: 2 cm – 2,5 m → hai đầu dải chính là vùng mù ở Bước 5.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">E3</span><h3>Hiệu chuẩn và sai số hệ thống</h3>
+        <span class="where">Mục 3.2 · Bước 4</span></div>
+      <p><b class="lb">Khái niệm.</b> <b>Sai số ngẫu nhiên</b> lệch mỗi lần một khác,
+      lấy trung bình nhiều lần thì giảm. <b>Sai số hệ thống</b> luôn lệch cùng một
+      chiều, đo bao nhiêu lần cũng không hết — phải <b>hiệu chuẩn</b> mới sửa được.</p>
+      <p><b class="lb">Vai trò trong bài.</b> Dùng cứng 340 m/s trong khi phòng đang
+      25 °C là sai số hệ thống điển hình: mọi phép đo đều lệch cùng chiều, cùng tỉ lệ.
+      Thay bằng công thức phụ thuộc nhiệt độ chính là hành động hiệu chuẩn. Viết được
+      đúng ý này là trả lời trọn vẹn Bước 4.</p>
+    </article>
+  </div>
+</section>
+
+<!-- ================= F ================= -->
+<section class="group" id="f">
+  <div class="group-h"><span class="k">F</span><h2>Lập trình nhúng</h2>
+    <span class="cnt">4 đơn vị</span></div>
+  <p class="group-lead">Phần "đã học C/C++" trong mục Yêu cầu — nhưng dùng ở mức rất nhẹ.</p>
+
+  <div class="units">
+    <article class="unit">
+      <div class="unit-h"><span class="n">F1</span><h3>Sketch: setup() và loop()</h3>
+        <span class="where">Mục 2.1</span></div>
+      <p><b class="lb">Khái niệm.</b> Chương trình Arduino gọi là <b>sketch</b>, viết
+      bằng C++ nhưng không có <code>main()</code> lộ ra. <code>setup()</code> chạy
+      <b>đúng một lần</b> sau khi cấp nguồn hoặc nhấn reset — nơi khai báo chế độ chân,
+      mở cổng serial, khởi động thư viện. <code>loop()</code> chạy <b>lặp vô hạn</b>
+      ngay sau đó.</p>
+      <p><b class="lb">Vai trò trong bài.</b> Cả ba chương trình đều theo đúng khuôn:
+      cấu hình một lần trong <code>setup()</code>, đọc cảm biến và in ra trong
+      <code>loop()</code>. Tài liệu ví <code>loop()</code> với <code>while()</code>
+      trong C — đúng, thực chất trình biên dịch bọc nó trong một vòng lặp vô tận.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">F2</span><h3>Từ mã nguồn tới chip</h3>
+        <span class="where">Mục 2.1 · file HEX</span></div>
+      <p><b class="lb">Khái niệm.</b> Chuỗi công cụ:</p>
+      <div class="path">
+        .ino <span class="ar">→</span> <b>tiền xử lý</b> <span class="ar">→</span>
+        <b>trình biên dịch</b> <span class="ar">→</span> mã máy Xtensa
+        <span class="ar">→</span> <b>trình liên kết</b> ghép thư viện
+        <span class="ar">→</span> <b>file HEX</b> <span class="ar">→</span>
+        nạp qua USB–UART <span class="ar">→</span> bộ nhớ Flash của ESP32
+      </div>
+      <p style="margin-top:10px"><b class="lb">Vai trò trong bài.</b> Giải thích hai nút
+      bấm bạn dùng suốt buổi: <b>Compile</b> chạy tới bước sinh file HEX,
+      <b>Upload</b> chạy nốt bước nạp. <b>Intel HEX</b> là định dạng văn bản ASCII, mỗi
+      dòng là một bản ghi gồm độ dài, địa chỉ, loại bản ghi, dữ liệu và tổng kiểm tra —
+      nhờ vậy truyền được qua đường serial thuần văn bản.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">F3</span><h3>Thư viện và <code>#include</code></h3>
+        <span class="where">Mục 3.1</span></div>
+      <p><b class="lb">Khái niệm.</b> Thư viện là mã người khác viết sẵn, gói phần khó
+      thành lời gọi hàm đơn giản. Trong Arduino IDE cài qua <b>Library Manager</b>, rồi
+      khai báo bằng <code>#include</code>.</p>
+      <p><b class="lb">Vai trò trong bài.</b> <code>DHT.h</code> (kèm
+      <i>Adafruit Unified Sensor</i>) giấu toàn bộ trình tự bắt tay One-Wire ở đơn vị C2
+      vào sau <code>dht.readTemperature()</code>. Đây cũng là chỗ thấy rõ ranh giới
+      "biết dùng" và "biết nguyên lý" — bài thí nghiệm cố tình hỏi cái phần bị giấu.</p>
+    </article>
+
+    <article class="unit">
+      <div class="unit-h"><span class="n">F4</span><h3>Hàm thời gian và <code>pulseIn()</code></h3>
+        <span class="where">Mục 3.2 · trọng tâm</span></div>
+      <p><b class="lb">Khái niệm.</b> <code>delay(ms)</code> và
+      <code>delayMicroseconds(µs)</code> chặn hoàn toàn — trong lúc chờ, chương trình
+      không làm gì khác. <code>micros()</code> trả về số micro giây từ lúc khởi động.
+      <code>pulseIn(chân, mức, timeout)</code> chờ chân lên đúng mức rồi bấm giờ cho tới
+      khi nó rời mức đó, trả về độ rộng xung tính bằng µs; hết thời gian chờ mà không
+      thấy xung thì trả về <b>0</b>.</p>
+      <p><b class="lb">Vai trò trong bài.</b> Đây là hàm quan trọng nhất của mục 3.2 —
+      nó chính là cái đồng hồ đo thời gian bay ở đơn vị D3. Tham số <b>timeout</b> là
+      thứ khiến chương trình không đứng im khi trước mặt cảm biến trống trơn, và giá trị
+      trả về 0 là cách nhận biết "không có vật cản" trong code.</p>
+    </article>
+  </div>
+</section>
+
+<!-- ================= G ================= -->
+<section class="group" id="g">
+  <div class="group-h"><span class="k">G</span><h2>Công cụ — lý thuyết &amp; vai trò</h2>
+    <span class="cnt">8 công cụ</span></div>
+  <p class="group-lead">Mỗi công cụ giải quyết đúng một khâu; biết nó nằm ở khâu nào thì
+  khi hỏng mới biết tìm ở đâu.</p>
+
+  <div class="scroll">
+    <table class="tbl">
+      <thead><tr><th>Công cụ</th><th>Nó là gì (lý thuyết)</th><th>Vai trò trong bài</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Arduino IDE 2.x</td>
+          <td>Môi trường phát triển tích hợp: trình soạn thảo + chuỗi biên dịch +
+          bộ nạp + terminal, chạy trên nền Java, mã nguồn mở.</td>
+          <td>Nơi gõ code, bấm Compile, bấm Upload, và mở Serial Monitor. Là công cụ
+          trung tâm của cả buổi.</td>
+        </tr>
+        <tr>
+          <td>Board Manager<br>+ ESP32 core</td>
+          <td>Gói hỗ trợ bo mạch: chứa trình biên dịch Xtensa, thư viện lõi, và định
+          nghĩa chân. Nó dịch các lệnh Arduino chung thành lệnh cụ thể của ESP32.</td>
+          <td>Lý do phải chọn đúng <b>ESP32 Dev Module</b> trong Tools → Board. Chọn
+          sai bo thì biên dịch ra mã cho chip khác, nạp vào sẽ không chạy.</td>
+        </tr>
+        <tr>
+          <td>Driver CH340</td>
+          <td>Trình điều khiển cho chip cầu <b>USB ↔ UART</b>. Máy tính không có cổng
+          COM vật lý nữa, chip này tạo ra một <b>cổng COM ảo</b> để hệ điều hành nhìn
+          thấy bo mạch.</td>
+          <td>Không cài driver thì danh sách Port trống, không nạp được. Đây là lỗi
+          đầu tiên cần nghĩ tới khi máy "không nhận KIT".</td>
+        </tr>
+        <tr>
+          <td>Serial Monitor</td>
+          <td>Cửa sổ terminal đọc dữ liệu từ cổng COM ảo và hiển thị dạng văn bản. Có
+          ô chọn tốc độ baud riêng.</td>
+          <td>Màn hình hiển thị duy nhất của bài — mọi số đo đều đọc ở đây. Tốc độ phải
+          khớp <code>Serial.begin()</code> trong code.</td>
+        </tr>
+        <tr>
+          <td>Thư viện DHT.h<br>+ Adafruit Unified Sensor</td>
+          <td>Mã cài đặt sẵn trình tự One-Wire theo đúng thời gian chuẩn của DHT, kèm
+          kiểm tra tổng và quy đổi đơn vị.</td>
+          <td>Bắt buộc cho mục 3.1. Không có nó thì phải tự viết hàng chục dòng đọc
+          xung theo micro giây.</td>
+        </tr>
+        <tr>
+          <td>Thư viện Wire.h</td>
+          <td>Thư viện <b>I2C</b> của Arduino (tên "Wire" dễ gây nhầm với One-Wire).</td>
+          <td>Dùng cho LCD 20x4 trên KIT. <b>Không</b> cần cho DHT11 — xem cảnh báo
+          bên dưới.</td>
+        </tr>
+        <tr>
+          <td>Wokwi</td>
+          <td>Trình mô phỏng vi điều khiển chạy trên trình duyệt: giả lập chip ESP32
+          ở mức lệnh, kèm mô hình các linh kiện ngoại vi.</td>
+          <td>Để tập trước ở nhà không cần KIT. Chạy được đúng code sẽ nạp lên bo thật.
+          Không thay thế được phần cắm dây và đo thực tế.</td>
+        </tr>
+        <tr>
+          <td>Thước / vật cản</td>
+          <td>Chuẩn đối chiếu — giá trị "thật" để so với giá trị cảm biến báo về.</td>
+          <td>Không có nó thì không đánh giá được sai số ở Bước 3, và không xác định
+          được vùng mù ở Bước 5.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= canh bao ================= -->
+<section class="flag">
+  <h3>Ba chỗ tài liệu môn ghi chưa chuẩn</h3>
+  <p><b>1. "US-015 giao tiếp với vi điều khiển bằng giao thức I2C."</b> Không đúng —
+  US-015 dùng hai chân Trigger/Echo, đúng như chính Bảng 1.4 của tài liệu ghi. I2C trên
+  KIT là đường nối tới màn hình LCD 20x4. Câu hỏi I2C cuối bài là hỏi kiến thức chung.</p>
+  <p><b>2. "Sóng siêu âm là sóng lan truyền với vận tốc lớn hơn vận tốc âm thanh."</b>
+  Siêu âm được định nghĩa bằng <i>tần số</i> trên 20 kHz, không phải bằng vận tốc.
+  Nó lan truyền cùng vận tốc với âm thanh nghe được trong cùng môi trường.</p>
+  <p><b>3. "Thêm thư viện DHT.h và Wire.h cho giao tiếp One-Wire."</b>
+  <code>Wire.h</code> là thư viện I2C, không liên quan tới One-Wire. Mục 3.1 chỉ cần
+  <code>DHT.h</code> và <i>Adafruit Unified Sensor</i>.</p>
+  <p class="q">Nêu được một trong ba điểm này trong báo cáo thường được đánh giá cao,
+  nhưng nên viết nhã nhặn kiểu "theo datasheet của US-015 thì…" thay vì nói tài liệu sai.</p>
+</section>
+
+<footer>
+  Tổng cộng 31 đơn vị kiến thức. Phần chấm điểm nặng nhất nằm ở nhóm C (One-Wire, I2C)
+  và các đơn vị D3, D4, E3 — đó là bốn câu hỏi tự luận của bài. Mã nguồn và mô phỏng
+  nằm cùng thư mục: <code>mo-phong.html</code>, <code>01-blink/</code>,
+  <code>02-dht11/</code>, <code>03-sieu-am/</code>.
+</footer>
+</div>
+</body>
+</html>

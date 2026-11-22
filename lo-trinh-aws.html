@@ -1,0 +1,1120 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lộ trình AWS</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f3f1ec; --surface:#ffffff; --ink:#1a2530; --muted:#5d6b78;
+  --line:#ddd8cf; --accent:#d47800; --accent-soft:#fbeed6;
+  --navy:#232f3e; --navy-soft:#e7ebf0;
+  --cost:#b0300f; --cost-soft:#fbe6e0;      /* có thể tính tiền */
+  --free:#0d6b4f; --free-soft:#e0f0e8;       /* always-free */
+  --warn:#9a5a00; --warn-soft:#fbf0dd; --ok:#0d6b4f; --ok-soft:#e0f0e8;
+  --code-bg:#1b2530; --code-ink:#d7dee7; --code-dim:#7c8b9c;
+  --hover:#eceae3;
+  --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#14181d; --surface:#1c222a; --ink:#e6e9ed; --muted:#8f9aa6;
+    --line:#2c343d; --accent:#f0a030; --accent-soft:#2e2309;
+    --navy:#5a7290; --navy-soft:#1a2432;
+    --cost:#e8795a; --cost-soft:#331610; --free:#4cbf95; --free-soft:#102b22;
+    --warn:#e0a040; --warn-soft:#2e2309; --ok:#4cbf95; --ok-soft:#102b22;
+    --code-bg:#0e1319; --hover:#242c35;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14181d; --surface:#1c222a; --ink:#e6e9ed; --muted:#8f9aa6;
+  --line:#2c343d; --accent:#f0a030; --accent-soft:#2e2309;
+  --navy:#5a7290; --navy-soft:#1a2432;
+  --cost:#e8795a; --cost-soft:#331610; --free:#4cbf95; --free-soft:#102b22;
+  --warn:#e0a040; --warn-soft:#2e2309; --ok:#4cbf95; --ok-soft:#102b22;
+  --code-bg:#0e1319; --hover:#242c35;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:920px;margin:0 auto;padding:30px 20px 80px;
+  display:flex;flex-direction:column;gap:20px}
+code{font-family:var(--mono);font-size:.88em;background:var(--accent-soft);
+  color:var(--accent);padding:1px 5px;border-radius:3px}
+a{color:var(--accent)}
+
+header{border-bottom:3px solid var(--accent);padding-bottom:16px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+h1{margin:7px 0 8px;font-size:clamp(23px,3.6vw,32px);font-weight:600;
+  letter-spacing:-.018em;text-wrap:balance}
+.sub{color:var(--muted);font-size:14px;margin:0;max-width:70ch}
+
+/* canh bao tien - luan de cua trang */
+.cost-box{background:var(--cost-soft);border:1px solid var(--cost);border-radius:6px;
+  padding:15px 18px}
+.cost-box h3{margin:0 0 8px;font-size:15.5px;color:var(--cost);font-weight:600}
+.cost-box p{margin:0 0 8px;font-size:13.8px}
+.cost-box b{color:var(--cost)}
+.cost-box ul{margin:4px 0 0;padding-left:20px;font-size:13.5px}
+.cost-box li{margin-bottom:3px}
+
+.prog{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  padding:14px 18px;position:sticky;top:0;z-index:5}
+.prog-top{display:flex;align-items:baseline;gap:12px;margin-bottom:9px}
+.prog-top b{font-size:14px;font-weight:600}
+.prog-top .cnt{font-size:12.5px;color:var(--muted)}
+.prog-top .pct{margin-left:auto;font-family:var(--mono);font-size:13px;
+  font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+.bar{height:7px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);
+  transition:width .25s ease}
+.prog button{margin-top:10px;font-family:var(--sans);font-size:12px;cursor:pointer;
+  background:transparent;border:1px solid var(--line);color:var(--muted);
+  padding:3px 10px;border-radius:4px}
+.prog button:hover{border-color:var(--accent);color:var(--accent)}
+
+.phase{display:flex;align-items:baseline;gap:12px;margin:18px 0 2px;
+  padding-bottom:8px;border-bottom:1px solid var(--line)}
+.phase .k{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--accent);flex:none}
+.phase h2{margin:0;font-size:19px;font-weight:600;letter-spacing:-.012em}
+.phase .meta{margin-left:auto;font-family:var(--mono);font-size:11.5px;
+  color:var(--muted);flex:none;text-align:right}
+.phase-lead{color:var(--muted);font-size:13.5px;margin:8px 0 12px;max-width:72ch}
+
+details.u{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  margin-bottom:9px;overflow:hidden}
+details.u[open]{border-color:var(--accent)}
+details.u summary{list-style:none;cursor:pointer;padding:12px 16px;
+  display:flex;align-items:center;gap:10px}
+details.u summary::-webkit-details-marker{display:none}
+details.u summary:hover{background:var(--hover)}
+summary input[type=checkbox]{width:16px;height:16px;accent-color:var(--ok);
+  cursor:pointer;flex:none;margin:0}
+summary .id{font-family:var(--mono);font-size:11.5px;font-weight:600;
+  color:var(--accent);background:var(--accent-soft);padding:2px 7px;border-radius:3px;flex:none}
+summary .ttl{font-weight:500;font-size:15px}
+summary .tag{font-family:var(--mono);font-size:10px;font-weight:600;
+  padding:2px 6px;border-radius:3px;flex:none;margin-left:auto}
+summary .tag.cost{color:var(--cost);background:var(--cost-soft)}
+summary .tag.free{color:var(--free);background:var(--free-soft)}
+summary .tag.safe{color:var(--navy);background:var(--navy-soft)}
+summary .time{font-family:var(--mono);font-size:11px;color:var(--muted);flex:none}
+summary .chev{color:var(--muted);font-size:12px;flex:none;transition:transform .18s}
+details.u[open] summary .chev{transform:rotate(90deg)}
+details.u.done summary .ttl{color:var(--muted);text-decoration:line-through}
+
+.body{padding:4px 18px 18px;border-top:1px solid var(--line);font-size:14.5px}
+.body h5{margin:16px 0 6px;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.body h5:first-child{margin-top:14px}
+.body p{margin:0 0 10px}
+.body ul,.body ol{margin:0 0 10px;padding-left:22px}
+.body li{margin-bottom:5px}
+.goal{background:var(--ok-soft);border-radius:5px;padding:9px 12px;font-size:14px}
+.goal b{color:var(--ok)}
+.why{background:var(--navy-soft);border-radius:5px;padding:9px 12px;
+  font-size:13.8px;margin:0 0 10px}
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:5px;
+  padding:12px 14px;overflow-x:auto;margin:0 0 10px;white-space:pre;
+  font-family:var(--mono);font-size:12.5px;line-height:1.6}
+pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.cmt{color:var(--code-dim)}
+.meas{background:var(--accent-soft);border-left:3px solid var(--accent);
+  border-radius:0 5px 5px 0;padding:10px 13px;font-size:13.8px;margin:0 0 10px}
+.meas b{color:var(--accent)}
+.trap{background:var(--cost-soft);border-left:3px solid var(--cost);
+  border-radius:0 5px 5px 0;padding:10px 13px;font-size:13.8px;margin:0 0 10px}
+.trap b{color:var(--cost)}
+.body table{width:100%;border-collapse:collapse;font-size:13.4px;margin:0 0 10px}
+.body table th,.body table td{text-align:left;padding:5px 8px;vertical-align:top}
+.body table tr:first-child{border-bottom:1px solid var(--line)}
+.body table code{font-size:.85em}
+@media (max-width:620px){.body table{font-size:12px}.body table th,.body table td{padding:4px 5px}}
+.refs{font-size:12.7px;color:var(--muted);border-top:1px dashed var(--line);
+  padding-top:9px;margin:14px 0 0}
+.refs a{display:inline-block;margin:2px 10px 2px 0}
+
+.callout{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:15px 18px;font-size:14px}
+.callout h3{margin:0 0 8px;font-size:15.5px;font-weight:600}
+.callout p{margin:0 0 9px}
+.callout ul{margin:0 0 9px;padding-left:20px}
+.callout li{margin-bottom:5px}
+
+.courses{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:4px 18px 18px}
+.course{border-top:1px solid var(--line);padding:12px 0}
+.course:first-of-type{border-top:none}
+.course h4{margin:0 0 4px;font-size:15px}
+.course h4 a{text-decoration:none}
+.course .badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:2px 6px;
+  border-radius:3px;background:var(--free-soft);color:var(--free);margin-left:6px}
+.course .badge.vn{background:var(--accent-soft);color:var(--accent)}
+.course p{margin:4px 0 0;font-size:13.5px;color:var(--muted)}
+
+footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;max-width:76ch}
+footer p{margin:0 0 10px}
+footer ul{margin:0 0 10px;padding-left:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Lớp nhà cung cấp · dưới VDT và AI infra</div>
+  <h1>Lộ trình AWS</h1>
+  <p class="sub">Mọi lộ trình khác của bạn (K8s, Docker, Terraform, AI infra) đều
+  <b>trung lập nhà cung cấp</b> — chúng cần một đám mây thật để chạy. Đây là đám mây đó.
+  Lộ trình này phủ <b>cả danh sách dịch vụ của roadmap.sh</b>, nhưng mỗi dịch vụ được nối
+  tới kiến thức sâu bạn đã có, kèm một bài đo trên free tier và một bẫy hoá đơn.</p>
+</header>
+
+<div class="cost-box">
+  <h3>⚠ Đọc trước khi tạo tài khoản — AWS tính tiền thật</h3>
+  <p>Đây là khác biệt lớn nhất so với <code>kind</code> trên máy bạn: <b>một cấu hình sai
+  chạy qua đêm là một hoá đơn thật về thẻ của bạn.</b> Lộ trình này ép bạn dựng lan can
+  trước (đơn vị 0), và mọi đơn vị tốn tiền đều có thẻ <span style="color:var(--cost);font-weight:600">💲 cost</span>
+  cùng thói quen <b>dựng → đo → <code>destroy</code> trong một buổi</b>.</p>
+  <p><b>Cơ cấu free tier đã đổi từ 15/07/2025.</b> Tài khoản mới giờ nhận
+  <b>100 $ khi đăng ký + tối đa 100 $ nữa</b> qua 5 hoạt động, và <b>hết hạn sau 6 tháng
+  hoặc khi tiêu hết credit</b> — không còn kiểu "750 giờ EC2/tháng trong 12 tháng" như tài
+  khoản cũ. Hệ quả: <b>đừng tạo tài khoản cho tới khi bạn thật sự bắt đầu Bước 1</b>, kẻo
+  đồng hồ 6 tháng chạy trong khi bạn chưa học. Số liệu đổi theo thời gian — luôn kiểm
+  <a href="https://aws.amazon.com/free/" target="_blank" rel="noopener">trang free tier</a>.</p>
+</div>
+
+<div class="prog">
+  <div class="prog-top"><b>Tiến độ</b>
+    <span class="cnt" id="cnt"></span>
+    <span class="pct" id="pct">0%</span></div>
+  <div class="bar"><i id="fill"></i></div>
+  <button id="reset">Xóa tiến độ</button>
+</div>
+
+<details class="u" id="VAO"><summary>
+  <span class="id">VÀO</span>
+  <span class="ttl">Điều kiện vào — và chuyện cái thẻ thanh toán</span>
+  <span class="tag safe">nền</span>
+  <span class="time">đọc trước</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p>Lộ trình này <b>treo dưới VDT</b>. Bạn nên học nó <b>sau hoặc song song VDT tuần 3
+    trở đi</b>, vì nó giả định bạn đã biết:</p>
+    <ul>
+      <li>Linux dòng lệnh, SSH (VDT tuần 1–2)</li>
+      <li>Docker (VDT tuần 3) — cho phần ECS/EKS</li>
+      <li>Kubernetes nền (VDT tuần 4–5) — cho EKS</li>
+      <li>Mạng cơ bản: IP, CIDR, cổng, DNS — cho VPC</li>
+      <li>Terraform nền (VDT tuần 7) — cho dự án cuối</li>
+    </ul>
+
+    <h5>Chuyện cái thẻ — đọc kỹ</h5>
+    <p>Tài khoản AWS <b>bắt buộc một thẻ thanh toán</b> (Visa/Mastercard quốc tế, hoặc thẻ
+    ảo). Đây là rào thật với sinh viên Việt Nam. Hai đường:</p>
+    <table>
+      <tr><th>Đường</th><th>Cần thẻ?</th><th>Hợp khi</th></tr>
+      <tr><td><b>AWS Educate</b></td><td><b>Không</b></td>
+          <td>bạn 14+ tuổi, chỉ muốn học và làm lab trong môi trường có sẵn, không đụng tới
+          hoá đơn</td></tr>
+      <tr><td><b>Tài khoản AWS thường</b></td><td>Có</td>
+          <td>bạn cần dựng hạ tầng thật, dùng Terraform, làm dự án cuối (U14)</td></tr>
+    </table>
+    <p>Lời khuyên: học khái niệm và lab trên <b>AWS Educate + FCJ</b> (xem mục Khoá học) để
+    không cần thẻ, rồi chỉ mở tài khoản thật khi tới dự án cuối — lúc đó mới đáng để đồng hồ
+    6 tháng chạy.</p>
+
+    <div class="trap"><b>Bẫy.</b> Tạo tài khoản bằng thẻ, quên tắt dịch vụ, rồi nhận hoá
+    đơn vài chục đô là chuyện xảy ra với <b>rất nhiều người mới</b>. Đơn vị 0 tồn tại chính
+    để chuyện đó không xảy ra với bạn. Đừng bỏ qua nó.</div>
+  </div>
+</details>
+
+<details class="u" id="MAP"><summary>
+  <span class="id">MAP</span>
+  <span class="ttl">Bản đồ — mỗi dịch vụ AWS nối vào kiến thức sâu nào</span>
+  <span class="tag safe">nền</span>
+  <span class="time">đọc trước</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p>Đây là thứ biến lộ trình này từ "checklist dịch vụ" thành thứ <b>liền mạch</b>: bạn
+    không học AWS từ số 0, bạn học <b>tên AWS đặt cho những thứ bạn đã hiểu bản chất</b>.</p>
+
+    <table>
+      <tr><th>Dịch vụ AWS</th><th>Thật ra là</th><th>Bạn đã học sâu ở</th></tr>
+      <tr><td>VPC, Subnet, Security Group</td><td>mạng, tường lửa, định tuyến</td>
+          <td>Lập trình mạng · TCP/IP</td></tr>
+      <tr><td>EC2</td><td>máy ảo</td><td>Container Security Ch 5 (VM vs container)</td></tr>
+      <tr><td>EBS / S3 / Glacier</td><td>phân cấp lưu trữ</td><td>AI infra 5.5 · CSAPP Ch 6</td></tr>
+      <tr><td>IAM</td><td>đặc quyền tối thiểu</td><td>Container Security C.3</td></tr>
+      <tr><td>CloudWatch</td><td>giám sát, metric, alarm</td><td>Prometheus (VDT tuần 7)</td></tr>
+      <tr><td>Auto-Scaling + ELB</td><td>mở rộng theo tải, cân bằng</td><td>AI infra 3.2, 3.6</td></tr>
+      <tr><td>CloudFront</td><td>cache theo cục bộ</td><td>AI infra 2.2 (cache)</td></tr>
+      <tr><td>RDS, DynamoDB</td><td>replication, sharding, key-value</td><td>DDIA Ch 6, 7 · Database Internals</td></tr>
+      <tr><td>ElastiCache</td><td>tầng cache</td><td>AI infra 2.2, 3.2</td></tr>
+      <tr><td>ECR / ECS / EKS</td><td>registry, điều phối container</td><td>AI infra giai đoạn C, 6</td></tr>
+      <tr><td>Lambda cold start</td><td>độ trễ khởi động, hàng đợi</td><td>AI infra 3.2, 2.5</td></tr>
+    </table>
+
+    <h5>Ba mạch xuyên suốt</h5>
+    <p><b>Mạch tiền</b> — đơn vị 0 (lan can) → mọi thẻ 💲 → U12 (EKS control plane tốn/giờ)
+    → U14 (<code>terraform destroy</code> là phản xạ). Tiền là trục của AWS, như định luật
+    sắt là trục của AI infra.</p>
+    <p><b>Mạch mạng</b> — U2 VPC → U4 ELB → U6 Route53/CloudFront → U13 API Gateway. Cùng
+    một gói tin đi từ Internet vào tới hàm của bạn.</p>
+    <p><b>Mạch triển khai</b> — U3 EC2 (một máy) → U4 ASG (nhiều máy) → U11 ECS (container)
+    → U12 EKS (K8s) → U13 Lambda (không máy nào). Năm bậc trừu tượng hoá, cùng một việc:
+    chạy code của bạn.</p>
+
+    <p style="color:var(--muted);font-size:12.8px;border-top:1px dashed var(--line);padding-top:10px">
+    <b>Tài liệu anh em</b> trong <code>D:\Documentation</code>:
+    <a href="lo-trinh-ai-infrastructure.html" target="_blank" rel="noopener">lo-trinh-ai-infrastructure.html</a>
+    (giá ở giai đoạn 9 chính là giá AWS),
+    <a href="ke-hoach-vdt.html" target="_blank" rel="noopener">ke-hoach-vdt.html</a> (lộ trình mẹ),
+    <a href="lo-trinh-c.html" target="_blank" rel="noopener">lo-trinh-c.html</a>.</p>
+  </div>
+</details>
+
+<!-- ===== 0 ===== -->
+<div class="phase"><span class="k">0</span><h2>An toàn tài khoản — trước mọi thực hành</h2>
+  <span class="meta">1 đơn vị · bắt buộc</span></div>
+<p class="phase-lead">Đơn vị duy nhất không được bỏ, không được làm sau. Dựng lan can trước
+khi chạm bất cứ dịch vụ nào tính tiền.</p>
+
+<details class="u" id="U0"><summary><input type="checkbox"><span class="id">0</span>
+  <span class="ttl">Lan can: MFA, IAM, Budgets và báo động hoá đơn</span>
+  <span class="tag safe">bắt buộc</span>
+  <span class="time">3 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Sau đơn vị này, không một cấu hình sai nào có thể âm
+    thầm đốt quá vài đô trước khi bạn nhận email cảnh báo.</p>
+
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> Đây là phiên bản AWS của "đặt
+    <code>ulimit</code> trước khi fork bomb". Trên máy bạn, sai thì treo máy; trên AWS, sai
+    thì mất tiền thật. Lan can phải có <b>trước</b>, không phải sau lần hoá đơn đầu tiên.</p>
+
+    <h5>Sáu việc, theo đúng thứ tự</h5>
+    <ol>
+      <li><b>Bật MFA cho tài khoản root</b> ngay lập tức. Root là chìa khoá toàn quyền —
+      mất nó là mất tất cả, kể cả quyền tắt chi tiêu.</li>
+      <li><b>Khoá root lại, tạo một user IAM</b> cho việc hằng ngày (nguyên tắc đặc quyền
+      tối thiểu — Container Security C.3). Không bao giờ dùng root để làm việc thường.</li>
+      <li><b>Bật cảnh báo free tier</b>: Billing → Billing preferences → "Receive Free Tier
+      Usage Alerts".</li>
+      <li><b>Tạo Budget</b> (AWS Budgets): đặt ngân sách tháng, ví dụ 10 $, cảnh báo ở 50%,
+      80%, 100%.</li>
+      <li><b>Tạo billing alarm trên CloudWatch</b>: metric <code>EstimatedCharges</code>
+      (USD), ngưỡng <b>5 / 10 / 25 $</b>, gửi email qua SNS.</li>
+      <li><b>Chọn một region và ở yên đó</b> (ví dụ <code>ap-southeast-1</code> Singapore
+      — gần Việt Nam nhất). Dịch vụ tạo nhầm region khác là nguồn "tôi đã xoá hết rồi mà
+      vẫn bị tính tiền" kinh điển.</li>
+    </ol>
+
+    <div class="meas"><b>Đo được.</b> Sau khi dựng xong, mở Billing → Free Tier, xem bảng
+    theo dõi mức dùng so với hạn free. Chụp lại. Đây là trang bạn sẽ mở <b>mỗi ngày</b>
+    trong tuần đầu.</div>
+
+    <div class="trap"><b>Bẫy.</b> CloudWatch billing alarm <b>chỉ tạo được ở region
+    <code>us-east-1</code></b> (Bắc Virginia), vì dữ liệu hoá đơn tổng hợp ở đó — dù tài
+    nguyên của bạn nằm ở Singapore. Người mới loay hoay không thấy metric
+    <code>EstimatedCharges</code> gần như luôn vì đang ở sai region.</div>
+
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Làm đủ sáu việc. Gửi thử một cảnh báo (hạ ngưỡng xuống 0.01 $ trong vài phút để
+      kích hoạt, rồi đặt lại) — xác nhận email thật sự tới.</li>
+      <li>Tạo user IAM thứ hai chỉ có quyền đọc (<code>ReadOnlyAccess</code>). Đăng nhập
+      bằng nó, thử tạo một EC2 — xác nhận bị từ chối. Bạn vừa thấy IAM policy chặn thật.</li>
+      <li>Viết một ghi chú <code>aws-an-toan.md</code>: region đang dùng, ngưỡng budget,
+      email nhận cảnh báo. Mỗi lần mở tài khoản là liếc lại.</li>
+    </ol>
+    <p class="refs">
+      <a href="https://aws.amazon.com/free/" target="_blank" rel="noopener">AWS Free Tier</a>
+      <a href="https://cloudjourney.awsstudygroup.com/" target="_blank" rel="noopener">FCJ workshop (tiếng Việt)</a>
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws</a>
+    </p>
+  </div>
+</details>
+
+<!-- ===== 1 ===== -->
+<div class="phase"><span class="k">1</span><h2>Nền tảng — IAM, VPC, EC2, mở rộng</h2>
+  <span class="meta">4 đơn vị · ~2 tuần</span></div>
+<p class="phase-lead">Ba dịch vụ cốt lõi roadmap.sh gọi là "Essentials", cộng lớp mở rộng.
+Hiểu bốn cái này là chạy được gần như mọi thứ trên AWS.</p>
+
+<details class="u" id="U1"><summary><input type="checkbox"><span class="id">1.1</span>
+  <span class="ttl">IAM — ai được làm gì</span>
+  <span class="tag free">free</span>
+  <span class="time">5 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Đọc và viết được một IAM policy, và hiểu khác biệt giữa
+    cấp quyền cho <i>người</i> và cấp quyền cho <i>tài nguyên</i>.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> IAM là <b>đặc quyền tối thiểu</b> bạn
+    học ở Container Security C.3, áp lên toàn đám mây. Gần như mọi sự cố bảo mật AWS lớn đều
+    là một IAM policy quá rộng. Học cái này trước mọi dịch vụ khác là có lý do.</p>
+    <h5>Khái niệm</h5>
+    <ul>
+      <li><b>User / Group</b> — danh tính người và nhóm.</li>
+      <li><b>Role</b> — danh tính <i>tạm</i> mà dịch vụ hoặc người <b>nhận vào</b> (assume)
+      khi cần. EC2 gọi S3 không dùng mật khẩu — nó mang một role.</li>
+      <li><b>Policy</b> — tài liệu JSON: cho phép/từ chối hành động nào trên tài nguyên nào.</li>
+      <li><b>Identity-based</b> (gắn vào user/role) vs <b>resource-based</b> (gắn vào tài
+      nguyên, ví dụ bucket policy của S3).</li>
+      <li><b>Instance profile</b> — cách gắn role vào một EC2.</li>
+    </ul>
+    <pre><code>{                                   <span class="cmt">// policy: chỉ cho đọc một bucket</span>
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": ["s3:GetObject"],
+    "Resource": "arn:aws:s3:::ten-bucket/*"
+  }]
+}</code></pre>
+    <div class="trap"><b>Bẫy.</b> <code>"Action": "*"</code> hoặc gắn
+    <code>AdministratorAccess</code> cho tiện là mở toang. Và role assume được bởi "bất kỳ
+    ai" (<code>Principal: "*"</code>) là lỗ hổng nghiêm trọng. Luôn hỏi: danh tính này cần
+    <b>đúng</b> hành động gì — rồi chỉ cho bấy nhiêu.</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Viết policy cho một user chỉ được khởi động/dừng EC2 nhưng không được xoá. Thử.</li>
+      <li>Tạo role <code>S3ReadOnly</code>, gắn vào một EC2 bằng instance profile, SSH vào
+      và chạy <code>aws s3 ls</code> — không cần cấu hình khoá. Giải thích vì sao chạy được.</li>
+      <li>Dùng IAM Policy Simulator kiểm một policy trước khi áp. So kết quả với dự đoán.</li>
+    </ol>
+    <p class="refs">
+      <a href="https://cloudjourney.awsstudygroup.com/" target="_blank" rel="noopener">FCJ · IAM (tiếng Việt)</a>
+      <a href="https://skillbuilder.aws/" target="_blank" rel="noopener">Skill Builder</a>
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws · IAM</a>
+    </p>
+  </div>
+</details>
+
+<details class="u" id="U2"><summary><input type="checkbox"><span class="id">1.2</span>
+  <span class="ttl">VPC — tầng mạng của bạn trên đám mây</span>
+  <span class="tag cost">💲 cost</span>
+  <span class="time">7 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Tự dựng một mạng có subnet công khai và riêng tư, hiểu
+    gói tin đi vào ra thế nào — và biết đúng hai thứ trong VPC tính tiền.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> VPC là mạng bạn học ở lập trình mạng
+    và TCP/IP, nhưng do bạn định nghĩa bằng cấu hình. CIDR, subnet, định tuyến — toàn khái
+    niệm cũ, tên mới.</p>
+    <h5>Khái niệm</h5>
+    <table>
+      <tr><th>Thành phần</th><th>Là gì</th></tr>
+      <tr><td>CIDR block</td><td>dải địa chỉ của VPC, ví dụ <code>10.0.0.0/16</code></td></tr>
+      <tr><td>Subnet công khai</td><td>có đường ra Internet qua Internet Gateway</td></tr>
+      <tr><td>Subnet riêng tư</td><td>không ra thẳng Internet; ra qua NAT Gateway</td></tr>
+      <tr><td>Route table</td><td>bảng định tuyến — gói đi đâu</td></tr>
+      <tr><td>Security Group</td><td>tường lửa mức máy (stateful)</td></tr>
+      <tr><td>Internet Gateway</td><td>cửa ra Internet của VPC (miễn phí)</td></tr>
+      <tr><td><b>NAT Gateway</b></td><td>cho subnet riêng ra Internet — <b>tính tiền theo giờ + dữ liệu</b></td></tr>
+    </table>
+    <div class="trap"><b>Bẫy tiền số một của người mới.</b> <b>NAT Gateway</b> chạy
+    ~0,045 $/giờ + phí dữ liệu — tức khoảng <b>30+ $/tháng</b> dù bạn không dùng gì, chỉ vì
+    nó tồn tại. Nhiều hoá đơn bất ngờ đến từ một NAT Gateway bỏ quên. Học thì dựng, thử,
+    rồi <b>xoá ngay trong buổi</b>. (Giá là bậc độ lớn — kiểm trang giá.)</div>
+    <div class="meas"><b>Đo được.</b> Đặt hai EC2 ở hai Availability Zone khác nhau trong
+    cùng VPC, <code>ping</code> giữa chúng — đo độ trễ chéo AZ (thường ~1 ms). So với ping
+    trong cùng AZ. Đây là con số bạn sẽ cần khi thiết kế hệ nhiều AZ.</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Dựng VPC <code>10.0.0.0/16</code> với một subnet công khai và một riêng tư. Đặt
+      EC2 ở mỗi subnet. Chứng minh máy công khai ra được Internet, máy riêng thì không
+      (cho tới khi thêm NAT).</li>
+      <li>Thêm NAT Gateway, cho máy riêng cập nhật gói, rồi <b>xoá NAT ngay</b>. Kiểm Billing
+      hôm sau xem nó tính bao nhiêu.</li>
+      <li>Siết Security Group: chỉ mở cổng 22 từ đúng IP nhà bạn. Thử SSH từ IP khác — bị
+      chặn. Đây là đặc quyền tối thiểu ở tầng mạng.</li>
+    </ol>
+    <p class="refs">
+      <a href="https://cloudjourney.awsstudygroup.com/" target="_blank" rel="noopener">FCJ · VPC (tiếng Việt)</a>
+      <a href="https://workshops.aws/" target="_blank" rel="noopener">workshops.aws</a>
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws · VPC</a>
+    </p>
+  </div>
+</details>
+
+<details class="u" id="U3"><summary><input type="checkbox"><span class="id">1.3</span>
+  <span class="ttl">EC2 — máy ảo, và cách mua cho rẻ</span>
+  <span class="tag cost">💲 cost</span>
+  <span class="time">7 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Chạy được một máy chủ, hiểu loại instance nào cho việc
+    gì, và bốn cách mua chênh nhau tới 10 lần giá.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> EC2 là máy ảo — thứ bạn phân biệt với
+    container ở Container Security Ch 5. Nó là nền của gần như mọi dịch vụ AWS khác.</p>
+    <h5>Khái niệm</h5>
+    <ul>
+      <li><b>Instance types</b>: họ <code>t</code> (burstable, rẻ), <code>m</code> (cân
+      bằng), <code>c</code> (CPU), <code>r</code> (RAM), <code>g/p</code> (GPU).</li>
+      <li><b>CPU credits</b> — họ <code>t</code> tích luỹ credit lúc rảnh, tiêu lúc bận;
+      hết credit thì bị bóp. Đây là lý do server <code>t2.micro</code> đôi khi chậm bất ngờ.</li>
+      <li><b>EBS</b> — ổ đĩa mạng gắn vào (gp3 SSD, io2 IOPS cao, magnetic rẻ).</li>
+      <li><b>Keypair</b> (SSH), <b>Elastic IP</b> (IP tĩnh), <b>user data</b> (script chạy
+      lúc khởi động).</li>
+      <li><b>Cách mua</b>: On-Demand (đắt, linh hoạt), Reserved/Savings Plan (cam kết, rẻ),
+      <b>Spot</b> (rẻ 70–90%, bị thu hồi — đúng cái bạn gặp ở AI infra 6.4).</li>
+    </ul>
+    <div class="meas"><b>Đo được.</b> Chạy một tác vụ CPU nặng trên <code>t3.micro</code>,
+    theo dõi CPU credit cạn dần trong CloudWatch rồi hiệu năng bị bóp. Đây là burstable
+    hiện nguyên hình — con số thật.</div>
+    <div class="trap"><b>Bẫy.</b> <b>Elastic IP không gắn vào máy nào thì bị tính tiền</b>
+    (AWS phạt việc giữ IPv4 mà không dùng). Và từ 2024 AWS tính phí cả IPv4 công khai đang
+    dùng. "Tôi dừng máy rồi mà vẫn mất tiền" thường là EIP mồ côi. Giải phóng EIP khi xoá máy.</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Chạy <code>t3.micro</code>, dùng user data tự cài và khởi động nginx lúc boot.
+      Truy cập được qua trình duyệt là xong.</li>
+      <li>So giá On-Demand và Spot cho cùng instance (xem trang giá). Chạy một Spot, quan
+      sát thông báo thu hồi nếu có.</li>
+      <li>Gắn thêm một EBS gp3, định dạng, mount, ghi file; tháo ra gắn sang máy khác —
+      dữ liệu còn nguyên. Bạn vừa thấy đĩa mạng tách rời khỏi máy.</li>
+    </ol>
+    <p class="refs">
+      <a href="https://cloudjourney.awsstudygroup.com/" target="_blank" rel="noopener">FCJ · EC2 (tiếng Việt)</a>
+      <a href="https://skillbuilder.aws/" target="_blank" rel="noopener">Skill Builder</a>
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws · EC2</a>
+    </p>
+  </div>
+</details>
+
+<details class="u" id="U4"><summary><input type="checkbox"><span class="id">1.4</span>
+  <span class="ttl">Auto-Scaling và Load Balancer</span>
+  <span class="tag cost">💲 cost</span>
+  <span class="time">6 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Cho hệ tự thêm máy khi tải lên, bớt máy khi tải xuống,
+    và phân phối yêu cầu — đo thời gian một máy mới sẵn sàng.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> Đây chính là tự động mở rộng bạn học ở
+    AI infra 3.2 và 3.6, nhưng do AWS lo. Và bẫy "mở rộng theo hiệu suất sử dụng là sai,
+    phải theo hàng đợi" vẫn đúng y nguyên ở đây.</p>
+    <h5>Khái niệm</h5>
+    <ul>
+      <li><b>AMI</b> — ảnh đĩa để nhân bản máy giống hệt.</li>
+      <li><b>Launch Template</b> — khuôn tạo máy (loại, AMI, SG, user data).</li>
+      <li><b>Auto-Scaling Group</b> — giữ số máy giữa min/max, tự thay máy chết.</li>
+      <li><b>Scaling Policy</b> — luật thêm/bớt (theo CPU, theo metric tuỳ chỉnh).</li>
+      <li><b>ELB</b> — ALB (tầng 7, HTTP) vs NLB (tầng 4, TCP, nhanh).</li>
+    </ul>
+    <div class="meas"><b>Đo được.</b> Đặt ASG min=1 max=3, chính sách theo CPU. Bắn tải để
+    đẩy CPU lên, <b>đo thời gian từ lúc vượt ngưỡng tới lúc máy mới nhận yêu cầu</b>: lập
+    lịch + khởi động + user data + health check. So với con số "thời gian mở rộng" bạn đo ở
+    AI infra 3.6 — AWS nhanh hay chậm hơn?</div>
+    <div class="trap"><b>Bẫy.</b> Health check quá nhạy giết máy đang khởi động dở (ứng
+    dụng chưa kịp lên), ASG thay máy liên tục — vòng lặp sập, tốn tiền. Đặt
+    <code>health check grace period</code> đủ dài. Đây là lỗi bạn đã gặp ở AI infra 3.6,
+    cùng bản chất.</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Dựng ALB + ASG phục vụ một trang đơn giản. Bắn tải, quan sát ASG thêm máy, rồi
+      ngừng tải, quan sát nó bớt. Ghi thời gian mỗi chiều.</li>
+      <li>Giết tay một máy trong ASG — xác nhận ASG tự thay. Đây là chịu lỗi ở mức hạ tầng.</li>
+      <li>Đổi chính sách từ "theo CPU" sang "theo số request mỗi target". Cái nào hợp hơn
+      cho một hệ phục vụ? Liên hệ bẫy ở AI infra 3.2.</li>
+    </ol>
+    <p class="refs">
+      <a href="https://workshops.aws/" target="_blank" rel="noopener">workshops.aws</a>
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws · Auto-Scaling</a>
+    </p>
+  </div>
+</details>
+
+<!-- ===== 2 ===== -->
+<div class="phase"><span class="k">2</span><h2>Dịch vụ dùng hằng ngày</h2>
+  <span class="meta">3 đơn vị · ~1,5 tuần</span></div>
+<p class="phase-lead">roadmap.sh gọi là "Learn these next": lưu trữ, DNS, CDN, giám sát.
+Phần lớn có hạn always-free rộng rãi.</p>
+
+<details class="u" id="U5"><summary><input type="checkbox"><span class="id">2.1</span>
+  <span class="ttl">S3 — lưu trữ đối tượng và các lớp</span>
+  <span class="tag free">free</span>
+  <span class="time">5 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Hiểu S3 là đáy của phân cấp lưu trữ, và dùng lifecycle
+    để tự đẩy dữ liệu nguội sang lớp rẻ hơn.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> Đây là tầng "lưu trữ đối tượng" ở đáy
+    phân cấp bạn học ở AI infra 5.5 — nơi checkpoint và dataset gốc sống. Chậm, rẻ, gần như
+    vô hạn, bền.</p>
+    <h5>Khái niệm</h5>
+    <ul>
+      <li><b>Bucket / Object</b> — không gian tên và file. Không phải hệ thống file — không
+      có thư mục thật, chỉ có khoá.</li>
+      <li><b>Storage classes</b>: Standard (nóng) → Standard-IA (ít truy cập) → Glacier
+      (lạnh, lấy ra mất phút tới giờ). Càng lạnh càng rẻ lưu, càng đắt/chậm lấy.</li>
+      <li><b>Lifecycle</b> — luật tự chuyển lớp theo tuổi: "sau 30 ngày sang IA, sau 90
+      sang Glacier".</li>
+    </ul>
+    <div class="meas"><b>Đo được.</b> Tải một file 100 MB lên S3 và lên một EBS gắn vào
+    EC2. Đo độ trễ đọc ngẫu nhiên của mỗi bên. S3 chậm hơn EBS nhiều — đó là lý do S3 là
+    đáy phân cấp, không phải đĩa làm việc. Con số này khớp bảng ở AI infra 5.5.</div>
+    <div class="trap"><b>Bẫy.</b> Bucket để công khai nhầm là nguyên nhân rò rỉ dữ liệu
+    phổ biến nhất lịch sử AWS. Mặc định giờ là chặn công khai — <b>đừng tắt nó</b> trừ khi
+    thật sự phục vụ web tĩnh, và khi đó dùng CloudFront đứng trước (U6).</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Tạo bucket, bật versioning, tải lên rồi sửa một file — xem các phiên bản cũ vẫn
+      còn. Đây là nền của backup.</li>
+      <li>Đặt lifecycle: file sau 1 ngày sang IA. Kiểm sau đó storage class đã đổi.</li>
+      <li>Host một trang web tĩnh từ S3. Đo độ trễ. Rồi đặt CloudFront trước (U6), đo lại.</li>
+    </ol>
+    <p class="refs">
+      <a href="https://cloudjourney.awsstudygroup.com/" target="_blank" rel="noopener">FCJ · S3 (tiếng Việt)</a>
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws · S3</a>
+    </p>
+  </div>
+</details>
+
+<details class="u" id="U6"><summary><input type="checkbox"><span class="id">2.2</span>
+  <span class="ttl">Route 53 (DNS) và CloudFront (CDN)</span>
+  <span class="tag free">gần free</span>
+  <span class="time">5 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Hiểu DNS định tuyến thế nào và CDN cache ra sao — đo
+    chênh lệch hit/miss.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> CloudFront là <b>cache theo cục bộ</b>
+    — đúng nguyên lý bạn học ở AI infra 2.2, chỉ ở tầng mạng toàn cầu thay vì trong chip.
+    Route 53 là DNS bạn đã biết từ môn mạng.</p>
+    <h5>Khái niệm</h5>
+    <ul>
+      <li><b>Route 53</b>: hosted zone, bản ghi (A, CNAME…), <b>routing policy</b> (đơn
+      giản, theo trọng số, theo độ trễ, theo địa lý), health check (tự chuyển khi một đích
+      chết).</li>
+      <li><b>CloudFront</b>: distribution (phân phối từ các điểm biên gần người dùng),
+      cache policy, invalidation (xoá cache khi nội dung đổi), Lambda@Edge.</li>
+    </ul>
+    <div class="meas"><b>Đo được.</b> Phục vụ một ảnh qua CloudFront. Request đầu (miss —
+    phải lấy từ gốc) và request sau (hit — từ biên). Đo độ trễ cả hai, xem header
+    <code>X-Cache</code>. Tỉ lệ chênh chính là giá trị của CDN, và nó là "cục bộ về không
+    gian" của AI infra 2.2 ở quy mô địa cầu.</div>
+    <div class="trap"><b>Bẫy.</b> Hosted zone của Route 53 tính ~0,50 $/tháng mỗi zone —
+    nhỏ nhưng là một trong ít thứ của hai dịch vụ này không free. Và quên invalidation thì
+    người dùng thấy nội dung cũ sau khi bạn đã cập nhật — "tôi deploy rồi mà web không đổi".</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Trỏ một tên miền (hoặc dùng tên mặc định) qua Route 53 tới ALB ở U4.</li>
+      <li>Đặt CloudFront trước trang S3 ở U5, đo hit/miss, đọc <code>X-Cache</code>.</li>
+      <li>Cập nhật nội dung, tạo invalidation, xác nhận biên trả nội dung mới.</li>
+    </ol>
+    <p class="refs">
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws · Route53, CloudFront</a>
+      <a href="https://cloudjourney.awsstudygroup.com/" target="_blank" rel="noopener">FCJ</a>
+    </p>
+    <p style="font-size:12.8px;color:var(--muted)"><b>SES</b> (gửi email) nằm cùng bước này
+    trên roadmap.sh nhưng để sau: sandbox chỉ gửi tới địa chỉ đã xác minh, ít giá trị học
+    cho tới khi bạn có ứng dụng thật cần gửi mail.</p>
+  </div>
+</details>
+
+<details class="u" id="U7"><summary><input type="checkbox"><span class="id">2.3</span>
+  <span class="ttl">CloudWatch — giám sát, bản AWS của Prometheus</span>
+  <span class="tag free">gần free</span>
+  <span class="time">4 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Thu metric, log, đặt alarm — và thấy nó khác Prometheus
+    bạn học ở VDT chỗ nào.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> Đây đúng chỗ Prometheus/Grafana của
+    VDT tuần 7, nhưng là dịch vụ quản lý. Hiểu một cái là hiểu cái kia — khác ở mô hình đẩy
+    vs kéo và ở chuyện ai vận hành.</p>
+    <h5>Khái niệm</h5>
+    <ul>
+      <li><b>Metrics</b> — số theo thời gian; metric tuỳ chỉnh bạn tự đẩy lên.</li>
+      <li><b>Logs</b> — CloudWatch Logs gom log tập trung; truy vấn bằng Logs Insights.</li>
+      <li><b>Alarms</b> — ngưỡng → hành động (báo, hoặc kích ASG, hoặc chạy Lambda).</li>
+      <li><b>Events / EventBridge</b> — phản ứng theo sự kiện và lịch.</li>
+    </ul>
+    <table>
+      <tr><th></th><th>Prometheus (VDT)</th><th>CloudWatch</th></tr>
+      <tr><td>Mô hình</td><td>kéo (scrape)</td><td>đẩy (push)</td></tr>
+      <tr><td>Truy vấn</td><td>PromQL</td><td>Metric Math + Logs Insights</td></tr>
+      <tr><td>Vận hành</td><td>bạn tự chạy</td><td>AWS lo</td></tr>
+      <tr><td>Giá</td><td>chỉ tốn máy</td><td>theo metric/log, dễ bất ngờ</td></tr>
+    </table>
+    <div class="trap"><b>Bẫy tiền.</b> Đẩy log cực nhiều hoặc tạo hàng nghìn custom metric
+    làm hoá đơn CloudWatch phình âm thầm. Always-free chỉ gồm 10 custom metric, 10 alarm,
+    5 GB log. Vượt là tính tiền — kiểm trang giá.</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Đẩy một custom metric từ ứng dụng của bạn lên, vẽ dashboard. So trải nghiệm với
+      Grafana.</li>
+      <li>Gom log của EC2 vào CloudWatch Logs, dùng Logs Insights đếm số lỗi trong 1 giờ.</li>
+      <li>Đặt alarm: CPU &gt; 70% trong 5 phút → gửi email. Dùng chính alarm này nối vào ASG
+      ở U4.</li>
+    </ol>
+    <p class="refs">
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws · CloudWatch</a>
+      <a href="https://cloudjourney.awsstudygroup.com/" target="_blank" rel="noopener">FCJ</a>
+    </p>
+  </div>
+</details>
+
+<!-- ===== 3 ===== -->
+<div class="phase"><span class="k">3</span><h2>Dữ liệu và container</h2>
+  <span class="meta">5 đơn vị · ~2,5 tuần</span></div>
+<p class="phase-lead">Cơ sở dữ liệu quản lý và điều phối container. Đây là chỗ AWS gặp DDIA,
+Database Internals, và giai đoạn C + 6 của AI infra.</p>
+
+<details class="u" id="U8"><summary><input type="checkbox"><span class="id">3.1</span>
+  <span class="ttl">RDS — cơ sở dữ liệu quan hệ quản lý</span>
+  <span class="tag cost">💲 cost</span>
+  <span class="time">5 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Chạy Postgres/MySQL quản lý, hiểu Multi-AZ và backup —
+    và biết RDS vượt bậc micro là tốn tiền thật.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> RDS là replication và durability bạn
+    học ở DDIA Ch 6 và Database Internals, nhưng AWS lo phần vận hành. Hiểu lý thuyết rồi
+    thì RDS chỉ là các nút bật/tắt cho đúng cơ chế đó.</p>
+    <h5>Khái niệm</h5>
+    <ul>
+      <li><b>DB instance</b> — máy chủ CSDL quản lý; bạn không SSH vào.</li>
+      <li><b>Multi-AZ</b> — bản sao đồng bộ ở AZ khác, tự chuyển khi hỏng (đây là
+      single-leader replication của DDIA).</li>
+      <li><b>Read replica</b> — bản sao bất đồng bộ để chia tải đọc.</li>
+      <li><b>Storage</b>: gp (SSD thường), io (IOPS cao), magnetic.</li>
+    </ul>
+    <div class="trap"><b>Bẫy tiền.</b> Multi-AZ <b>nhân đôi</b> chi phí (chạy hai máy).
+    Và RDS vượt <code>db.t3.micro</code> là ra khỏi free tier. Bật Multi-AZ để "cho giống
+    production" lúc học là cách nhanh nhất đốt free credit. Học thì single-AZ micro, dựng
+    rồi xoá.</div>
+    <div class="meas"><b>Đo được.</b> Bật Multi-AZ, rồi chủ động trigger failover từ console.
+    Đo thời gian đứt kết nối tới lúc bản dự phòng lên. Đây là "thời gian khôi phục" của
+    AI infra 7.4, đo trên dịch vụ thật.</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Tạo RDS Postgres single-AZ micro, kết nối từ EC2 trong cùng VPC (không mở ra
+      Internet). Chạy vài truy vấn.</li>
+      <li>Bật tự động backup, xoá một bảng, khôi phục về thời điểm trước đó
+      (point-in-time). Ghi thời gian khôi phục.</li>
+      <li>Bật Multi-AZ, đo failover như trên, rồi <b>tắt Multi-AZ và xoá</b> khi xong.</li>
+    </ol>
+    <p class="refs">
+      <a href="lo-trinh-ai-infrastructure.html" target="_blank" rel="noopener">AI infra · nối 7.4</a>
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws · RDS</a>
+      <a href="https://cloudjourney.awsstudygroup.com/" target="_blank" rel="noopener">FCJ</a>
+    </p>
+  </div>
+</details>
+
+<details class="u" id="U9"><summary><input type="checkbox"><span class="id">3.2</span>
+  <span class="ttl">DynamoDB — NoSQL và nghệ thuật khoá</span>
+  <span class="tag free">free</span>
+  <span class="time">6 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Thiết kế bảng theo mẫu truy vấn (không theo dữ liệu),
+    và hiểu vì sao đó là tư duy ngược với SQL.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> DynamoDB là sharding key-value bạn học
+    ở DDIA Ch 7, hiện thực hoá. Khoá phân mảnh quyết định hiệu năng — đúng bài học phân mảnh
+    của DDIA.</p>
+    <h5>Khái niệm</h5>
+    <ul>
+      <li><b>Table / Item / Attribute</b> — bảng, hàng, cột (nhưng không cố định schema).</li>
+      <li><b>Partition key</b> (bắt buộc) + <b>sort key</b> (tuỳ chọn) = primary key.
+      Partition key quyết định dữ liệu nằm shard nào.</li>
+      <li><b>Secondary index</b> (GSI/LSI) — truy vấn theo trường khác.</li>
+      <li><b>Streams</b> — dòng thay đổi, kích Lambda (nối U13).</li>
+      <li><b>Capacity</b>: on-demand vs provisioned.</li>
+    </ul>
+    <div class="trap"><b>Bẫy thiết kế.</b> Thiết kế DynamoDB như bảng SQL (chuẩn hoá, join)
+    là sai căn bản — DynamoDB không join. Phải biết trước mẫu truy vấn rồi thiết kế khoá
+    cho đúng chúng. Partition key chọn kém (ví dụ ít giá trị) tạo "hot partition" — một
+    shard quá tải, đúng bài học phân mảnh lệch của DDIA.</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Cài DynamoDB Local (chạy máy bạn, không tốn tiền), thiết kế bảng cho một app
+      (ví dụ: bài đăng của người dùng). Viết trước 3 mẫu truy vấn, rồi thiết kế khoá.</li>
+      <li>Tạo GSI để truy vấn theo trường thứ hai. So số đọc trước và sau.</li>
+      <li>Bật Streams, nối vào một Lambda ghi log mỗi khi có item mới. Đây là kiến trúc
+      hướng sự kiện (nối Designing Event-Driven Systems).</li>
+    </ol>
+    <p class="refs">
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws · DynamoDB</a>
+      <a href="https://cloudjourney.awsstudygroup.com/" target="_blank" rel="noopener">FCJ</a>
+    </p>
+  </div>
+</details>
+
+<details class="u" id="U10"><summary><input type="checkbox"><span class="id">3.3</span>
+  <span class="ttl">ElastiCache — Redis/Memcached quản lý</span>
+  <span class="tag cost">💲 cost</span>
+  <span class="time">3 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Đặt một tầng cache trước CSDL và đo mức giảm độ trễ.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> Đây là tầng cache của AI infra 2.2 và
+    3.2 ở mức ứng dụng: giữ kết quả nóng trong RAM thay vì hỏi CSDL mỗi lần. Cùng nguyên lý
+    cục bộ về thời gian.</p>
+    <div class="meas"><b>Đo được.</b> Một endpoint đọc từ RDS, đo p99. Thêm ElastiCache
+    (Redis) đứng trước với mẫu cache-aside, đo lại. Mức giảm chính là giá trị của cache —
+    và nó khớp bài học "dùng lại dữ liệu vừa dùng" của AI infra 2.2.</div>
+    <div class="trap"><b>Bẫy.</b> ElastiCache <b>không có bậc always-free</b> và chạy theo
+    giờ như EC2. Và cache sai cách (không đặt TTL, không xử lý invalidation) cho dữ liệu cũ
+    — "hai bài toán khó nhất khoa học máy tính là đặt tên và vô hiệu hoá cache".</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Dựng Redis micro, cài mẫu cache-aside cho endpoint ở U8, đo p99 trước/sau, rồi xoá.</li>
+      <li>Thử đặt TTL ngắn và dài, quan sát đánh đổi độ tươi dữ liệu và tỉ lệ hit.</li>
+      <li>Giải thích khi nào cache <b>không</b> giúp (dữ liệu đọc một lần, ghi nhiều).</li>
+    </ol>
+    <p class="refs">
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws · ElastiCache</a>
+    </p>
+  </div>
+</details>
+
+<details class="u" id="U11"><summary><input type="checkbox"><span class="id">3.4</span>
+  <span class="ttl">ECR, ECS, Fargate — chạy container không cần K8s</span>
+  <span class="tag cost">💲 cost</span>
+  <span class="time">6 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Đẩy ảnh lên registry AWS và chạy container, hiểu khi
+    nào ECS đủ và khi nào mới cần EKS.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> Container bạn hiểu tới tận namespaces
+    ở giai đoạn C của AI infra. ECR là registry — nơi ký ảnh (C.4) sống. ECS là cách chạy
+    container <b>đơn giản hơn K8s nhiều</b>, hợp phần lớn nhu cầu.</p>
+    <h5>Khái niệm</h5>
+    <ul>
+      <li><b>ECR</b> — registry riêng của bạn; đẩy/kéo ảnh, quét lỗ hổng (nối C.4).</li>
+      <li><b>ECS</b>: cluster → service → task (một hoặc vài container chạy cùng).</li>
+      <li><b>Fargate</b> — chạy container <b>không quản máy chủ</b>: không EC2, trả theo
+      container. Serverless cho container.</li>
+      <li>EC2 launch type (bạn quản máy, rẻ hơn khi tải ổn định) vs Fargate (AWS quản,
+      tiện, đắt hơn mỗi đơn vị).</li>
+    </ul>
+    <div class="trap"><b>Bẫy.</b> Người mới nhảy thẳng vào EKS vì "K8s mới xịn". Với một
+    service, <b>ECS/Fargate đơn giản hơn nhiều</b> và không có control plane tính tiền theo
+    giờ (U12). Chọn EKS chỉ khi thật sự cần hệ sinh thái K8s. Đây là bài "không phải cái gì
+    cũng cần K8s" — song song với "không phải cái gì cũng cần feature store" ở AI infra 8.5.</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Build ảnh service (dùng ảnh tối ưu từ AI infra C.2), đẩy lên ECR, bật quét lỗ
+      hổng — so với Trivy bạn chạy ở C.4.</li>
+      <li>Chạy nó trên Fargate sau một ALB. Không tạo một EC2 nào. Truy cập được là xong.</li>
+      <li>Chạy cùng ảnh đó bằng ECS trên EC2 launch type. So chi phí và công sức hai cách.</li>
+    </ol>
+    <p class="refs">
+      <a href="lo-trinh-ai-infrastructure.html" target="_blank" rel="noopener">AI infra · giai đoạn C (container)</a>
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws · ECS</a>
+      <a href="https://cloudjourney.awsstudygroup.com/" target="_blank" rel="noopener">FCJ · Container</a>
+    </p>
+  </div>
+</details>
+
+<details class="u" id="U12"><summary><input type="checkbox"><span class="id">3.5</span>
+  <span class="ttl">EKS — Kubernetes quản lý</span>
+  <span class="tag cost">💲 cost</span>
+  <span class="time">6 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Chạy K8s bạn học ở VDT trên AWS — và biết rõ cái giá
+    của nó trước khi bật.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> EKS là nơi K8s (VDT tuần 4–5) và AI
+    infra giai đoạn 6 chạy thật trên cloud. Đây cũng là nơi GPU trên K8s (AI infra 6.2)
+    thành hiện thực — với cảnh báo quota ở dưới.</p>
+    <div class="trap"><b>Bẫy tiền lớn nhất của cả lộ trình.</b> EKS tính <b>control plane
+    theo giờ</b> (~0,10 $/giờ ≈ 72 $/tháng) <b>bất kể bạn chạy gì</b>, cộng tiền node EC2,
+    cộng NAT Gateway (U2), cộng ELB. Một cụm EKS học tập bỏ quên cuối tuần là một hoá đơn
+    thật. <b>Quy tắc tuyệt đối: dựng → làm bài → <code>eksctl delete cluster</code> ngay
+    trong buổi.</b> Giá là bậc độ lớn, kiểm trang giá.</div>
+    <div class="trap"><b>Bẫy GPU.</b> Instance GPU (họ <code>g</code>, <code>p</code>) cần
+    <b>xin tăng quota</b>, và tài khoản mới thường <b>bị từ chối</b>. Nên nếu AI infra gợi
+    ý thuê GPU trên cloud, biết trước rằng trên AWS bạn phải xin quota trước, có thể mất
+    vài ngày. Kaggle/Vast.ai (AI infra, mục GPU) không có rào này.</div>
+    <div class="meas"><b>Đo được.</b> Dựng EKS tối thiểu, deploy đúng service bạn chạy trên
+    <code>kind</code> ở VDT. So: lệnh giống hệt không? Thời gian dựng cụm là bao lâu?
+    Rồi xoá và đối chiếu Billing.</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Dùng <code>eksctl</code> dựng cụm nhỏ nhất, deploy một Deployment + Service +
+      Ingress, truy cập được, rồi <b>xoá sạch</b>. Làm trọn trong một buổi.</li>
+      <li>So EKS với ECS (U11) cho cùng một ứng dụng: công sức, chi phí, khi nào đáng.</li>
+      <li>Đọc về AWS Load Balancer Controller và EBS CSI driver — vì sao EKS cần chúng mà
+      <code>kind</code> thì không? (Gợi ý: cloud provider integration.)</li>
+    </ol>
+    <p class="refs">
+      <a href="lo-trinh-ai-infrastructure.html" target="_blank" rel="noopener">AI infra · 6.2 GPU trên K8s</a>
+      <a href="ke-hoach-vdt.html" target="_blank" rel="noopener">VDT · tuần 4–5 K8s</a>
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws · EKS</a>
+    </p>
+  </div>
+</details>
+
+<!-- ===== 4 ===== -->
+<div class="phase"><span class="k">4</span><h2>Serverless</h2>
+  <span class="meta">1 đơn vị · ~1 tuần</span></div>
+<p class="phase-lead">Chạy code mà không quản máy nào. Mô hình tính tiền và độ trễ khác hẳn
+— và cold start là lý thuyết hàng đợi của AI infra hiện ra bằng mili-giây.</p>
+
+<details class="u" id="U13"><summary><input type="checkbox"><span class="id">4.1</span>
+  <span class="ttl">Lambda, API Gateway, EventBridge — và cold start</span>
+  <span class="tag free">free</span>
+  <span class="time">6 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Dựng một API không máy chủ, và đo được cold start —
+    hiểu vì sao nó xảy ra bằng kiến thức bạn đã có, không phải học thuộc.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> Cold start là <b>độ trễ khởi động</b> —
+    đúng số hạng L của định luật sắt (AI infra 1.1) và họ hàng với thời gian biên dịch
+    <code>torch.compile</code> (AI infra 2.5): lần gọi đầu phải dựng môi trường, nên chậm
+    bất thường, và nó hiện lên p99 chứ không lên trung bình (AI infra 3.2).</p>
+    <h5>Khái niệm</h5>
+    <ul>
+      <li><b>Lambda</b> — hàm chạy theo sự kiện, trả tiền theo mili-giây × bộ nhớ. Không
+      có yêu cầu thì không tốn gì.</li>
+      <li><b>Layers</b> — thư viện dùng chung giữa các hàm (nhớ lớp ảnh ở C.2).</li>
+      <li><b>Versioning / Aliases</b> — triển khai canary cho hàm (nối AI infra 8.2).</li>
+      <li><b>API Gateway</b> — biến hàm thành HTTP endpoint.</li>
+      <li><b>EventBridge</b> — kích hàm theo lịch (cron) hoặc theo sự kiện (S3 có file mới,
+      DynamoDB Stream ở U9).</li>
+      <li><b>Cold start</b> — lần gọi sau khi hàm "ngủ" phải khởi tạo lại runtime: chậm
+      hơn hẳn lần gọi "nóng".</li>
+    </ul>
+    <div class="meas"><b>Đo được.</b> Deploy một Lambda. Gọi nó ngay sau khi deploy
+    (cold), rồi gọi lại liền (warm). Đo cả hai. Chênh lệch là cold start. Rồi thử hàm viết
+    bằng Python so với Go/runtime nhẹ — ngôn ngữ nặng khởi tạo lâu hơn. Đây là bảng
+    prefill/decode của AI infra 3.4, phiên bản serverless.</div>
+    <div class="trap"><b>Bẫy.</b> Lambda trong VPC (để nối RDS) từng cold start rất lâu vì
+    phải gắn card mạng; giờ đã đỡ nhưng vẫn là cạm bẫy. Và API Gateway tính theo request —
+    rẻ lúc học, nhưng một vòng lặp gọi nhầm hàng triệu lần là hoá đơn thật. Luôn có giới
+    hạn và alarm (U0).</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Dựng API: API Gateway → Lambda → DynamoDB (U9). Một endpoint ghi, một endpoint
+      đọc. Không có EC2 nào. Đo độ trễ cold/warm.</li>
+      <li>Dùng EventBridge chạy một Lambda mỗi 5 phút ghi log. Đây là cron không máy chủ.</li>
+      <li>So chi phí: cùng API này chạy trên Lambda vs trên một <code>t3.micro</code> luôn
+      bật. Ở mức lưu lượng nào thì EC2 rẻ hơn? Đây là bài toán điểm hoà vốn — nối AI infra 9.1.</li>
+    </ol>
+    <p class="refs">
+      <a href="lo-trinh-ai-infrastructure.html" target="_blank" rel="noopener">AI infra · 3.2 hàng đợi, 2.5 cold start</a>
+      <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws · Lambda</a>
+      <a href="https://cloudjourney.awsstudygroup.com/" target="_blank" rel="noopener">FCJ · Serverless</a>
+    </p>
+  </div>
+</details>
+
+<!-- ===== 5 ===== -->
+<div class="phase"><span class="k">5</span><h2>Ghép lại và chứng chỉ</h2>
+  <span class="meta">2 đơn vị · ~2 tuần</span></div>
+<p class="phase-lead">Một dự án dùng tới gần hết những gì ở trên, và một đường chứng chỉ để
+có thứ đưa ra khi xin việc.</p>
+
+<details class="u" id="U14"><summary><input type="checkbox"><span class="id">5.1</span>
+  <span class="ttl">Dự án: deploy service Go của VDT lên AWS bằng Terraform</span>
+  <span class="tag cost">💲 cost</span>
+  <span class="time">15 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Lấy chính service Go bạn viết ở VDT, đưa lên AWS thật
+    bằng hạ tầng khai báo — và xoá sạch được bằng một lệnh. Đây là dự án <b>dễ kể khi
+    phỏng vấn</b> vì nó chạm cả nửa lộ trình.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> roadmap.sh nói thẳng: "cách học tốt
+    nhất là làm một app đơn giản và dùng các dịch vụ trên để triển khai". Dự án này biến
+    checklist thành thứ chạy được, và dùng Terraform (VDT tuần 7) để mọi thứ tái lập và
+    xoá được.</p>
+    <h5>Yêu cầu</h5>
+    <ol>
+      <li>Toàn bộ hạ tầng bằng <b>Terraform</b> — không bấm tay trong console. VPC (U2),
+      ECS/Fargate hoặc EKS (U11/U12), RDS (U8), ALB (U4).</li>
+      <li>Service lấy ảnh từ <b>ECR</b> (U11), đã quét lỗ hổng (nối AI infra C.4).</li>
+      <li><b>CloudWatch</b> (U7): log tập trung + một dashboard + một alarm.</li>
+      <li>IAM đúng đặc quyền tối thiểu (U1): service chỉ có quyền nó cần.</li>
+      <li>Một lệnh <code>terraform destroy</code> xoá sạch — <b>và bạn chạy nó mỗi khi
+      ngừng làm việc.</b></li>
+      <li>Một <code>CHI-PHI.md</code>: ước tính chi phí tháng nếu để chạy, và chi phí thật
+      đã phát sinh trong lúc làm (đọc từ Billing).</li>
+    </ol>
+    <div class="trap"><b>Bẫy.</b> <code>terraform destroy</code> đôi khi <b>không xoá hết</b>:
+    bucket S3 còn dữ liệu, EBS snapshot, log group, EIP mồ côi — chúng ở lại và tính tiền.
+    Sau mỗi destroy, mở Billing hôm sau kiểm còn gì chạy không. Thói quen này quan trọng
+    hơn bản thân dự án.</div>
+    <h5>Các bước</h5>
+    <ol>
+      <li>Tuần 1: Terraform dựng VPC + Fargate + ALB, service chạy và truy cập được. Destroy.</li>
+      <li>Tuần 2: thêm RDS, CloudWatch, IAM siết chặt. Viết <code>CHI-PHI.md</code>.
+      README theo cấu trúc vấn đề → thiết kế → chi phí → cách xoá.</li>
+    </ol>
+    <p class="refs">
+      <a href="ke-hoach-vdt.html" target="_blank" rel="noopener">VDT · service Go + Terraform</a>
+      <a href="lo-trinh-ai-infrastructure.html" target="_blank" rel="noopener">AI infra · C.4 quét ảnh, 9.1 chi phí</a>
+      <a href="https://workshops.aws/" target="_blank" rel="noopener">workshops.aws</a>
+    </p>
+  </div>
+</details>
+
+<details class="u" id="U15"><summary><input type="checkbox"><span class="id">5.2</span>
+  <span class="ttl">Đường chứng chỉ và Well-Architected</span>
+  <span class="tag safe">cert</span>
+  <span class="time">tuỳ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Biến kiến thức rời thành một tín hiệu tuyển dụng công
+    nhận được, và học khung tư duy mà mọi đề thi lẫn mọi buổi phỏng vấn AWS dựa vào.</p>
+    <p class="why"><b>Vì sao đơn vị này tồn tại.</b> Cert là <b>đầu ra</b>, như file
+    <code>so-lieu.md</code> của AI infra. Nó ép bạn học có mục tiêu thay vì tick checklist,
+    và nhà tuyển dụng ở Việt Nam đọc được nó ngay.</p>
+    <h5>Hai nền tảng đọc trước</h5>
+    <ul>
+      <li><b>Shared Responsibility Model</b> — AWS lo bảo mật <i>của</i> đám mây (phần cứng,
+      nhân), bạn lo bảo mật <i>trên</i> đám mây (cấu hình, IAM, dữ liệu). Nhầm ranh giới này
+      là gốc của phần lớn sự cố.</li>
+      <li><b>Well-Architected Framework</b> — 6 trụ: xuất sắc vận hành, bảo mật, độ tin cậy,
+      hiệu năng, tối ưu chi phí, bền vững. Đây là checklist thiết kế AWS chính thức, và câu
+      hỏi phỏng vấn thường xoay quanh nó.</li>
+    </ul>
+    <h5>Đường cert, theo thứ tự</h5>
+    <table>
+      <tr><th>Cert</th><th>Mức</th><th>Khi nào thi</th></tr>
+      <tr><td><b>Cloud Practitioner</b> (CLF-C02)</td><td>nền, hỏi khái niệm + giá + dịch vụ</td>
+          <td>sau khi xong Bước 0–2 của lộ trình này</td></tr>
+      <tr><td><b>Solutions Architect Associate</b> (SAA-C03)</td><td>thiết kế hệ, đánh đổi</td>
+          <td>sau khi xong cả lộ trình + dự án U14</td></tr>
+    </table>
+    <p>Lộ trình này phủ phần lớn nội dung cả hai. Luyện đề là phần còn lại — dùng khoá
+    freeCodeCamp miễn phí (mục Khoá học) và đề thử.</p>
+    <div class="trap"><b>Bẫy.</b> Thi lấy cert mà chưa từng dựng gì thật là học vẹt — rớt
+    phần tình huống, và kể cả đậu cũng không làm được việc. Cert đi <b>sau</b> thực hành,
+    không thay thế nó. Dự án U14 quan trọng hơn tấm cert.</div>
+    <h5>Bài tập</h5>
+    <ol>
+      <li>Đọc Well-Architected, rồi tự chấm dự án U14 theo 6 trụ: nó mạnh trụ nào, yếu trụ
+      nào? Viết ra. Đây chính là dạng câu hỏi phỏng vấn.</li>
+      <li>Làm một đề thử Cloud Practitioner miễn phí, xem đạt chưa, khoanh vùng yếu.</li>
+      <li>Quyết định mốc thi cụ thể và đăng ký — một ngày thi thật là động lực mạnh nhất.</li>
+    </ol>
+    <p class="refs">
+      <a href="https://aws.amazon.com/architecture/well-architected/" target="_blank" rel="noopener">Well-Architected Framework</a>
+      <a href="https://www.freecodecamp.org/news/aws-certified-cloud-practitioner-study-course-pass-the-exam-with-this-free-13-hour-course/" target="_blank" rel="noopener">freeCodeCamp CCP (free)</a>
+      <a href="https://www.freecodecamp.org/news/pass-the-aws-certified-solutions-architect-associate-certification/" target="_blank" rel="noopener">freeCodeCamp SAA (free)</a>
+    </p>
+  </div>
+</details>
+
+<!-- ===== KHOA HOC ===== -->
+<div class="phase"><span class="k">★</span><h2>Khoá học miễn phí tốt nhất</h2>
+  <span class="meta">bạn yêu cầu riêng</span></div>
+<p class="phase-lead">Toàn bộ miễn phí, đã kiểm từng link. Xếp theo thứ tự nên dùng. Lưu ý:
+roadmap.sh chỉ là <b>bản đồ</b> (checklist), không dạy — các khoá dưới mới là chỗ học thật.</p>
+
+<div class="courses">
+  <div class="course">
+    <h4><a href="https://cloudjourney.awsstudygroup.com/" target="_blank" rel="noopener">AWS First Cloud Journey (FCJ)</a>
+      <span class="badge vn">tiếng Việt</span><span class="badge">không cần thẻ</span></h4>
+    <p><b>Dùng đầu tiên.</b> Chương trình của AWS Việt Nam: <b>150+ workshop thực hành</b>
+    có hướng dẫn chi tiết, nhiều bài tiếng Việt, phủ EC2/S3/VPC/IAM, container, serverless,
+    data, AI/ML. Có chương trình FCJ Workforce cho sinh viên (4 tuần, hướng cert/thực tập).
+    Đây là tài nguyên hợp bạn nhất — vừa miễn phí, vừa tiếng Việt, vừa hands-on.</p>
+  </div>
+  <div class="course">
+    <h4><a href="https://skillbuilder.aws/" target="_blank" rel="noopener">AWS Skill Builder</a>
+      <span class="badge">chính chủ</span></h4>
+    <p>Nền tảng học chính thức của AWS, 1000+ tài nguyên miễn phí. Khoá
+    <b>Cloud Practitioner Essentials</b> (~6 giờ, cập nhật 6/2025) phủ đủ miền thi CLF-C02.
+    Có <b>Cloud Quest: Cloud Practitioner</b> bản miễn phí — học kiểu game, làm trong kịch
+    bản AWS thật. Lab sâu cần gói trả phí, nhưng phần video + Cloud Quest là đủ để bắt đầu.</p>
+  </div>
+  <div class="course">
+    <h4><a href="https://www.freecodecamp.org/news/aws-certified-cloud-practitioner-study-course-pass-the-exam-with-this-free-13-hour-course/" target="_blank" rel="noopener">freeCodeCamp — Cloud Practitioner</a>
+      <span class="badge">~13 giờ</span></h4>
+    <p>Khoá video đầy đủ luyện thi CLF-C02, miễn phí trên YouTube, cập nhật cho 2026. Xem
+    song song khi học Bước 1–2 của lộ trình này.</p>
+  </div>
+  <div class="course">
+    <h4><a href="https://www.freecodecamp.org/news/pass-the-aws-certified-solutions-architect-associate-certification/" target="_blank" rel="noopener">freeCodeCamp — Solutions Architect Associate</a>
+      <span class="badge">dài</span></h4>
+    <p>Khoá SAA-C03 đầy đủ (Andrew Brown / ExamPro), rất dài nhưng phủ sâu. Dùng sau khi
+    xong cả lộ trình, để luyện cho cert thứ hai.</p>
+  </div>
+  <div class="course">
+    <h4><a href="https://aws.amazon.com/education/awseducate/" target="_blank" rel="noopener">AWS Educate</a>
+      <span class="badge">không cần thẻ</span></h4>
+    <p>Dành cho người từ 14 tuổi, <b>không cần thẻ thanh toán</b>. Lộ trình Cloud Essentials
+    học kiểu game có huy hiệu. Đây là đường học không chạm hoá đơn — hợp để làm quen trước
+    khi mở tài khoản thật.</p>
+  </div>
+  <div class="course">
+    <h4><a href="https://workshops.aws/" target="_blank" rel="noopener">AWS Workshops</a>
+      <span class="badge">chính chủ · hands-on</span></h4>
+    <p>Kho workshop thực hành chính thức của AWS theo từng chủ đề, miễn phí (chỉ tốn tài
+    nguyên bạn tạo trong lúc làm — nhớ xoá). Dùng khi muốn đào sâu một dịch vụ cụ thể.</p>
+  </div>
+  <div class="course">
+    <h4><a href="https://aws.amazon.com/architecture/well-architected/" target="_blank" rel="noopener">Well-Architected Framework (tài liệu)</a>
+      <span class="badge">đọc</span></h4>
+    <p>Không phải khoá học mà là tài liệu nền — 6 trụ thiết kế AWS. Đọc ở U15, dùng để tự
+    chấm dự án và trả lời phỏng vấn.</p>
+  </div>
+  <div class="course">
+    <h4><a href="https://www.meetup.com/aws-vn/" target="_blank" rel="noopener">AWS Vietnam User Group</a>
+      <span class="badge vn">cộng đồng VN</span></h4>
+    <p>Cộng đồng người dùng AWS Việt Nam: talk, workshop, networking. Theo dõi để bắt các
+    sự kiện miễn phí (Community Day, Summit) và hỏi đáp bằng tiếng Việt.</p>
+  </div>
+</div>
+
+<footer>
+  <p><b>16 đơn vị, khoảng 90 giờ.</b> Mỗi ngày 1–2 tiếng thì chừng <b>6–8 tuần</b>. Nhưng
+  AWS không học một mạch như C hay AI infra — nó là <b>lớp bạn học song song</b>: mỗi khi
+  VDT hoặc AI infra cần một đám mây thật để chạy, bạn mở đúng đơn vị tương ứng ở đây.</p>
+
+  <p><b>Thứ tự đề nghị.</b> Đơn vị <b>0</b> trước tiên và bắt buộc. Rồi <b>1.1 → 1.2 → 1.3</b>
+  (IAM, VPC, EC2) là lõi — xong ba cái này là đủ thi Cloud Practitioner cùng một khoá
+  freeCodeCamp. Phần còn lại học khi dự án cần tới.</p>
+
+  <p><b>Ba điều không bao giờ quên:</b></p>
+  <ul>
+    <li>Đơn vị 0 (lan can hoá đơn) <b>trước</b> mọi thứ khác.</li>
+    <li>Mọi thẻ <span style="color:var(--cost);font-weight:600">💲 cost</span>: dựng → đo →
+    <code>destroy</code> trong một buổi. Đặc biệt EKS, NAT Gateway, RDS Multi-AZ.</li>
+    <li>Học <b>khái niệm</b>, không học thuộc <b>tên AWS đặt</b> — ~80% chuyển thẳng sang
+    GCP/Azure. Tên dịch vụ đổi, nguyên lý thì không.</li>
+  </ul>
+
+  <p style="color:var(--muted);font-size:12.5px;border-top:1px dashed var(--line);padding-top:10px">
+  <b>Về số liệu:</b> giá và hạn free tier (100 $ + 100 $, hết hạn 6 tháng; NAT ~30 $/tháng;
+  EKS ~72 $/tháng) là <b>bậc độ lớn để ước lượng</b>, không phải báo giá chính thức —
+  AW đổi cơ cấu free tier từ 15/07/2025 và giá thay đổi theo region, theo thời gian. Luôn
+  kiểm <a href="https://aws.amazon.com/free/" target="_blank" rel="noopener">trang free tier</a>
+  và trang giá của từng dịch vụ. Lộ trình này phủ đúng danh sách dịch vụ của
+  <a href="https://roadmap.sh/aws" target="_blank" rel="noopener">roadmap.sh/aws</a> bạn đưa,
+  nhưng nối mỗi dịch vụ về kiến thức sâu trong tủ sách của bạn.</p>
+</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY = "lotrinh-aws-v1";
+  var units = Array.prototype.slice.call(
+                document.querySelectorAll("details.u input[type=checkbox]"))
+              .map(function(b){ return b.closest("details.u"); });
+  var done = {};
+  try { done = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch(e){ done = {}; }
+
+  function ve(){
+    var n = 0;
+    units.forEach(function(u){
+      var ok = !!done[u.id];
+      u.classList.toggle("done", ok);
+      u.querySelector("input").checked = ok;
+      if(ok) n++;
+    });
+    var pct = units.length ? Math.round(n * 100 / units.length) : 0;
+    document.getElementById("pct").textContent = pct + "%";
+    document.getElementById("cnt").textContent = n + "/" + units.length + " don vi";
+    document.getElementById("fill").style.width = pct + "%";
+  }
+
+  units.forEach(function(u){
+    var box = u.querySelector("input");
+    box.addEventListener("click", function(ev){ ev.stopPropagation(); });
+    box.addEventListener("change", function(){
+      if(box.checked) done[u.id] = 1; else delete done[u.id];
+      try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e){}
+      ve();
+    });
+  });
+
+  document.getElementById("reset").addEventListener("click", function(){
+    done = {};
+    try { localStorage.removeItem(KEY); } catch(e){}
+    ve();
+  });
+
+  ve();
+})();
+</script>
+</body>
+</html>

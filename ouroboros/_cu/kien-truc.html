@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kiến trúc Ouroboros</title>
+<style>
+:root{
+  --bg:#faf9f7; --surface:#fff; --surface-2:#f2f0ec; --surface-3:#e8e4dc; --border:#e2ddd5;
+  --ink:#1c1a17; --ink-2:#4f4940; --ink-3:#8a8379;
+  --accent:#b4622a; --accent-soft:#f7e9df; --accent-line:#dfa77c;
+  --ok:#3f7a4d; --ok-soft:#e4f0e6;
+  --warn:#9a6a1c; --warn-soft:#f7edd8;
+  --code-bg:#2a2724; --code-ink:#e9e3da;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Cascadia Mono",monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141317; --surface:#1c1b20; --surface-2:#24232a; --surface-3:#2e2d36; --border:#332f3a;
+  --ink:#ecebf0; --ink-2:#b3afba; --ink-3:#7d7887;
+  --accent:#e59462; --accent-soft:#3a2a1e; --accent-line:#8a5734;
+  --ok:#6bbd80; --ok-soft:#1d3224;
+  --warn:#d9a441; --warn-soft:#332a16;
+  --code-bg:#100f13; --code-ink:#ded8e6;
+}}
+:root[data-theme="dark"]{
+  --bg:#141317; --surface:#1c1b20; --surface-2:#24232a; --surface-3:#2e2d36; --border:#332f3a;
+  --ink:#ecebf0; --ink-2:#b3afba; --ink-3:#7d7887;
+  --accent:#e59462; --accent-soft:#3a2a1e; --accent-line:#8a5734;
+  --ok:#6bbd80; --ok-soft:#1d3224; --warn:#d9a441; --warn-soft:#332a16;
+  --code-bg:#100f13; --code-ink:#ded8e6;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:20px}
+body{margin:0; background:var(--bg); color:var(--ink);
+  font:17px/1.72 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif; -webkit-font-smoothing:antialiased}
+
+/* layout */
+.shell{display:grid; grid-template-columns:238px minmax(0,1fr); gap:44px; max-width:1180px; margin:0 auto; padding:0 20px}
+nav{position:sticky; top:0; align-self:start; max-height:100vh; overflow-y:auto; padding:30px 0 60px; font-size:13.5px}
+nav::-webkit-scrollbar{width:5px} nav::-webkit-scrollbar-thumb{background:var(--border); border-radius:9px}
+nav .nt{font:650 10.5px/1 var(--mono); letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3); margin:22px 0 9px}
+nav .nt:first-child{margin-top:0}
+nav a{display:block; color:var(--ink-2); text-decoration:none; padding:4px 10px; border-left:2px solid transparent; line-height:1.4; border-radius:0 5px 5px 0}
+nav a:hover{color:var(--accent); background:var(--surface-2)}
+nav a.act{color:var(--accent); border-left-color:var(--accent); background:var(--accent-soft); font-weight:600}
+nav a.sub{padding-left:20px; font-size:12.5px; color:var(--ink-3)}
+main{padding:30px 0 140px; min-width:0}
+
+/* type */
+h1{font-size:clamp(30px,5.4vw,42px); line-height:1.15; letter-spacing:-.022em; margin:0 0 14px; font-weight:650}
+h2{font-size:clamp(23px,3.6vw,30px); letter-spacing:-.016em; margin:68px 0 18px; padding-top:26px; border-top:1px solid var(--border); font-weight:650}
+h2:first-of-type{border-top:0; padding-top:0}
+h3{font-size:20px; margin:40px 0 12px; font-weight:640; letter-spacing:-.008em}
+h4{font-size:16.5px; margin:26px 0 8px; font-weight:640; color:var(--ink-2)}
+p{margin:0 0 17px; max-width:72ch}
+ul,ol{max-width:72ch; padding-left:24px; margin:0 0 17px}
+li{margin:7px 0}
+strong{font-weight:650}
+a{color:var(--accent)}
+hr{border:0; border-top:1px solid var(--border); margin:40px 0}
+.lede{font-size:19px; color:var(--ink-2); max-width:66ch; margin-bottom:22px}
+blockquote{margin:22px 0; padding:15px 20px; background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 10px 10px 0; color:var(--ink-2)}
+blockquote p:last-child{margin:0}
+blockquote strong{color:var(--ink)}
+
+/* code */
+code{font:.86em var(--mono); background:var(--surface-2); padding:2px 6px; border-radius:5px; color:var(--ink)}
+pre{background:var(--code-bg); color:var(--code-ink); padding:17px 19px; border-radius:11px; overflow-x:auto; margin:20px 0; font:13.5px/1.62 var(--mono); border:1px solid var(--border)}
+pre code{background:none; padding:0; color:inherit; font-size:inherit}
+pre .cm{color:#8b9a7e} pre .kw{color:#d99a6c} pre .st{color:#9dbfa8}
+pre.ascii{background:var(--surface); color:var(--ink-2); font-size:12.4px; line-height:1.45}
+
+/* tables */
+.tw{overflow-x:auto; margin:20px 0}
+table{border-collapse:collapse; width:100%; font-size:15px; min-width:420px}
+th{text-align:left; font:650 11.5px/1.3 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); padding:9px 13px; border-bottom:1.5px solid var(--border); vertical-align:bottom}
+td{padding:10px 13px; border-bottom:1px solid var(--border); vertical-align:top}
+tbody tr:hover{background:var(--surface-2)}
+td code{font-size:.82em}
+
+/* callouts */
+.box{border-radius:12px; padding:17px 20px; margin:22px 0; font-size:15.5px; max-width:74ch}
+.box p:last-child{margin:0}
+.box .bh{font:650 11px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:9px}
+.b-key{background:var(--accent-soft); border:1px solid var(--accent-line)} .b-key .bh{color:var(--accent)}
+.b-warn{background:var(--warn-soft); border:1px solid var(--warn)} .b-warn .bh{color:var(--warn)}
+.b-ok{background:var(--ok-soft); border:1px solid var(--ok)} .b-ok .bh{color:var(--ok)}
+.b-book{background:var(--surface-2); border:1px solid var(--border)} .b-book .bh{color:var(--ink-3)}
+
+/* figure */
+figure{margin:26px 0; background:var(--surface); border:1px solid var(--border); border-radius:13px; padding:22px; overflow-x:auto}
+figcaption{margin-top:14px; font-size:13px; color:var(--ink-3); text-align:center; line-height:1.5}
+figure svg{display:block; margin:0 auto; max-width:100%; height:auto}
+svg text{font-family:ui-sans-serif,system-ui,sans-serif}
+svg .m{font-family:var(--mono)}
+
+/* stack diagram */
+.stack{display:flex; flex-direction:column; gap:9px}
+.lyr{border:1.5px solid var(--border); border-radius:11px; padding:13px 16px; background:var(--surface-2)}
+.lyr.hi{border-color:var(--accent); background:var(--accent-soft)}
+.lyr-h{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:9px}
+.lyr-n{font:650 15px var(--mono); color:var(--accent)}
+.lyr-p{font:600 10.5px var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); background:var(--surface); padding:3px 8px; border-radius:5px; border:1px solid var(--border)}
+.parts{display:flex; flex-wrap:wrap; gap:7px}
+.part{font:12.5px var(--mono); background:var(--surface); border:1px solid var(--border); border-radius:7px; padding:6px 10px; color:var(--ink-2)}
+.lyr-d{font-size:13.5px; color:var(--ink-3); margin-top:9px; line-height:1.5}
+.snakeline{display:flex; align-items:center; gap:11px; margin:12px 0 0; padding:13px 16px; background:var(--accent-soft); border:1.5px dashed var(--accent); border-radius:11px; font-size:14.5px; color:var(--ink-2)}
+.snakeline b{color:var(--accent)}
+
+/* nấc rail */
+.nac{border-left:2px solid var(--border); padding-left:24px; margin-left:8px; position:relative}
+.nac::before{content:attr(data-n); position:absolute; left:-17px; top:2px; width:32px; height:32px; border-radius:50%;
+  background:var(--accent); color:#fff; font:650 13px/32px var(--mono); text-align:center; box-shadow:0 0 0 5px var(--bg)}
+.nac h3{margin-top:0}
+.q{font-size:15.5px; color:var(--ink-2); background:var(--surface-2); border-radius:9px; padding:12px 16px; margin:0 0 17px; max-width:74ch}
+.q b{color:var(--ink)}
+
+/* misc */
+.two{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:22px 0}
+.pane{background:var(--surface-2); border:1px solid var(--border); border-radius:11px; padding:15px 17px; font-size:14px}
+.pane h5{margin:0 0 10px; font:650 11px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3)}
+.pane ul{margin:0; padding-left:18px; font-family:var(--mono); font-size:12.5px; line-height:1.9}
+.pane.acc{background:var(--accent-soft); border-color:var(--accent-line)}
+.steps{counter-reset:s; list-style:none; padding:0; max-width:74ch}
+.steps li{counter-increment:s; position:relative; padding:11px 0 11px 46px; border-bottom:1px solid var(--border); font-size:15.5px}
+.steps li::before{content:counter(s); position:absolute; left:0; top:11px; width:28px; height:28px; border-radius:8px;
+  background:var(--surface-3); color:var(--ink-2); font:650 13px/28px var(--mono); text-align:center}
+.steps li.hot::before{background:var(--accent); color:#fff}
+.steps li:last-child{border-bottom:0}
+.tiny{font-size:13.5px; color:var(--ink-3)}
+
+/* header + footer */
+header.top{padding:48px 0 30px; border-bottom:1px solid var(--border); margin-bottom:40px}
+.eyebrow{font:650 11px var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin-bottom:14px}
+.who{display:flex; gap:9px; flex-wrap:wrap; margin-top:20px}
+.who span{font-size:12.5px; background:var(--surface-2); border:1px solid var(--border); border-radius:20px; padding:5px 13px; color:var(--ink-3)}
+footer{margin-top:80px; padding-top:26px; border-top:1px solid var(--border); font-size:14px; color:var(--ink-3)}
+#tt{position:fixed; right:18px; bottom:18px; z-index:9; font:inherit; font-size:13px; padding:9px 14px;
+  border:1px solid var(--border); background:var(--surface); color:var(--ink-2); border-radius:9px; cursor:pointer; box-shadow:0 3px 14px rgba(0,0,0,.09)}
+#tt:hover{border-color:var(--accent); color:var(--accent)}
+
+@media(max-width:940px){
+  .shell{grid-template-columns:1fr; gap:0}
+  nav{position:static; max-height:none; border-bottom:1px solid var(--border); margin-bottom:8px; padding-bottom:20px}
+  nav .navwrap{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:2px}
+  nav a.sub{display:none}
+  .two{grid-template-columns:1fr}
+  body{font-size:16px}
+}
+</style>
+</head>
+<body>
+<button id="tt" onclick="tog()">Sáng / tối</button>
+<div class="shell">
+
+<nav><div class="navwrap">
+  <div class="nt">Kiến trúc</div>
+  <a href="#p0">0 · Vì sao bạn bí</a>
+  <a href="#p1">I · Bức tranh lớn</a>
+  <a href="#p2">II · Đi theo một byte</a>
+  <a href="#n0" class="sub">Nấc 0 · Một file</a>
+  <a href="#n1" class="sub">Nấc 1 · Chỉ mục RAM</a>
+  <a href="#n2" class="sub">Nấc 2 · Trang 4KB</a>
+  <a href="#n3" class="sub">Nấc 3 · B-Tree</a>
+  <a href="#n4" class="sub">Nấc 4 · Buffer pool</a>
+  <a href="#n5" class="sub">Nấc 5 · WAL</a>
+  <a href="#n6" class="sub">Nấc 6 · Đa luồng</a>
+  <a href="#n7" class="sub">Nấc 7 · Qua mạng</a>
+  <a href="#n8" class="sub">Nấc 8 · Go</a>
+  <a href="#n9" class="sub">Nấc 9 · Raft</a>
+  <a href="#n10" class="sub">Nấc 10 · Container</a>
+  <a href="#n11" class="sub">Nấc 11 · Quản đốc</a>
+  <a href="#p3">III · Giải phẫu</a>
+  <a href="#p4">IV · Sách → dòng code</a>
+  <a href="#p5">V · Phải biết trước</a>
+  <a href="#p6">VI · Dòng đầu tiên</a>
+</div></nav>
+
+<main>
+<header class="top">
+  <div class="eyebrow">🐍 Ouroboros</div>
+  <h1>Kiến trúc — bản chi tiết</h1>
+  <p class="lede">Dự án có hình gì · một byte đi qua những đâu · chương sách nào phục vụ dòng code nào.</p>
+  <div class="who">
+    <span>Đọc <b>trước</b> khi gõ dòng đầu tiên</span>
+    <span>Đọc lại ở đầu mỗi phase</span>
+    <span>~45 phút cho Phần 0–II</span>
+  </div>
+</header>
+
+<!-- ══════════ PHẦN 0 ══════════ -->
+<h2 id="p0">Phần 0 — Vì sao bạn chưa biết bắt đầu từ đâu</h2>
+
+<p>Cảm giác của bạn đúng, và nó không phải do bạn kém. Nó do hai hiểu lầm mà gần như ai cũng mắc.</p>
+
+<h3>Hiểu lầm 1: "Phải hiểu hết rồi mới code được"</h3>
+<p>Sai. Ngược lại mới đúng: <strong>bạn hiểu được là nhờ đã code.</strong></p>
+<p>Bạn có thể đọc chương B-Tree của Petrov ba lần và vẫn mơ hồ. Nhưng chỉ cần tự viết hàm <code>split()</code> một lần — chỉ một lần thôi — là hiểu mãi mãi. Vì lúc viết, bạn buộc phải trả lời những câu sách không nói: node đầy thì đẩy key nào lên cha? Con trỏ trỏ đi đâu? Nếu cha cũng đầy thì sao?</p>
+<p>Sách cho bạn <strong>bản đồ</strong>. Code cho bạn <strong>ký ức cơ bắp</strong>. Không thay thế nhau được.</p>
+
+<h3>Hiểu lầm 2: "Phải xây theo bản vẽ kiến trúc"</h3>
+<p>Cũng sai — và đây mới là thứ đang chặn bạn.</p>
+<p>Sơ đồ bạn sắp thấy ở Phần I là <strong>đích đến sau 20 tháng</strong>. Không ai ngồi xuống và gõ ra kiến trúc đó. Nếu bạn cố bắt đầu từ nó, bạn sẽ tê liệt — đúng như bây giờ.</p>
+
+<blockquote><p><strong>Bộ xương biết đi (walking skeleton).</strong><br>Viết thứ nhỏ nhất mà <em>chạy được từ đầu đến cuối</em>. Rồi phình nó ra từng chút một. Mỗi bước phình, hệ thống vẫn phải chạy.</p></blockquote>
+
+<p>Cụ thể với Ouroboros: tuần thứ 6, bạn sẽ viết một cơ sở dữ liệu <strong>60 dòng C</strong>. Nó xấu, nó chậm, nó mất dữ liệu khi cúp điện. <strong>Nhưng nó chạy.</strong></p>
+<p>Rồi tuần 7 bạn hỏi <em>"sao đọc chậm thế?"</em> → thêm chỉ mục trong RAM. Tuần 8 <em>"sao file phình mãi?"</em> → thêm nén gộp. Tuần 12 <em>"sao cúp điện là mất?"</em> → thêm WAL.</p>
+
+<div class="box b-key"><span class="bh">Điểm mấu chốt</span>
+<p>Mỗi lần thêm, bạn giải một bài toán <strong>bạn tự cảm nhận được</strong>, chứ không phải bài toán sách bảo có. Đó là lý do bạn sẽ nhớ.</p></div>
+
+<p>Sau 9 tuần, thứ 60 dòng đó trở thành 6.000 dòng và có hình dạng đúng như sơ đồ kiến trúc. Nhưng bạn đến đó bằng cách bò, không phải bằng cách nhảy.</p>
+
+<h3>Vậy sơ đồ kiến trúc để làm gì?</h3>
+<p>Để bạn biết <strong>mình đang bò về hướng nào</strong>, và để khi thêm một mảnh, bạn biết nó gắn vào đâu. Chỉ vậy thôi. Nó là la bàn, không phải bản vẽ thi công.</p>
+
+<!-- ══════════ PHẦN I ══════════ -->
+<h2 id="p1">Phần I — Bức tranh lớn</h2>
+
+<h3>Mọi đám mây đều trả lời 5 câu hỏi</h3>
+<p>Bóc AWS, Google Cloud, Azure ra thì phần lõi đều đang trả lời đúng 5 câu:</p>
+<div class="tw"><table>
+<thead><tr><th>#</th><th>Câu hỏi</th><th>Thành phần của bạn</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Cất dữ liệu xuống đĩa sao cho <b>mất điện không mất dữ liệu</b>?</td><td><code>ouro-store</code></td></tr>
+<tr><td>2</td><td>Cho <b>máy khác ở xa</b> dùng được dữ liệu đó?</td><td><code>ouro-net</code></td></tr>
+<tr><td>3</td><td><b>Nhiều máy</b> cùng giữ dữ liệu, máy chết vẫn đúng?</td><td><code>ouro-dist</code></td></tr>
+<tr><td>4</td><td><b>Nhốt phần mềm vào hộp</b> để chạy cô lập trên máy chung?</td><td><code>ouro-run</code></td></tr>
+<tr><td>5</td><td><b>Tự động</b> quyết định hộp nào chạy ở máy nào?</td><td><code>ouro-ctl</code></td></tr>
+</tbody></table></div>
+<p>Cộng câu thứ sáu chạy xuyên suốt: <em>làm sao nhìn thấy cả đống đó đang làm gì?</em> → <code>ouro-scope</code>.</p>
+
+<h3>Sơ đồ tổng thể</h3>
+<div class="stack">
+  <div class="lyr hi">
+    <div class="lyr-h"><span class="lyr-n">ouro-ctl</span><span class="lyr-p">Go · Phase 7</span></div>
+    <div class="parts"><span class="part">API server</span><span class="part">Scheduler</span><span class="part">Controller / reconcile</span></div>
+    <div class="lyr-d">Nhận YAML "tôi muốn 3 bản chạy" → chọn máy → lặp mãi để thực tế khớp mong muốn</div>
+  </div>
+  <div class="lyr">
+    <div class="lyr-h"><span class="lyr-n">ouro-run</span><span class="lyr-p">Go + C · Phase 6</span></div>
+    <div class="parts"><span class="part">namespaces</span><span class="part">cgroups</span><span class="part">overlayfs</span><span class="part">veth / bridge</span><span class="part">seccomp</span></div>
+    <div class="lyr-d">Nhốt tiến trình vào hộp: không thấy, không đụng, không ăn quá phần</div>
+  </div>
+  <div class="lyr">
+    <div class="lyr-h"><span class="lyr-n">ouro-dist</span><span class="lyr-p">Go · Phase 5</span></div>
+    <div class="parts"><span class="part">Raft</span><span class="part">Gossip</span><span class="part">Replication</span><span class="part">Client / leader lookup</span></div>
+    <div class="lyr-d">Ba bản sao cùng đồng ý một sự thật, dù một máy chết</div>
+  </div>
+  <div class="lyr">
+    <div class="lyr-h"><span class="lyr-n">ouro-net</span><span class="lyr-p">C Phase 3 → Go Phase 4</span></div>
+    <div class="parts"><span class="part">epoll event loop</span><span class="part">wire protocol</span><span class="part">thread pool</span></div>
+    <div class="lyr-d">10.000 máy nói chuyện được với store cùng lúc</div>
+  </div>
+  <div class="lyr">
+    <div class="lyr-h"><span class="lyr-n">ouro-store</span><span class="lyr-p">C · Phase 1–2</span></div>
+    <div class="parts"><span class="part">B-Tree</span><span class="part">LSM</span><span class="part">WAL</span><span class="part">buffer pool</span><span class="part">recovery</span></div>
+    <div class="lyr-d">Biến RAM tạm bợ thành đĩa bền vững — cúp điện không mất dữ liệu</div>
+  </div>
+  <div class="snakeline">🐍 <span><b>Vòng khép kín:</b> <code>ouro-ctl</code> lưu trạng thái của chính nó vào cụm <code>ouro-store</code> ở đáy — mà cụm đó lại đang chạy trong container do <code>ouro-ctl</code> đặt xuống.</span></div>
+</div>
+
+<h3>Luật vàng của kiến trúc</h3>
+<blockquote><p><strong>Mỗi lớp chỉ được biết lớp ngay dưới nó. Không được nhảy cóc.</strong></p></blockquote>
+<p><code>ouro-ctl</code> không biết B-Tree tồn tại — nó chỉ biết gọi <code>Put(key, value)</code>. <code>ouro-store</code> không biết mạng tồn tại — nó chỉ biết ghi file.</p>
+<p>Vì sao luật này quan trọng đến thế: <strong>nó cho phép bạn xây từng lớp một và test được từng lớp một.</strong> Nếu <code>ouro-store</code> phải biết về Raft, bạn không thể test nó một mình, và Phase 1 sẽ không bao giờ kết thúc. Đây cũng là lý do thứ tự phase đi từ dưới lên.</p>
+
+<h3>Sáu thành phần, mỗi cái một câu</h3>
+<div class="tw"><table>
+<thead><tr><th>Thành phần</th><th>Một câu</th><th>Dòng ước tính</th></tr></thead>
+<tbody>
+<tr><td><code>ouro-store</code></td><td>Biến RAM tạm bợ thành đĩa bền vững, không mất khi cúp điện</td><td>~8.000 C</td></tr>
+<tr><td><code>ouro-net</code></td><td>Cho máy khác nói chuyện được với store, 10.000 máy cùng lúc</td><td>~2.500 C + ~1.500 Go</td></tr>
+<tr><td><code>ouro-dist</code></td><td>Ba bản sao cùng đồng ý một sự thật, dù máy chết</td><td>~6.000 Go</td></tr>
+<tr><td><code>ouro-run</code></td><td>Nhốt tiến trình vào hộp: không thấy, không đụng, không ăn quá phần</td><td>~5.000 Go+C</td></tr>
+<tr><td><code>ouro-ctl</code></td><td>Đọc ý muốn người dùng, tự làm thực tế khớp ý muốn đó</td><td>~8.000 Go</td></tr>
+<tr><td><code>ouro-scope</code></td><td>Đo, đếm, vẽ — để không bao giờ tối ưu mù</td><td>~2.000</td></tr>
+</tbody></table></div>
+
+<!-- ══════════ PHẦN II ══════════ -->
+<h2 id="p2">Phần II — Đi theo một byte</h2>
+
+<p class="lede">Đây là phần cho bạn cái nhìn tổng quan thống nhất mà bạn đang thiếu.</p>
+
+<p>Ta đi theo đúng <strong>một thao tác</strong> — <code>PUT user:1 = "Quan"</code> — từ lúc bạn gõ tới lúc nó nằm yên trên mặt đĩa. Mỗi tầng dưới đây là một nấc tiến hoá, và <strong>bạn thật sự sẽ gõ theo đúng thứ tự này</strong>.</p>
+<p>Chú ý cách mỗi nấc sinh ra từ một câu hỏi bực bội về nấc trước. Đó là toàn bộ bí quyết của việc học qua dự án.</p>
+
+<!-- Nấc 0 -->
+<div class="nac" data-n="0" id="n0">
+<h3>Một file, 60 dòng <span class="tiny">· Tuần 6</span></h3>
+<p class="q"><b>Câu hỏi:</b> Cơ sở dữ liệu ít nhất phải làm được gì? &nbsp;<b>Trả lời:</b> Ghi được, đọc lại được. Hết.</p>
+
+<pre><code><span class="cm">// PUT: nối vào cuối file. Không bao giờ sửa thứ đã ghi.</span>
+<span class="kw">void</span> put(<span class="kw">const char</span> *key, <span class="kw">const char</span> *val) {
+    FILE *f = fopen(<span class="st">"data.db"</span>, <span class="st">"a"</span>);        <span class="cm">// "a" = append</span>
+    fprintf(f, <span class="st">"%s\t%s\n"</span>, key, val);
+    fclose(f);
+}
+
+<span class="cm">// GET: quét cả file từ đầu, nhớ giá trị CUỐI CÙNG khớp key.</span>
+<span class="kw">int</span> get(<span class="kw">const char</span> *key, <span class="kw">char</span> *out) {
+    FILE *f = fopen(<span class="st">"data.db"</span>, <span class="st">"r"</span>);
+    <span class="kw">if</span> (!f) <span class="kw">return</span> -1;
+    <span class="kw">char</span> line[1024];
+    <span class="kw">int</span> found = -1;
+    <span class="kw">while</span> (fgets(line, <span class="kw">sizeof</span> line, f)) {
+        <span class="kw">char</span> *tab = strchr(line, <span class="st">'\t'</span>);
+        <span class="kw">if</span> (!tab) <span class="kw">continue</span>;
+        *tab = <span class="st">'\0'</span>;                         <span class="cm">// cắt đôi: trước tab là key</span>
+        <span class="kw">if</span> (strcmp(line, key) == 0) {
+            <span class="kw">char</span> *v = tab + 1;
+            v[strcspn(v, <span class="st">"\n"</span>)] = <span class="st">'\0'</span>;
+            strcpy(out, v);
+            found = 0;                       <span class="cm">// bản ghi sau đè bản ghi trước</span>
+        }
+    }
+    fclose(f);
+    <span class="kw">return</span> found;
+}</code></pre>
+
+<p><strong>Đó là một cơ sở dữ liệu thật.</strong> Không đùa. Nó có hai tính chất mà các engine thật cũng có:</p>
+<ul>
+<li><strong>Append-only</strong> — chỉ nối thêm, không bao giờ sửa chỗ cũ. Ghi tuần tự nhanh hơn ghi ngẫu nhiên rất nhiều, trên cả HDD lẫn SSD.</li>
+<li><strong>Last write wins</strong> — muốn sửa thì ghi đè bản mới ở cuối; muốn xoá thì ghi một "bia mộ" (tombstone).</li>
+</ul>
+<p>Cả LSM Tree của RocksDB lẫn WAL của PostgreSQL đều đứng trên đúng hai ý này.</p>
+
+<div class="box b-ok"><span class="bh">🎯 Dòng code đầu tiên của dự án</span>
+<p>Không phải kiến trúc. Không phải thiết kế. Là 60 dòng này — và nó chạy được ngay hôm bạn gõ xong.</p></div>
+<p class="tiny"><b>Nó tệ ở đâu:</b> đọc là O(n) — 1 triệu bản ghi thì mỗi lần <code>get</code> phải quét 1 triệu dòng.</p>
+</div>
+
+<!-- Nấc 1 -->
+<div class="nac" data-n="1" id="n1">
+<h3>Chỉ mục trong RAM <span class="tiny">· Tuần 6–7</span></h3>
+<p class="q"><b>Câu hỏi:</b> Đọc chậm quá, làm sao nhanh? &nbsp;<b>Ý tưởng:</b> Giữ trong RAM bảng băm <code>key → vị trí byte</code>. <code>get</code> thành: tra bảng băm → <code>lseek</code> tới đúng chỗ → đọc một dòng.</p>
+
+<figure>
+<svg viewBox="0 0 640 210" role="img" aria-label="Bảng băm trong RAM trỏ tới vị trí byte trong file trên đĩa">
+  <text x="8" y="18" font-size="12" font-weight="700" fill="var(--ink-3)">RAM</text>
+  <rect x="8" y="28" width="624" height="42" rx="8" fill="var(--accent-soft)" stroke="var(--accent-line)"/>
+  <text class="m" x="24" y="54" font-size="13" fill="var(--ink)">{ "user:1" → byte 27 ,  "user:2" → byte 14 }</text>
+
+  <path d="M120 70 L120 105 M120 105 L296 105 L296 128" stroke="var(--accent)" stroke-width="1.6" fill="none" stroke-dasharray="4 3"/>
+  <path d="M296 128 l-4 -7 l8 0 z" fill="var(--accent)"/>
+  <path d="M330 70 L330 92 L172 92 L172 128" stroke="var(--ink-3)" stroke-width="1.4" fill="none" stroke-dasharray="4 3"/>
+  <path d="M172 128 l-4 -7 l8 0 z" fill="var(--ink-3)"/>
+
+  <text x="8" y="148" font-size="12" font-weight="700" fill="var(--ink-3)">ĐĨA</text>
+  <rect x="8" y="130" width="140" height="44" rx="5" fill="var(--surface-2)" stroke="var(--border)"/>
+  <rect x="148" y="130" width="130" height="44" rx="5" fill="var(--surface-2)" stroke="var(--border)"/>
+  <rect x="278" y="130" width="140" height="44" rx="5" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
+  <text class="m" x="20" y="157" font-size="11.5" fill="var(--ink-2)">user:1 Quan</text>
+  <text class="m" x="160" y="157" font-size="11.5" fill="var(--ink-2)">user:2 Nam</text>
+  <text class="m" x="290" y="157" font-size="11.5" fill="var(--ink)">user:1 Hai</text>
+  <text class="m" x="20" y="190" font-size="10.5" fill="var(--ink-3)">byte 0</text>
+  <text class="m" x="160" y="190" font-size="10.5" fill="var(--ink-3)">byte 14</text>
+  <text class="m" x="290" y="190" font-size="10.5" fill="var(--accent)">byte 27 ← bản mới thắng</text>
+  <text x="440" y="157" font-size="12" fill="var(--ink-3)">bản cũ vẫn nằm đó,</text>
+  <text x="440" y="173" font-size="12" fill="var(--ink-3)">chỉ là không ai trỏ tới</text>
+</svg>
+<figcaption>Bảng băm trỏ thẳng tới vị trí byte. Ghi đè = nối bản mới + đổi con trỏ.</figcaption>
+</figure>
+
+<p><strong>Bạn vừa tự phát minh ra Bitcask</strong> — engine lưu trữ thật của Riak. Nghiêm túc.</p>
+<p class="tiny"><b>Nó tệ ở đâu:</b> toàn bộ key phải vừa trong RAM, và file phình vô hạn vì bản cũ không bao giờ bị xoá.</p>
+<div class="box b-book"><span class="bh">📖 Kiến thức cần</span><p>TLPI Ch4–5 (<code>open</code>, <code>read</code>, <code>write</code>, <code>lseek</code>), CSAPP Ch10. Đây là lúc bạn học <strong>file descriptor là gì</strong> — xem Phần V.</p></div>
+</div>
+
+<!-- Nấc 2 -->
+<div class="nac" data-n="2" id="n2">
+<h3>Trang có cấu trúc <span class="tiny">· Tuần 6–7</span></h3>
+<p class="q"><b>Câu hỏi:</b> File dạng dòng text thì lôi thôi — muốn nhảy tới bản ghi thứ 500 thì sao? &nbsp;<b>Ý tưởng:</b> Chia file thành <b>trang (page)</b> cố định 4KB, mỗi trang tự mô tả nội dung của nó.</p>
+
+<figure>
+<svg viewBox="0 0 660 190" role="img" aria-label="Cấu trúc một trang 4KB kiểu slotted page">
+  <rect x="10" y="40" width="98" height="56" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+  <rect x="108" y="40" width="62" height="56" fill="var(--surface-3)" stroke="var(--border)"/>
+  <rect x="170" y="40" width="62" height="56" fill="var(--surface-3)" stroke="var(--border)"/>
+  <rect x="232" y="40" width="180" height="56" fill="var(--surface)" stroke="var(--border)" stroke-dasharray="4 3"/>
+  <rect x="412" y="40" width="110" height="56" fill="var(--ok-soft)" stroke="var(--ok)"/>
+  <rect x="522" y="40" width="128" height="56" fill="var(--ok-soft)" stroke="var(--ok)"/>
+
+  <text x="59" y="64" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--accent)">HEADER</text>
+  <text class="m" x="59" y="80" font-size="10" text-anchor="middle" fill="var(--ink-3)">n=2 · checksum</text>
+  <text class="m" x="139" y="66" font-size="11" text-anchor="middle" fill="var(--ink-2)">slot 0</text>
+  <text class="m" x="139" y="80" font-size="9.5" text-anchor="middle" fill="var(--ink-3)">→522</text>
+  <text class="m" x="201" y="66" font-size="11" text-anchor="middle" fill="var(--ink-2)">slot 1</text>
+  <text class="m" x="201" y="80" font-size="9.5" text-anchor="middle" fill="var(--ink-3)">→412</text>
+  <text x="322" y="73" font-size="11.5" text-anchor="middle" fill="var(--ink-3)">còn trống</text>
+  <text class="m" x="467" y="73" font-size="11" text-anchor="middle" fill="var(--ink-2)">data 1</text>
+  <text class="m" x="586" y="73" font-size="11" text-anchor="middle" fill="var(--ink-2)">data 0</text>
+
+  <path d="M240 112 L300 112" stroke="var(--ink-3)" stroke-width="1.4"/><path d="M300 112 l-7 -4 l0 8 z" fill="var(--ink-3)"/>
+  <path d="M404 112 L344 112" stroke="var(--ink-3)" stroke-width="1.4"/><path d="M344 112 l7 -4 l0 8 z" fill="var(--ink-3)"/>
+  <text x="322" y="132" font-size="11" text-anchor="middle" fill="var(--ink-3)">gặp nhau = trang đầy</text>
+
+  <text class="m" x="10" y="30" font-size="10.5" fill="var(--ink-3)">0</text>
+  <text class="m" x="632" y="30" font-size="10.5" fill="var(--ink-3)">4096</text>
+  <text x="139" y="160" font-size="12" fill="var(--ink-3)">slot mọc từ trái sang →</text>
+  <text x="650" y="160" font-size="12" text-anchor="end" fill="var(--ink-3)">← data mọc từ phải sang</text>
+</svg>
+<figcaption>Slotted page: chỉ mục mọc từ trái, dữ liệu mọc từ phải. Gặp nhau là hết chỗ.</figcaption>
+</figure>
+
+<p>Vì sao 4KB: vì đó là kích thước <strong>page</strong> của kernel Linux và thường là kích thước khối của hệ tệp. Ghi đúng một page = kernel làm đúng một thao tác. Ghi 4KB+1 byte = kernel phải đụng hai page.</p>
+<p>Đây là ví dụ đầu tiên về việc <strong>kiến trúc máy tính rò rỉ lên tận thiết kế phần mềm</strong> — thứ CSAPP dạy suốt.</p>
+<p><code>checksum</code> trong header để phát hiện <strong>torn page</strong>: máy chết giữa lúc ghi, nửa trang mới nửa trang cũ. Không có checksum thì bạn đọc phải rác mà không biết.</p>
+<div class="box b-book"><span class="bh">📖 Kiến thức cần</span><p>DB Internals Ch3 (File Formats), CSAPP Ch6 (vì sao 4KB).</p></div>
+</div>
+
+<!-- Nấc 3 -->
+<div class="nac" data-n="3" id="n3">
+<h3>B-Tree <span class="tiny">· Tuần 8–10</span></h3>
+<p class="q"><b>Câu hỏi:</b> Bảng băm trong RAM không chứa nổi 1 tỷ key. Và tôi muốn hỏi <i>"cho tôi mọi key từ user:100 đến user:200"</i> — bảng băm chịu. &nbsp;<b>Ý tưởng:</b> Cây giữ key <b>có thứ tự</b>, và cây nằm <b>trên đĩa</b>, không trong RAM.</p>
+
+<figure>
+<svg viewBox="0 0 620 250" role="img" aria-label="Cây B-Tree ba tầng, mỗi node là một page 4KB">
+  <rect x="245" y="14" width="130" height="34" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
+  <text class="m" x="310" y="36" font-size="12" text-anchor="middle" fill="var(--ink)">[ user:500 ]</text>
+  <text x="392" y="35" font-size="11" fill="var(--ink-3)">gốc · 1 page</text>
+
+  <path d="M280 48 L165 88" stroke="var(--ink-3)" stroke-width="1.4"/><path d="M165 88 l6 -5 l1 8 z" fill="var(--ink-3)"/>
+  <path d="M340 48 L455 88" stroke="var(--ink-3)" stroke-width="1.4"/><path d="M455 88 l-7 -3 l1 8 z" fill="var(--ink-3)"/>
+
+  <rect x="90" y="90" width="150" height="34" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text class="m" x="165" y="112" font-size="11.5" text-anchor="middle" fill="var(--ink-2)">[user:200 | user:350]</text>
+  <rect x="380" y="90" width="150" height="34" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text class="m" x="455" y="112" font-size="11.5" text-anchor="middle" fill="var(--ink-2)">[user:800 | user:900]</text>
+  <text x="548" y="111" font-size="11" fill="var(--ink-3)">nhánh</text>
+
+  <g stroke="var(--ink-3)" stroke-width="1.2">
+    <path d="M120 124 L75 164"/><path d="M165 124 L165 164"/><path d="M210 124 L255 164"/>
+    <path d="M410 124 L365 164"/><path d="M455 124 L455 164"/><path d="M500 124 L545 164"/>
+  </g>
+  <g fill="var(--ok-soft)" stroke="var(--ok)">
+    <rect x="40" y="166" width="70" height="40" rx="5"/><rect x="130" y="166" width="70" height="40" rx="5"/>
+    <rect x="220" y="166" width="70" height="40" rx="5"/><rect x="330" y="166" width="70" height="40" rx="5"/>
+    <rect x="420" y="166" width="70" height="40" rx="5"/><rect x="510" y="166" width="70" height="40" rx="5"/>
+  </g>
+  <g font-size="10.5" text-anchor="middle" fill="var(--ok)" class="m">
+    <text x="75" y="191">dữ liệu</text><text x="165" y="191">dữ liệu</text><text x="255" y="191">dữ liệu</text>
+    <text x="365" y="191">dữ liệu</text><text x="455" y="191">dữ liệu</text><text x="545" y="191">dữ liệu</text>
+  </g>
+  <text x="310" y="232" font-size="12" text-anchor="middle" fill="var(--ink-3)">mỗi ô = đúng một page 4KB · dữ liệu thật chỉ nằm ở lá</text>
+</svg>
+<figcaption>Mỗi node là đúng một page 4KB — đó là toàn bộ bí mật của B-Tree.</figcaption>
+</figure>
+
+<p>Điểm mấu chốt sách hay nói lướt: <strong>mỗi node là đúng một page 4KB.</strong></p>
+<p>Vì sao? Vì đọc đĩa tính theo page. Một page 4KB chứa ~200 key. Cây 3 tầng chứa 200³ = <strong>8 triệu</strong> key và tìm bất kỳ key nào chỉ tốn <strong>3 lần đọc đĩa</strong>. Cây 4 tầng: 1,6 tỷ key, 4 lần đọc đĩa.</p>
+<p>Đó là toàn bộ lý do B-Tree thống trị cơ sở dữ liệu suốt 50 năm. Nó tối ưu cho thứ đắt nhất: <strong>số lần chạm đĩa</strong>, không phải số phép so sánh.</p>
+
+<div class="box b-warn"><span class="bh">Phần khó nhất bạn sẽ vật lộn</span>
+<p><code>split</code>. Node đầy, thêm key nữa thì sao? Cắt đôi, đẩy key giữa lên cha. Nhưng cha cũng đầy thì sao? Cắt cha, đẩy lên ông. Tới gốc mà gốc đầy? Tạo gốc mới — <strong>cây cao thêm một tầng, và đó là cách duy nhất B-Tree cao lên.</strong></p>
+<p style="margin-top:10px">Viết được <code>split</code> và <code>merge</code> đúng là lúc bạn thật sự hiểu B-Tree. Không phải lúc đọc xong chương.</p></div>
+<div class="box b-book"><span class="bh">📖 Kiến thức cần</span><p>DB Internals Ch2, Ch4, Ch6.</p></div>
+</div>
+
+<!-- Nấc 4 -->
+<div class="nac" data-n="4" id="n4">
+<h3>Buffer pool <span class="tiny">· Tuần 11</span></h3>
+<p class="q"><b>Câu hỏi:</b> Cây nằm trên đĩa, nhưng mỗi lần tra lại đọc đĩa thì chậm chết — mà giữ cả cây trong RAM thì không đủ chỗ. &nbsp;<b>Ý tưởng:</b> Giữ <b>những page nóng nhất</b> trong RAM, page nguội thì đá ra.</p>
+
+<figure>
+<svg viewBox="0 0 620 250" role="img" aria-label="Buffer pool giữ page nóng trong RAM, đá page nguội xuống đĩa">
+  <rect x="10" y="14" width="600" height="86" rx="10" fill="var(--accent-soft)" stroke="var(--accent-line)"/>
+  <text x="26" y="36" font-size="12" font-weight="700" fill="var(--accent)">BUFFER POOL · RAM có hạn (vd 256MB)</text>
+  <g>
+    <rect x="30" y="46" width="88" height="42" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+    <rect x="130" y="46" width="88" height="42" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+    <rect x="230" y="46" width="88" height="42" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+    <rect x="330" y="46" width="88" height="42" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+    <rect x="430" y="46" width="88" height="42" rx="6" fill="var(--surface-3)" stroke="var(--ink-3)" stroke-dasharray="4 3"/>
+  </g>
+  <g class="m" font-size="11" text-anchor="middle">
+    <text x="74" y="63" fill="var(--ink)">page 7 ★</text><text x="74" y="79" fill="var(--ink-3)" font-size="9.5">pin=1</text>
+    <text x="174" y="63" fill="var(--ink)">page 2</text><text x="174" y="79" fill="var(--ink-3)" font-size="9.5">pin=0</text>
+    <text x="274" y="63" fill="var(--ink)">page 9 ★</text><text x="274" y="79" fill="var(--ink-3)" font-size="9.5">pin=0</text>
+    <text x="374" y="63" fill="var(--ink)">page 4</text><text x="374" y="79" fill="var(--ink-3)" font-size="9.5">pin=3</text>
+    <text x="474" y="70" fill="var(--ink-3)" font-size="10.5">nạn nhân?</text>
+  </g>
+  <text x="530" y="63" font-size="11" fill="var(--accent)">★ = bẩn</text>
+  <text x="530" y="79" font-size="11" fill="var(--ink-3)">pin = đang dùng</text>
+
+  <path d="M274 100 L274 148" stroke="var(--accent)" stroke-width="1.6"/><path d="M274 148 l-4 -8 l8 0 z" fill="var(--accent)"/>
+  <text x="290" y="120" font-size="12" fill="var(--ink-2)">hết chỗ → CLOCK chọn nạn nhân</text>
+  <text x="290" y="138" font-size="12" fill="var(--ink-2)">nếu bẩn (★) thì ghi xuống trước</text>
+
+  <rect x="10" y="156" width="600" height="60" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text x="26" y="178" font-size="12" font-weight="700" fill="var(--ink-3)">ĐĨA</text>
+  <g class="m" font-size="11" fill="var(--ink-3)"><text x="26" y="200">page 0 · 1 · 2 · 3 · 4 · 5 · 6 · 7 · 8 · 9 · 10 · …  (toàn bộ cây)</text></g>
+  <text x="310" y="240" font-size="12" text-anchor="middle" fill="var(--accent)">bạn đã học đúng bài toán này ở môn Hệ điều hành — lần này bạn LÀ kernel</text>
+</svg>
+<figcaption>Page replacement: cùng bài toán FIFO / LRU / CLOCK bạn học ở môn OS.</figcaption>
+</figure>
+
+<p>Bạn có nhận ra không — <strong>đây chính xác là bài toán page replacement</strong> mà bạn đã học ở môn Hệ điều hành. Cùng bài toán, cùng thuật toán, chỉ khác là lần này <strong>bạn là kernel</strong>.</p>
+<p>Đó là lý do OSTEP Ch21–22 nằm trong tuần này. Bạn đã học khái niệm rồi; giờ bạn cài nó, và nó sẽ dính vào đầu theo cách bài giảng không làm được.</p>
+<p><code>pin</code> là thứ sách hay bỏ qua: một page đang được luồng khác đọc thì <strong>không được đá ra</strong>. Đây là mầm mống của Phase 2.</p>
+<div class="box b-book"><span class="bh">📖 Kiến thức cần</span><p>OSTEP Ch21–22 · PostgreSQL 14 Internals Part II.<br><b>Đối chiếu:</b> đọc Rogov xem PostgreSQL làm y hệt thứ bạn vừa viết, ở quy mô thật.</p></div>
+</div>
+
+<!-- Nấc 5 -->
+<div class="nac" data-n="5" id="n5">
+<h3>WAL — sống sót qua cúp điện <span class="tiny">· Tuần 12–13</span></h3>
+<div class="box b-key"><span class="bh">Nấc quan trọng nhất của cả Phase 1</span><p>Đọc kỹ phần này. Nó là lý do tồn tại của chữ D trong ACID.</p></div>
+
+<p class="q"><b>Câu hỏi:</b> Máy mất điện giữa lúc <code>split</code> một node B-Tree. Nửa cây đã ghi, nửa chưa. Bật lại máy thì cây hỏng. Làm sao?</p>
+
+<p>Trước hết phải biết một sự thật phũ phàng: khi bạn gọi <code>write()</code>, dữ liệu <strong>không</strong> xuống đĩa. Nó nằm trong RAM của kernel. <code>write()</code> trả về "thành công" khi dữ liệu mới chỉ nằm trong RAM. Kernel sẽ ghi xuống đĩa sau — có thể 30 giây sau.</p>
+<p>Cúp điện trong 30 giây đó: <strong>mất sạch, mà chương trình của bạn tưởng đã ghi xong.</strong></p>
+<p>Muốn chắc chắn xuống đĩa phải gọi <code>fsync()</code>. Nhưng <code>fsync()</code> tốn 0,1–10 mili giây — chậm hơn <code>write()</code> khoảng <strong>mười nghìn lần</strong>.</p>
+
+<h4>Ý tưởng WAL</h4>
+<p>Đừng <code>fsync</code> cả cây. Chỉ <code>fsync</code> một dòng nhật ký nhỏ, ghi tuần tự, <em>trước khi</em> đụng vào cây.</p>
+
+<ol class="steps">
+<li>Ghi vào WAL: <code>LSN 42: đặt user:1 = Quan</code> — nối vào cuối, tuần tự</li>
+<li class="hot"><code>fsync(WAL)</code> — <b>ĐẮT</b>, nhưng chỉ một lần, một file</li>
+<li>✓ Giờ mới báo cho client "xong rồi"</li>
+<li>Sửa B-Tree trong buffer pool — chỉ trong RAM</li>
+<li>Lúc nào rảnh thì ghi page bẩn xuống đĩa</li>
+</ol>
+<p>Cúp điện ở bước 4 hay 5? Không sao. Bật máy lại → đọc WAL từ checkpoint gần nhất → làm lại (redo) mọi thao tác.</p>
+
+<blockquote><p><strong>Quy tắc bất di bất dịch: nhật ký phải xuống đĩa trước dữ liệu.</strong><br>Write-Ahead Logging — "ghi trước" là ghi trước dữ liệu.</p></blockquote>
+
+<p><strong>Group commit:</strong> <code>fsync</code> đắt, nên nếu 100 client cùng ghi trong 1ms, gom cả 100 vào một lần <code>fsync</code>. Trả giá một lần, phục vụ 100 người. Đây là kỹ thuật cho PostgreSQL và MySQL đạt hàng chục nghìn giao dịch mỗi giây trên phần cứng thường.</p>
+
+<div class="box b-ok"><span class="bh">🎯 Vì sao có test tra tấn</span>
+<p><code>kill -9</code> 1000 lần ngẫu nhiên là để kiểm chứng đúng cơ chế này. Không qua được test đó thì <code>ouro-store</code> chưa phải cơ sở dữ liệu — nó chỉ là một cái file.</p></div>
+<div class="box b-book"><span class="bh">📖 Kiến thức cần</span><p>DB Internals Ch5 · <strong>OSTEP Ch42 (Crash Consistency)</strong> — chương quan trọng nhất phase này · PostgreSQL 14 Internals Part II.</p></div>
+</div>
+
+<!-- Nấc 6 -->
+<div class="nac" data-n="6" id="n6">
+<h3>Nhiều luồng <span class="tiny">· Phase 2, tuần 15–21</span></h3>
+<p class="q"><b>Câu hỏi:</b> Một lúc chỉ phục vụ một người thì phí cả CPU 8 nhân. &nbsp;<b>Ý tưởng:</b> Nhiều luồng cùng dùng chung buffer pool và B-Tree.</p>
+<p>Và lập tức bạn rơi vào địa ngục:</p>
+<div class="tw"><table>
+<thead><tr><th>Vấn đề</th><th>Hiện tượng</th></tr></thead>
+<tbody>
+<tr><td>Hai luồng cùng <code>split</code> một node</td><td>Cây hỏng, mất dữ liệu</td></tr>
+<tr><td>Một luồng đá page mà luồng khác đang đọc</td><td>Đọc phải rác</td></tr>
+<tr><td>Hai luồng khoá hai page theo thứ tự ngược nhau</td><td><b>Deadlock</b> — treo vĩnh viễn</td></tr>
+</tbody></table></div>
+<p>Đây là lúc concurrency ngừng là lý thuyết. Bạn sẽ gặp một con bug xuất hiện <strong>1 lần trong 10.000 lần chạy</strong>, và bạn sẽ học được rằng <code>printf</code> không giúp được gì — phải dùng ThreadSanitizer.</p>
+<p>Kỹ thuật bạn sẽ học: <strong>latch crabbing</strong> (bò như cua trên cây — khoá con rồi mới thả cha), lock-free reader, đọc-ghi tách biệt.</p>
+<div class="box b-book"><span class="bh">📖 Kiến thức cần</span><p>OSTEP Ch26–33 (toàn bộ concurrency) · CSAPP Ch12 · TLPI Ch29–33.</p></div>
+</div>
+
+<!-- Nấc 7 -->
+<div class="nac" data-n="7" id="n7">
+<h3>Qua mạng <span class="tiny">· Phase 3, tuần 24–32</span></h3>
+<p class="q"><b>Câu hỏi:</b> Giờ cho máy khác dùng được <code>ouro-store</code>.</p>
+<p>Máy A gửi <code>PUT user:1 = Quan</code> qua dây tới máy B. Nhưng TCP không gửi "tin nhắn" — nó gửi <strong>một dòng byte không có ranh giới</strong>. Bạn gửi 3 tin nhắn, bên kia có thể nhận thành 1 cục, hoặc 5 mảnh.</p>
+
+<figure>
+<svg viewBox="0 0 640 120" role="img" aria-label="Cấu trúc gói tin của wire protocol">
+  <g stroke="var(--border)">
+    <rect x="10" y="26" width="92" height="40" rx="5" fill="var(--accent-soft)" stroke="var(--accent)"/>
+    <rect x="102" y="26" width="58" height="40" fill="var(--surface-2)"/>
+    <rect x="160" y="26" width="76" height="40" fill="var(--surface-2)"/>
+    <rect x="236" y="26" width="98" height="40" fill="var(--surface-2)"/>
+    <rect x="334" y="26" width="76" height="40" fill="var(--surface-2)"/>
+    <rect x="410" y="26" width="220" height="40" rx="5" fill="var(--ok-soft)" stroke="var(--ok)"/>
+  </g>
+  <g class="m" font-size="11.5" text-anchor="middle" fill="var(--ink)">
+    <text x="56" y="43">magic</text><text x="131" y="43">ver</text><text x="198" y="43">opcode</text>
+    <text x="285" y="43">req_id</text><text x="372" y="43">len</text><text x="520" y="43">payload</text>
+  </g>
+  <g class="m" font-size="10" text-anchor="middle" fill="var(--ink-3)">
+    <text x="56" y="58">4 byte</text><text x="131" y="58">1</text><text x="198" y="58">1</text>
+    <text x="285" y="58">8 byte</text><text x="372" y="58">4 byte</text><text x="520" y="58">len byte</text>
+  </g>
+  <g font-size="10.5" text-anchor="middle" fill="var(--ink-3)">
+    <text x="56" y="82">"OURO"</text><text x="198" y="82">PUT=1</text><text x="285" y="82">để ghép hồi đáp</text><text x="372" y="82">độ dài phần sau</text>
+  </g>
+  <text x="320" y="108" font-size="12" text-anchor="middle" fill="var(--accent)">đọc đúng 18 byte header → biết len → đọc tiếp đúng len byte. Luôn luôn.</text>
+</svg>
+<figcaption>Tự đóng gói vì TCP chỉ cho bạn một dòng byte, không có ranh giới tin nhắn.</figcaption>
+</figure>
+
+<h4>Bài toán thật sự của Phase 3: 10.000 client cùng kết nối</h4>
+<div class="tw"><table>
+<thead><tr><th>Cách làm</th><th>Vấn đề</th></tr></thead>
+<tbody>
+<tr><td>Mỗi client một luồng</td><td>Mỗi luồng ngốn ~8MB stack. 10.000 luồng = 80GB. Chết.</td></tr>
+<tr><td><code>select()</code></td><td>Mỗi vòng lặp phải quét cả 10.000 socket để hỏi "có gì mới không?" — O(n).</td></tr>
+<tr><td><b><code>epoll</code></b></td><td>Kernel giữ sẵn danh sách, <b>chỉ trả về socket đã sẵn sàng</b> — O(1).</td></tr>
+</tbody></table></div>
+
+<pre class="ascii"><code>        ┌─────────────────────────────────────┐
+        │   MỘT luồng chạy vòng lặp sự kiện   │
+        │                                     │
+        │   ready = epoll_wait(...)           │  ← ngủ cho tới khi có việc
+        │   với mỗi fd trong ready:           │
+        │       đọc / xử lý / ghi             │
+        └──────────────┬──────────────────────┘
+                       │ kernel theo dõi giúp
+        ┌──────────────┴──────────────────────┐
+        │ 10.000 socket, chỉ 12 cái có dữ liệu│
+        │ → epoll_wait trả về đúng 12 cái     │
+        └─────────────────────────────────────┘</code></pre>
+
+<p>Bạn sẽ viết <strong>bốn bản</strong> server và đo cả bốn: tuần tự → fork mỗi client → thread pool → epoll. Cố ý làm sai trước, để thấy nó sai bằng số đo của chính mình.</p>
+<div class="box b-book"><span class="bh">📖 Kiến thức cần</span><p><strong>UNP Ch6 và Ch30</strong> (Ch30 so sánh 9 kiến trúc server kèm số đo thật — chương đọc kỹ nhất cả lộ trình) · TLPI Ch63 · CSAPP Ch11.</p></div>
+</div>
+
+<!-- Nấc 8 -->
+<div class="nac" data-n="8" id="n8">
+<h3>Viết lại bằng Go <span class="tiny">· Phase 4, tuần 33–38</span></h3>
+<p>Bạn nói chưa từng viết Go và không biết runtime là gì. Đây là chỗ giải thích.</p>
+
+<h4>Runtime là gì</h4>
+<p>Chương trình C: <code>main()</code> gần như là thứ đầu tiên chạy, nói chuyện thẳng với kernel. Không có ai ở giữa.</p>
+<p>Chương trình Go: trước <code>main()</code> của bạn, <strong>một bộ máy viết sẵn khởi động trước</strong> — đó là runtime. Nó gồm bộ thu gom rác (GC) và <strong>một bộ lập lịch</strong>.</p>
+
+<div class="two">
+<div class="pane"><h5>C</h5><ul><li>main() → kernel</li></ul>
+<p class="tiny" style="margin:10px 0 0">Bạn kiểm soát từng byte. Bạn cũng tự chịu mọi lỗi.</p></div>
+<div class="pane acc"><h5>Go</h5><ul><li>main() → runtime → kernel</li><li>&nbsp;&nbsp;GC</li><li>&nbsp;&nbsp;scheduler</li><li>&nbsp;&nbsp;netpoller (epoll gói lại)</li></ul></div>
+</div>
+
+<h4>Vì sao Phase 4 phải nằm SAU Phase 3</h4>
+<p>Vì bạn vừa tự tay viết epoll bằng C. Giờ trong Go bạn viết:</p>
+<pre><code>conn, _ := listener.Accept()
+<span class="kw">go</span> handleConn(conn)              <span class="cm">// một dòng</span></code></pre>
+<p>Hai dòng đó xử lý được 100.000 kết nối. Trông như phép màu — trừ khi bạn vừa viết epoll bằng tay xong, lúc đó bạn biết chính xác Go đang giấu gì:</p>
+
+<div class="tw"><table>
+<thead><tr><th>Bạn viết trong Go</th><th>Runtime thật sự làm gì</th></tr></thead>
+<tbody>
+<tr><td><code>go f()</code></td><td>Tạo goroutine — <b>không</b> phải OS thread. ~2KB stack, co giãn được</td></tr>
+<tr><td><code>conn.Read(buf)</code></td><td>Trông như blocking, nhưng runtime đăng ký fd vào <b>epoll</b> rồi cho goroutine khác chạy</td></tr>
+<tr><td>100.000 goroutine</td><td>Chạy trên ~8 OS thread. Runtime tự xoay vòng</td></tr>
+</tbody></table></div>
+
+<p>Bộ lập lịch của Go làm <strong>đúng công việc</strong> mà OSTEP Ch7–10 mô tả cho kernel — nhưng ở userspace. Đổi goroutine tốn ~100 nano giây; đổi OS thread tốn ~1–2 micro giây, <strong>chậm hơn 10–20 lần</strong>.</p>
+<p>Đó là toàn bộ lý do Go thống trị hạ tầng đám mây: Docker, Kubernetes, etcd, Prometheus đều viết bằng Go.</p>
+
+<p><strong>Bạn giữ cả hai bản</strong> và lập bảng — đây là thứ bạn kể trong phỏng vấn:</p>
+<div class="tw"><table>
+<thead><tr><th></th><th>C</th><th>Go</th></tr></thead>
+<tbody>
+<tr><td>Số dòng</td><td>~2.500</td><td>~1.500</td></tr>
+<tr><td>Throughput</td><td>?</td><td>?</td></tr>
+<tr><td>p99 latency</td><td>?</td><td>?</td></tr>
+<tr><td>RAM khi 10k kết nối</td><td>?</td><td>?</td></tr>
+<tr><td>Giờ công để viết</td><td>?</td><td>?</td></tr>
+</tbody></table></div>
+<div class="box b-book"><span class="bh">📖 Kiến thức cần</span><p>Learning Go Ch1–13 · Mastering Go (chương Concurrency + runtime).</p></div>
+</div>
+
+<!-- Nấc 9 -->
+<div class="nac" data-n="9" id="n9">
+<h3>Ba máy, Raft <span class="tiny">· Phase 5, tuần 41–51</span></h3>
+<p class="q"><b>Câu hỏi:</b> Một máy chết là mất hết. Cần 3 máy cùng giữ dữ liệu. &nbsp;<b>Vấn đề:</b> Ba máy làm sao <b>đồng ý</b> thứ tự các thao tác, khi mạng có thể chậm, gói tin có thể mất, máy có thể chết giữa chừng?</p>
+
+<figure>
+<svg viewBox="0 0 620 250" role="img" aria-label="Luồng ghi qua Raft: leader nhân bản log, chờ đa số, rồi commit">
+  <rect x="14" y="60" width="74" height="34" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text x="51" y="82" font-size="12" text-anchor="middle" fill="var(--ink-2)">client</text>
+  <path d="M88 77 L168 77" stroke="var(--accent)" stroke-width="1.6"/><path d="M168 77 l-8 -4 l0 8 z" fill="var(--accent)"/>
+  <text x="128" y="68" font-size="10.5" text-anchor="middle" fill="var(--accent)">PUT</text>
+
+  <rect x="170" y="52" width="130" height="50" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.8"/>
+  <text x="235" y="73" font-size="13" text-anchor="middle" font-weight="700" fill="var(--accent)">Node A</text>
+  <text x="235" y="90" font-size="11" text-anchor="middle" fill="var(--ink-2)">LEADER</text>
+  <text class="m" x="310" y="70" font-size="10.5" fill="var(--ink-3)">① ghi vào log của mình</text>
+
+  <path d="M220 102 L150 152" stroke="var(--ink-3)" stroke-width="1.5"/><path d="M150 152 l7 -4 l1 8 z" fill="var(--ink-3)"/>
+  <path d="M275 102 L395 152" stroke="var(--ink-3)" stroke-width="1.5"/><path d="M395 152 l-8 -3 l1 8 z" fill="var(--ink-3)"/>
+  <text x="196" y="130" font-size="10.5" text-anchor="end" fill="var(--ink-3)">② gửi bản sao log</text>
+
+  <rect x="80" y="154" width="120" height="46" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text x="140" y="174" font-size="12.5" text-anchor="middle" fill="var(--ink)">Node B</text>
+  <text x="140" y="190" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">follower</text>
+  <rect x="340" y="154" width="120" height="46" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text x="400" y="174" font-size="12.5" text-anchor="middle" fill="var(--ink)">Node C</text>
+  <text x="400" y="190" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">follower</text>
+
+  <path d="M160 154 L225 112" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <path d="M380 154 L268 112" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="270" y="140" font-size="10.5" fill="var(--ok)">③ "đã ghi"</text>
+
+  <rect x="478" y="60" width="132" height="84" rx="9" fill="var(--ok-soft)" stroke="var(--ok)"/>
+  <text x="544" y="84" font-size="12" text-anchor="middle" font-weight="700" fill="var(--ok)">④ ĐA SỐ 2/3</text>
+  <text x="544" y="103" font-size="11" text-anchor="middle" fill="var(--ink-2)">leader commit</text>
+  <text x="544" y="122" font-size="11" text-anchor="middle" fill="var(--ink-2)">⑤ báo client:</text>
+  <text x="544" y="137" font-size="11" text-anchor="middle" fill="var(--ink-2)">xong</text>
+
+  <text x="310" y="232" font-size="12.5" text-anchor="middle" fill="var(--accent)">2 trên 3 là đủ → một máy chết, hệ thống vẫn chạy</text>
+</svg>
+<figcaption>Mọi tập "đa số" đều giao nhau ở ít nhất một node — nên không thể có hai leader cùng đúng.</figcaption>
+</figure>
+
+<p>Chữ <strong>đa số</strong> là chìa khoá. 2 trên 3 là đủ. Nghĩa là một máy chết, hệ thống vẫn chạy. Và vì mọi đa số đều phải giao nhau ở ít nhất một node, không thể có hai leader cùng tin mình đúng.</p>
+
+<p>Ba phần của Raft bạn sẽ viết:</p>
+<ol>
+<li><strong>Leader election</strong> — leader im lặng quá lâu, follower tự ứng cử, ai được đa số phiếu thì thắng</li>
+<li><strong>Log replication</strong> — leader đẩy log sang follower, đảm bảo mọi log giống hệt nhau</li>
+<li><strong>Safety</strong> — không bao giờ commit thứ có thể bị mất</li>
+</ol>
+
+<div class="box b-key"><span class="bh">Chú ý cấu trúc</span>
+<p><code>ouro-dist</code> <strong>không viết lại</strong> <code>ouro-store</code>. Nó <strong>bọc</strong> ra ngoài. Mọi thao tác ghi đi qua Raft log trước, rồi mới được "áp dụng" vào <code>ouro-store</code> bên dưới. <code>ouro-store</code> hoàn toàn không biết mình đang được nhân bản — đó là luật vàng ở Phần I đang phát huy tác dụng.</p></div>
+
+<div class="box b-warn"><span class="bh">⚠️ Luật quan trọng nhất phase này</span>
+<p>Cuốn <em>Distributed Services with Go</em> dựng gần đúng thứ này. Gõ theo nó ở <code>scratch/</code> để học, rồi <strong>đóng sách lại</strong> và viết <code>ouro-dist</code> từ đầu. Copy code vào dự án = Phase 5 mất sạch ý nghĩa.</p></div>
+<div class="box b-book"><span class="bh">📖 Kiến thức cần</span><p>Raft paper · DB Internals Ch8–14 · DDIA Ch5–9.</p></div>
+</div>
+
+<!-- Nấc 10 -->
+<div class="nac" data-n="10" id="n10">
+<h3>Nhốt vào hộp <span class="tiny">· Phase 6, tuần 52–62</span></h3>
+<p class="q"><b>Câu hỏi:</b> Ba bản <code>ouro-store</code> chạy chung một máy thì đạp lên chân nhau: cùng tên file, cùng cổng mạng, một thằng ăn hết RAM. &nbsp;<b>Ý tưởng:</b> Cho mỗi cái một "thế giới riêng".</p>
+
+<div class="box b-key"><span class="bh">Điều làm bạn ngạc nhiên nhất cả dự án</span>
+<p><strong>Container không phải máy ảo. Nó là một tiến trình Linux bình thường — chỉ khác vài con trỏ trong struct của kernel.</strong></p></div>
+
+<p>Kernel giữ cho mỗi tiến trình một struct <code>task_struct</code>. Trong đó có con trỏ tới bảng PID, tới bảng mount, tới ngăn xếp mạng. <strong>Namespace chỉ là: cho tiến trình này trỏ tới một bảng khác.</strong></p>
+
+<div class="two">
+<div class="pane"><h5>Tiến trình thường</h5><ul>
+<li>task_struct</li>
+<li>├─ pid_ns → bảng PID chung</li>
+<li>├─ mnt_ns → / của host</li>
+<li>├─ net_ns → eth0 thật</li>
+<li>└─ uts_ns → hostname host</li>
+</ul></div>
+<div class="pane acc"><h5>Tiến trình trong container</h5><ul>
+<li>task_struct</li>
+<li>├─ pid_ns → bảng RIÊNG (nó là PID 1!)</li>
+<li>├─ mnt_ns → / RIÊNG (overlayfs)</li>
+<li>├─ net_ns → card mạng ẢO (veth)</li>
+<li>└─ uts_ns → hostname RIÊNG</li>
+</ul></div>
+</div>
+
+<p>Sáu namespace bạn sẽ dùng: PID, MNT, NET, UTS, IPC, USER. Gọi bằng <code>clone()</code> hoặc <code>unshare()</code> với cờ tương ứng. Thế thôi.</p>
+
+<h4>Cgroups còn đơn giản hơn nữa — nó là một hệ thống tệp</h4>
+<p>Giới hạn RAM 256MB:</p>
+<pre><code>mkdir /sys/fs/cgroup/ouro-1
+<span class="kw">echo</span> 268435456 &gt; /sys/fs/cgroup/ouro-1/memory.max
+<span class="kw">echo</span> $PID     &gt; /sys/fs/cgroup/ouro-1/cgroup.procs</code></pre>
+<p>Xong. Kernel tự lo. Toàn bộ "resource limit" của Docker là ghi số vào file.</p>
+
+<p><strong>Overlayfs</strong> cho image nhiều lớp: chồng nhiều thư mục chỉ-đọc lên nhau, thêm một lớp ghi-được ở trên cùng. Sửa file ở lớp dưới → kernel chép nó lên lớp trên rồi sửa (copy-on-write). Đó là lý do 50 container chạy cùng image chỉ tốn dung lượng của một image.</p>
+<p><strong>Mạng:</strong> tạo cặp <code>veth</code> — như một sợi dây ảo hai đầu. Một đầu cắm vào namespace mạng của container, đầu kia cắm vào bridge trên host. Thêm NAT để ra Internet.</p>
+<div class="box b-book"><span class="bh">📖 Kiến thức cần</span><p>Container Security Ch2–4, Ch6, Ch8, Ch10 · TLPI Ch38–39 · <code>man 7 namespaces</code>, <code>man 7 cgroups</code>.</p></div>
+</div>
+
+<!-- Nấc 11 -->
+<div class="nac" data-n="11" id="n11">
+<h3>Quản đốc <span class="tiny">· Phase 7, tuần 65–75</span></h3>
+<p class="q"><b>Câu hỏi:</b> Có 10 máy, cần chạy 30 container. Ai quyết định cái nào ở đâu? Container chết thì ai bật lại?</p>
+
+<blockquote><p><strong>Toàn bộ bí mật của Kubernetes:</strong><br>Người dùng không ra lệnh <em>"chạy container ở máy 3"</em>. Người dùng khai báo <em>"tôi muốn luôn có 3 bản chạy"</em>. Hệ thống tự lo cho thực tế khớp với mong muốn.</p></blockquote>
+
+<figure>
+<svg viewBox="0 0 620 220" role="img" aria-label="Vòng lặp reconcile so sánh mong muốn với thực tế">
+  <rect x="180" y="10" width="260" height="34" rx="9" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
+  <text x="310" y="32" font-size="13" text-anchor="middle" font-weight="700" fill="var(--accent)">VÒNG LẶP RECONCILE (lặp mãi mãi)</text>
+
+  <path d="M240 44 L120 82" stroke="var(--ink-3)" stroke-width="1.4"/><path d="M120 82 l7 -4 l1 8 z" fill="var(--ink-3)"/>
+  <path d="M310 44 L310 82" stroke="var(--ink-3)" stroke-width="1.4"/><path d="M310 82 l-4 -8 l8 0 z" fill="var(--ink-3)"/>
+  <path d="M380 44 L500 82" stroke="var(--ink-3)" stroke-width="1.4"/><path d="M500 82 l-8 -3 l1 8 z" fill="var(--ink-3)"/>
+
+  <rect x="20" y="84" width="180" height="70" rx="9" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text x="110" y="106" font-size="12" text-anchor="middle" font-weight="700" fill="var(--ink-3)">MONG MUỐN</text>
+  <text class="m" x="110" y="126" font-size="12" text-anchor="middle" fill="var(--ink)">replicas: 3</text>
+  <text x="110" y="144" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">(đọc từ ouro-store)</text>
+
+  <rect x="220" y="84" width="180" height="70" rx="9" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text x="310" y="106" font-size="12" text-anchor="middle" font-weight="700" fill="var(--ink-3)">THỰC TẾ</text>
+  <text class="m" x="310" y="126" font-size="12" text-anchor="middle" fill="var(--ink)">đang chạy: 2</text>
+  <text x="310" y="144" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">(hỏi node agent)</text>
+
+  <rect x="420" y="84" width="180" height="70" rx="9" fill="var(--ok-soft)" stroke="var(--ok)"/>
+  <text x="510" y="106" font-size="12" text-anchor="middle" font-weight="700" fill="var(--ok)">KHÁC BIỆT?</text>
+  <text x="510" y="126" font-size="11.5" text-anchor="middle" fill="var(--ink)">thiếu 1</text>
+  <text x="510" y="144" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">→ bảo node nào đó chạy thêm</text>
+
+  <path d="M510 154 L510 180 L310 180 L310 168" stroke="var(--accent)" stroke-width="1.5" fill="none" stroke-dasharray="5 4"/>
+  <path d="M310 168 l-4 8 l8 0 z" fill="var(--accent)"/>
+  <text x="410" y="198" font-size="11.5" text-anchor="middle" fill="var(--accent)">ngủ 1 giây → lặp lại, mãi mãi</text>
+</svg>
+<figcaption>Chỉ có thế. Toàn bộ Kubernetes là ý tưởng này lặp lại ở 30 chỗ khác nhau.</figcaption>
+</figure>
+
+<p>Deployment, ReplicaSet, Service, Ingress — mỗi cái một vòng reconcile. <strong>Hiểu vòng lặp này là hiểu Kubernetes.</strong> Không phải thuộc lệnh <code>kubectl</code>.</p>
+
+<div class="box b-key"><span class="bh">🐍 Chỗ con rắn cắn đuôi</span>
+<p>"Mong muốn" lưu ở đâu? Ở <code>ouro-store</code> — cụm 3 node có Raft từ Phase 5. Mà cụm đó lại đang chạy trong container do <code>ouro-run</code> tạo, được chính <code>ouro-ctl</code> này đặt xuống.</p>
+<p style="margin-top:10px">Thật sự Kubernetes cũng vậy: nó lưu state vào <strong>etcd</strong>, mà etcd thường chạy như một pod trong chính cụm đó. Bạn không làm trò lạ — bạn làm đúng thứ công nghiệp làm.</p></div>
+<div class="box b-book"><span class="bh">📖 Kiến thức cần</span><p>Kubernetes Up &amp; Running Ch5–13, <strong>Ch17 (Extending Kubernetes)</strong> · Cloud Native Go Ch4.</p></div>
+</div>
+
+<h3>Toàn cảnh 11 nấc</h3>
+<div class="tw"><table>
+<thead><tr><th>Nấc</th><th>Thêm gì</th><th>Giải bài toán</th><th>Phase</th><th>Dòng cộng dồn</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>File append-only</td><td>Ghi/đọc được</td><td>1</td><td>60</td></tr>
+<tr><td>1</td><td>Chỉ mục RAM</td><td>Đọc chậm</td><td>1</td><td>200</td></tr>
+<tr><td>2</td><td>Page 4KB</td><td>Không có cấu trúc</td><td>1</td><td>700</td></tr>
+<tr><td>3</td><td>B-Tree</td><td>Key không vừa RAM, cần quét dải</td><td>1</td><td>2.500</td></tr>
+<tr><td>4</td><td>Buffer pool</td><td>RAM có hạn</td><td>1</td><td>3.500</td></tr>
+<tr><td>5</td><td>WAL + recovery</td><td><b>Cúp điện mất dữ liệu</b></td><td>1</td><td>5.000</td></tr>
+<tr><td>6</td><td>Đa luồng</td><td>Phí CPU</td><td>2</td><td>8.000</td></tr>
+<tr><td>7</td><td>epoll + protocol</td><td>Máy khác không dùng được</td><td>3</td><td>10.500</td></tr>
+<tr><td>8</td><td>Viết lại bằng Go</td><td>Học Go, so sánh</td><td>4</td><td>12.000</td></tr>
+<tr><td>9</td><td>Raft</td><td>Một máy chết là mất hết</td><td>5</td><td>18.000</td></tr>
+<tr><td>10</td><td>Namespace + cgroup</td><td>Các bản đạp chân nhau</td><td>6</td><td>23.000</td></tr>
+<tr><td>11</td><td>Reconcile loop</td><td>Ai quyết định cái gì ở đâu</td><td>7</td><td>31.000</td></tr>
+</tbody></table></div>
+<div class="box b-ok"><span class="bh">Vì sao lộ trình này khả thi</span><p><strong>Không nấc nào nhảy quá xa nấc trước.</strong> Đó là lý do 31.000 dòng cuối cùng không đáng sợ như con số.</p></div>
+
+<!-- ══════════ PHẦN III ══════════ -->
+<h2 id="p3">Phần III — Giải phẫu từng thành phần</h2>
+
+<h3><code>ouro-store</code></h3>
+<pre class="ascii"><code>store/
+├── include/store.h        API công khai — CHỈ 6 hàm
+├── src/
+│   ├── page.c             đọc/ghi/parse page 4KB, checksum
+│   ├── btree.c            search, insert, split, delete, merge
+│   ├── lsm.c              memtable, SSTable, compaction
+│   ├── bufpool.c          page cache, pin/unpin, CLOCK
+│   ├── wal.c              append log, LSN, group commit
+│   ├── recovery.c         redo từ WAL, checkpoint
+│   └── util.c             wrapper syscall (viết tuần 1!)
+└── tests/
+    ├── test_btree.c
+    ├── test_recovery.c
+    └── torture.sh         kill -9 ngẫu nhiên 1000 lần</code></pre>
+
+<p><strong>API công khai cố ý chỉ có 6 hàm.</strong> Mọi độ phức tạp nằm bên trong, không lộ ra:</p>
+<pre><code>store_t *store_open (<span class="kw">const char</span> *path, store_opts_t *opts);
+<span class="kw">int</span>      store_put  (store_t *s, slice_t key, slice_t val);
+<span class="kw">int</span>      store_get  (store_t *s, slice_t key, slice_t *out);
+<span class="kw">int</span>      store_del  (store_t *s, slice_t key);
+iter_t  *store_scan (store_t *s, slice_t from, slice_t to);
+<span class="kw">int</span>      store_close(store_t *s);</code></pre>
+<p class="tiny"><b>Phần khó nhất:</b> <code>btree.c</code> hàm <code>split()</code> và <code>recovery.c</code>. Dự trù mỗi cái một tuần riêng, và dự trù sẽ viết sai vài lần.</p>
+
+<h3><code>ouro-net</code></h3>
+<div class="two">
+<div class="pane"><h5>net/ — C, Phase 3</h5><ul><li>proto.c — đóng/mở gói</li><li>server.c — epoll loop</li><li>conn.c — trạng thái kết nối</li><li>client.c</li></ul></div>
+<div class="pane"><h5>netgo/ — Go, Phase 4</h5><ul><li>proto.go</li><li>server.go</li><li>conn.go</li><li>client.go</li></ul></div>
+</div>
+<p class="tiny"><b>Phần khó nhất:</b> đọc <b>một phần</b>. TCP có thể trả về 3 byte trong khi bạn cần 18. Phải nhớ trạng thái đọc dở của từng kết nối và quay lại sau. Đây là nguồn bug số một của server tự viết.</p>
+
+<h3><code>ouro-dist</code></h3>
+<pre class="ascii"><code>dist/
+├── raft/
+│   ├── raft.go        vòng đời: follower → candidate → leader
+│   ├── log.go         log có LSN, so khớp, cắt bớt
+│   ├── election.go    timeout, bỏ phiếu
+│   ├── replicate.go   AppendEntries
+│   └── snapshot.go    nén log
+├── gossip/            ai còn sống (kiểu SWIM)
+├── fsm/               áp Raft log vào ouro-store
+└── client/            tìm leader, retry, cân bằng đọc</code></pre>
+<p class="tiny"><b>Phần khó nhất:</b> test. Bug phân tán chỉ hiện khi mạng lỗi đúng lúc. Phải viết được bộ mô phỏng mạng biết làm chậm, làm mất, chia đôi mạng.</p>
+
+<h3><code>ouro-run</code></h3>
+<pre class="ascii"><code>run/
+├── ns/         unshare/clone với 6 cờ namespace
+├── cgroup/     ghi số vào /sys/fs/cgroup
+├── image/      tải, giải nén layer, dựng overlayfs
+├── network/    veth, bridge, NAT
+├── security/   seccomp filter, drop capability
+└── shim/       tiến trình cha giám sát container</code></pre>
+<div class="box b-warn"><span class="bh">Phần khó nhất: thứ tự</span>
+<p>Phải <code>pivot_root</code> <strong>sau</strong> khi dựng mount namespace nhưng <strong>trước</strong> khi <code>exec</code>. Sai thứ tự thì hoặc rò rỉ ra host, hoặc container không chạy nổi. Đây đúng là câu hỏi phỏng vấn.</p></div>
+
+<h3><code>ouro-ctl</code></h3>
+<pre class="ascii"><code>ctl/
+├── api/           REST/gRPC, validate, versioning
+├── store/         dùng ouro-dist làm nơi lưu state 🐍
+├── scheduler/     lọc node → chấm điểm → gán
+├── controller/    vòng reconcile cho từng loại tài nguyên
+├── agent/         chạy trên mỗi node, gọi ouro-run
+└── cmd/ouroctl/   CLI</code></pre>
+<p class="tiny"><b>Phần khó nhất:</b> làm cho vòng reconcile <b>idempotent</b> — chạy lại 100 lần phải ra cùng kết quả như chạy 1 lần. Vì nó sẽ chạy lại, liên tục, mãi mãi.</p>
+
+<!-- ══════════ PHẦN IV ══════════ -->
+<h2 id="p4">Phần IV — Mỗi chương sách phục vụ dòng code nào</h2>
+<p class="lede">Bảng này trả lời thẳng: chương đó nhằm mục đích gì, đóng góp thế nào.</p>
+
+<h3>Phase 0</h3>
+<div class="tw"><table><thead><tr><th>Đọc</th><th>Để hiểu</th><th>Dùng ở</th></tr></thead><tbody>
+<tr><td>CSAPP Ch2 (bits, integer)</td><td>Byte, bù hai, tràn số, endianness</td><td>Wire protocol (Phase 3), page header</td></tr>
+<tr><td>CSAPP Ch2.4 (float)</td><td>Vì sao <code>0.1+0.2 != 0.3</code></td><td>Tính toán benchmark, timestamp</td></tr>
+<tr><td>CSAPP Ch6 (cache)</td><td>Vì sao truy cập tuần tự nhanh hơn ngẫu nhiên</td><td><b>Toàn bộ thiết kế page và B-Tree</b></td></tr>
+<tr><td>CSAPP Ch5 (tối ưu)</td><td>Đo trước, tối ưu sau</td><td><code>ouro-scope</code>, mọi benchmark</td></tr>
+<tr><td>CSAPP Ch9.9 + OSTEP Ch17</td><td>Cấp phát bộ nhớ hoạt động ra sao</td><td>Buffer pool là <b>cùng bài toán</b></td></tr>
+<tr><td>TLPI Ch1–3</td><td>Syscall là gì, <code>errno</code>, quy ước Linux</td><td><code>util.c</code> — mọi dòng code sau này</td></tr>
+</tbody></table></div>
+<blockquote><p>Viết <code>myalloc</code> không phải bài tập vô ích. Buffer pool ở Nấc 4 <strong>chính là</strong> allocator: cấp phát khối cố định, theo dõi cái nào rảnh, quyết định đá cái nào. Bạn làm bài tập đó để 5 tuần sau viết buffer pool trong hai ngày thay vì hai tuần.</p></blockquote>
+
+<h3>Phase 1</h3>
+<div class="tw"><table><thead><tr><th>Đọc</th><th>Để hiểu</th><th>Dùng ở</th></tr></thead><tbody>
+<tr><td>DB Internals Ch1–3</td><td>Page layout, slotted page, file format</td><td><code>page.c</code></td></tr>
+<tr><td>DB Internals Ch2, 4, 6</td><td>B-Tree, split/merge, biến thể</td><td><code>btree.c</code></td></tr>
+<tr><td>DB Internals Ch5</td><td>WAL, recovery, checkpoint</td><td><code>wal.c</code>, <code>recovery.c</code></td></tr>
+<tr><td>DB Internals Ch7</td><td>LSM, SSTable, compaction</td><td><code>lsm.c</code></td></tr>
+<tr><td><b>OSTEP Ch42</b></td><td><b>Cúp điện thì hệ tệp làm gì</b></td><td>Thiết kế crash-safety — Nấc 5</td></tr>
+<tr><td>OSTEP Ch36–38</td><td>Đĩa quay thế nào, vì sao seek đắt</td><td>Vì sao append-only thắng</td></tr>
+<tr><td>OSTEP Ch21–22</td><td>Page replacement: FIFO/LRU/CLOCK</td><td><code>bufpool.c</code></td></tr>
+<tr><td>OSTEP Ch44</td><td>SSD khác HDD chỗ nào</td><td>Chọn tham số cho engine</td></tr>
+<tr><td>TLPI Ch4–5, 13</td><td><code>open/read/write/lseek</code>, đệm</td><td><code>util.c</code>, mọi thao tác I/O</td></tr>
+<tr><td>TLPI Ch49</td><td><code>mmap</code></td><td>Quyết định mmap hay pread</td></tr>
+<tr><td>TLPI Ch55</td><td>File locking</td><td>Nhiều tiến trình cùng mở store</td></tr>
+<tr><td>CSAPP Ch10</td><td>I/O ở tầng Unix</td><td>Nền cho tất cả trên</td></tr>
+<tr><td>PG14 Internals I–II</td><td><b>Engine thật làm y hệt thế nào</b></td><td>Đối chiếu sau khi tự viết</td></tr>
+</tbody></table></div>
+
+<h3>Phase 2</h3>
+<div class="tw"><table><thead><tr><th>Đọc</th><th>Để hiểu</th><th>Dùng ở</th></tr></thead><tbody>
+<tr><td>OSTEP Ch26–31</td><td>Lock, condition variable, semaphore</td><td>Khoá B-Tree, bảo vệ buffer pool</td></tr>
+<tr><td><b>OSTEP Ch32</b></td><td><b>Các kiểu bug concurrency phổ biến</b></td><td>Con bug 1/10.000 lần bạn sắp gặp</td></tr>
+<tr><td>CSAPP Ch12</td><td>Lập trình đồng thời thực hành</td><td>Thread pool</td></tr>
+<tr><td>CSAPP Ch8</td><td>Signal, ngắt luồng điều khiển</td><td>Graceful shutdown</td></tr>
+<tr><td>TLPI Ch29–33</td><td>pthread đầy đủ</td><td>Mọi dòng đa luồng</td></tr>
+<tr><td>TLPI Ch20–22</td><td>Signal chi tiết</td><td>Xử lý <code>SIGTERM</code> đúng cách</td></tr>
+<tr><td>TLPI Ch37</td><td>Daemon</td><td>Biến store thành dịch vụ nền</td></tr>
+<tr><td>TLPI Ch43–54</td><td>IPC</td><td>Giao tiếp giữa các tiến trình</td></tr>
+</tbody></table></div>
+
+<h3>Phase 3</h3>
+<div class="tw"><table><thead><tr><th>Đọc</th><th>Để hiểu</th><th>Dùng ở</th></tr></thead><tbody>
+<tr><td><b>UNP Ch30</b></td><td><b>9 kiến trúc server, có số đo</b></td><td>Chọn kiến trúc cho <code>ouro-net</code></td></tr>
+<tr><td>UNP Ch6</td><td>select/poll/epoll</td><td><code>server.c</code> vòng lặp sự kiện</td></tr>
+<tr><td>UNP Ch3–5</td><td>API socket nền</td><td>Mọi dòng mạng</td></tr>
+<tr><td>UNP Ch16</td><td>Non-blocking I/O</td><td>Bắt buộc cho epoll</td></tr>
+<tr><td>TLPI Ch63</td><td>epoll chi tiết, edge vs level trigger</td><td><code>server.c</code></td></tr>
+<tr><td>TLPI Ch56–61</td><td>Socket trên Linux</td><td><code>conn.c</code></td></tr>
+<tr><td>TCP/IP Illust. Ch17–21</td><td>TCP: cửa sổ, retransmit, Nagle</td><td>Vì sao p99 latency xấu</td></tr>
+<tr><td>TCP/IP Illust. Ch1–3</td><td>Gói tin đi qua các tầng</td><td>Đọc <code>tcpdump</code></td></tr>
+<tr><td>CSAPP Ch11</td><td>Lập trình mạng cho người mới</td><td>Ôn nhẹ trước UNP</td></tr>
+</tbody></table></div>
+
+<h3>Phase 4</h3>
+<div class="tw"><table><thead><tr><th>Đọc</th><th>Để hiểu</th><th>Dùng ở</th></tr></thead><tbody>
+<tr><td>Learning Go Ch1–9</td><td>Cú pháp, type, interface, lỗi</td><td>Toàn bộ code Go</td></tr>
+<tr><td>Learning Go Ch10, 12</td><td>Goroutine, channel, context</td><td><code>server.go</code></td></tr>
+<tr><td>Learning Go Ch13</td><td>Testing trong Go</td><td>Bộ test</td></tr>
+<tr><td>Mastering Go — Concurrency</td><td>sync, race, mẫu hình</td><td>Thread pool bản Go</td></tr>
+<tr><td>Mastering Go — runtime/GC</td><td><b>Runtime làm gì cho bạn</b></td><td>Hiểu vì sao Go nhanh ở I/O</td></tr>
+<tr><td>Net Prog with Go Ch3–7</td><td>net package</td><td><code>server.go</code>, <code>conn.go</code></td></tr>
+</tbody></table></div>
+
+<h3>Phase 5</h3>
+<div class="tw"><table><thead><tr><th>Đọc</th><th>Để hiểu</th><th>Dùng ở</th></tr></thead><tbody>
+<tr><td>Raft paper</td><td>Thuật toán đồng thuận</td><td><code>raft/</code> — tài liệu chính</td></tr>
+<tr><td>DB Internals Ch14</td><td>Consensus, Paxos vs Raft</td><td>Hiểu vì sao Raft thắng</td></tr>
+<tr><td>DB Internals Ch9</td><td>Phát hiện máy chết</td><td><code>gossip/</code></td></tr>
+<tr><td>DB Internals Ch10–11</td><td>Bầu leader, nhân bản, nhất quán</td><td><code>raft/</code>, <code>fsm/</code></td></tr>
+<tr><td>DB Internals Ch13</td><td>Giao dịch phân tán, 2PC</td><td>Ghi nhiều key nguyên tử</td></tr>
+<tr><td><b>DDIA Ch8–9</b></td><td><b>Vì sao phân tán khó đến vậy</b></td><td>Tư duy nền — đọc trước khi code</td></tr>
+<tr><td>DDIA Ch5</td><td>Các kiểu nhân bản</td><td>Chọn mô hình</td></tr>
+<tr><td>DSwGo cả cuốn</td><td>Mẫu hình Go cho dịch vụ phân tán</td><td>Học ở <code>scratch/</code>, không copy</td></tr>
+</tbody></table></div>
+
+<h3>Phase 6</h3>
+<div class="tw"><table><thead><tr><th>Đọc</th><th>Để hiểu</th><th>Dùng ở</th></tr></thead><tbody>
+<tr><td>Container Security Ch4</td><td><b>Namespace hoạt động ra sao</b></td><td><code>ns/</code></td></tr>
+<tr><td>Container Security Ch3</td><td>Cgroups v2</td><td><code>cgroup/</code></td></tr>
+<tr><td>Container Security Ch2</td><td>Syscall, capability, quyền</td><td><code>security/</code></td></tr>
+<tr><td>Container Security Ch6</td><td>Định dạng image, layer</td><td><code>image/</code></td></tr>
+<tr><td>Container Security Ch8</td><td>seccomp, AppArmor</td><td><code>security/</code></td></tr>
+<tr><td>Container Security Ch10</td><td>Mạng container</td><td><code>network/</code></td></tr>
+<tr><td>TLPI Ch38–39</td><td>Viết chương trình đặc quyền an toàn</td><td>Toàn bộ <code>run/</code> — chạy bằng root</td></tr>
+<tr><td>TLPI Ch14, 18</td><td>Hệ tệp, mount, hard/symlink</td><td><code>overlayfs</code>, <code>pivot_root</code></td></tr>
+<tr><td><code>man 7 namespaces</code></td><td>Tham chiếu chính xác</td><td>Tra hàng ngày</td></tr>
+</tbody></table></div>
+
+<h3>Phase 7</h3>
+<div class="tw"><table><thead><tr><th>Đọc</th><th>Để hiểu</th><th>Dùng ở</th></tr></thead><tbody>
+<tr><td>K8s U&amp;R Ch5–7</td><td>Pod, label, service discovery</td><td>Mô hình tài nguyên</td></tr>
+<tr><td>K8s U&amp;R Ch9–10</td><td>ReplicaSet, Deployment</td><td>Vòng reconcile, rolling update</td></tr>
+<tr><td><b>K8s U&amp;R Ch17</b></td><td><b>CRD, operator — cách mở rộng K8s</b></td><td>Thiết kế API server</td></tr>
+<tr><td>Cloud Native Go Ch4</td><td>Circuit breaker, retry, timeout</td><td>Chống lỗi lan truyền</td></tr>
+<tr><td>TLPI Ch62, 64</td><td>Terminal, pty</td><td><code>ouroctl exec -it</code></td></tr>
+<tr><td>TLPI Ch19</td><td>inotify</td><td>Nạp lại config nóng</td></tr>
+</tbody></table></div>
+
+<h3>Phase 8</h3>
+<div class="tw"><table><thead><tr><th>Đọc</th><th>Để hiểu</th><th>Dùng ở</th></tr></thead><tbody>
+<tr><td>MLSys — Training</td><td>Huấn luyện phân tán vận hành thế nào</td><td>All-reduce, checkpoint</td></tr>
+<tr><td>MLSys — AI Acceleration</td><td>GPU/TPU khác CPU chỗ nào</td><td>Device plugin</td></tr>
+<tr><td>MLSys — Efficient AI</td><td>Batching, lượng tử hoá, độ trễ</td><td>Inference server</td></tr>
+<tr><td>MLSys — ML Operations</td><td>Vòng đời hệ ML trong sản xuất</td><td>Thiết kế tổng thể</td></tr>
+<tr><td>MLSys — Benchmarking</td><td>Đo hệ ML thế nào cho đúng</td><td><code>ouro-scope</code> mở rộng</td></tr>
+</tbody></table></div>
+
+<!-- ══════════ PHẦN V ══════════ -->
+<h2 id="p5">Phần V — Những thứ bạn chưa biết mà bắt buộc phải biết</h2>
+<p class="lede">Lớp kiến thức nằm giữa "khái niệm" và "gõ được code" — thứ không ai dạy vì ai cũng tưởng bạn biết rồi.</p>
+
+<h3>1. Syscall thật ra là gì</h3>
+<p>Bạn đã nghe "lời gọi hệ thống" ở môn OS. Cụ thể: <code>write(fd, "hello", 5)</code> trông như gọi hàm thường, nhưng nó <strong>không phải</strong>. Nó chạy lệnh máy <code>syscall</code>, CPU chuyển từ <strong>user mode</strong> sang <strong>kernel mode</strong>, kernel làm việc, rồi quay về.</p>
+<div class="tw"><table><thead><tr><th>Loại</th><th>Thời gian</th></tr></thead><tbody>
+<tr><td>Gọi hàm C bình thường</td><td>~1 nano giây</td></tr>
+<tr><td>Syscall</td><td>~100–1.000 nano giây</td></tr>
+<tr><td><code>fsync()</code> trên SSD</td><td>~100.000–1.000.000 nano giây</td></tr>
+</tbody></table></div>
+<p><strong>Chậm hơn 100–1000 lần.</strong> Đó là toàn bộ lý do tồn tại của: đệm I/O (gom nhiều lần ghi nhỏ thành một syscall), buffer pool (tránh đọc đĩa), group commit (gom nhiều <code>fsync</code> thành một).</p>
+<div class="box b-key"><span class="bh">Mẹo đọc sách cơ sở dữ liệu</span><p>Mỗi khi thấy một kỹ thuật tối ưu, hỏi: <em>"nó đang tránh syscall nào?"</em> Chín trên mười lần, đó là câu trả lời.</p></div>
+
+<h3>2. File descriptor chỉ là một số nguyên</h3>
+<p><code>open()</code> trả về <code>3</code>. Con số đó <strong>không</strong> là địa chỉ, không là handle bí ẩn. Nó là <strong>chỉ số trong một mảng</strong> mà kernel giữ riêng cho tiến trình của bạn.</p>
+<figure>
+<svg viewBox="0 0 600 160" role="img" aria-label="Bảng file descriptor của tiến trình trỏ tới các đối tượng trong kernel">
+  <text x="10" y="20" font-size="12" font-weight="700" fill="var(--ink-3)">Tiến trình của bạn</text>
+  <text x="330" y="20" font-size="12" font-weight="700" fill="var(--ink-3)">Kernel</text>
+  <g class="m" font-size="12" fill="var(--ink)">
+    <text x="16" y="48">fd 0</text><text x="16" y="72">fd 1</text><text x="16" y="96">fd 2</text>
+    <text x="16" y="120">fd 3</text><text x="16" y="144">fd 4</text>
+  </g>
+  <g stroke="var(--ink-3)" stroke-width="1.2" stroke-dasharray="3 3">
+    <path d="M60 44 L322 44"/><path d="M60 68 L322 68"/><path d="M60 92 L322 92"/>
+  </g>
+  <g stroke="var(--accent)" stroke-width="1.5">
+    <path d="M60 116 L322 116"/><path d="M60 140 L322 140"/>
+  </g>
+  <g fill="var(--surface-2)" stroke="var(--border)">
+    <rect x="326" y="32" width="250" height="22" rx="4"/><rect x="326" y="56" width="250" height="22" rx="4"/><rect x="326" y="80" width="250" height="22" rx="4"/>
+  </g>
+  <g fill="var(--accent-soft)" stroke="var(--accent)">
+    <rect x="326" y="104" width="250" height="22" rx="4"/><rect x="326" y="128" width="250" height="22" rx="4"/>
+  </g>
+  <g class="m" font-size="11" fill="var(--ink-2)">
+    <text x="336" y="47">stdin</text><text x="336" y="71">stdout</text><text x="336" y="95">stderr</text>
+  </g>
+  <g class="m" font-size="11" fill="var(--ink)">
+    <text x="336" y="119">data.db · đang ở byte 4096</text><text x="336" y="143">socket → 10.0.0.5:7000</text>
+  </g>
+</svg>
+<figcaption><code>open()</code> = kernel tìm ô trống nhỏ nhất, gắn con trỏ vào, trả về chỉ số. Hết.</figcaption>
+</figure>
+<p>Vì sao quan trọng: ở Phase 3 bạn giữ 10.000 fd cùng lúc. Biết nó chỉ là mảng thì <code>epoll</code> hết bí ẩn — bạn đang đưa cho kernel một danh sách chỉ số và bảo "cái nào sẵn sàng thì gọi tôi".</p>
+<p>Và trong Linux <strong>mọi thứ đều là file</strong>: file thật, socket, pipe, thiết bị, thậm chí cgroup. Cùng <code>read</code>/<code>write</code>. Đó là triết lý Unix, và nó làm code của bạn ngắn đi rất nhiều.</p>
+
+<h3>3. <code>write()</code> KHÔNG ghi xuống đĩa</h3>
+<div class="box b-key"><span class="bh">Sự thật quan trọng nhất trong Phần V</span></div>
+<figure>
+<svg viewBox="0 0 440 230" role="img" aria-label="Dữ liệu dừng ở page cache trong RAM, không xuống đĩa ngay">
+  <rect x="120" y="10" width="200" height="34" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text class="m" x="220" y="32" font-size="12.5" text-anchor="middle" fill="var(--ink)">write(fd, data, n)</text>
+  <path d="M220 44 L220 72" stroke="var(--ink-3)" stroke-width="1.5"/><path d="M220 72 l-4 -8 l8 0 z" fill="var(--ink-3)"/>
+
+  <rect x="90" y="74" width="260" height="56" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.8"/>
+  <text x="220" y="97" font-size="13" text-anchor="middle" font-weight="700" fill="var(--warn)">Page cache (RAM của kernel)</text>
+  <text x="220" y="116" font-size="11.5" text-anchor="middle" fill="var(--ink-2)">dữ liệu dừng ở ĐÂY · write() trả về ngay</text>
+
+  <path d="M220 130 L220 168" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="5 4"/><path d="M220 168 l-4 -8 l8 0 z" fill="var(--ink-3)"/>
+  <text x="232" y="152" font-size="11" fill="var(--ink-3)">kernel ghi xuống lúc nào nó thích</text>
+  <text x="232" y="166" font-size="11" fill="var(--ink-3)">(có thể 30 giây sau)</text>
+
+  <rect x="140" y="170" width="160" height="40" rx="8" fill="var(--ok-soft)" stroke="var(--ok)"/>
+  <text x="220" y="195" font-size="13" text-anchor="middle" font-weight="700" fill="var(--ok)">ĐĨA</text>
+
+  <text x="20" y="100" font-size="26">⚡</text>
+  <text x="8" y="122" font-size="10.5" fill="var(--warn)">cúp điện</text>
+  <text x="8" y="136" font-size="10.5" fill="var(--warn)">ở đây =</text>
+  <text x="8" y="150" font-size="10.5" fill="var(--warn)">mất sạch</text>
+</svg>
+<figcaption>Dù <code>write()</code> đã báo thành công. Đây là nguồn gốc của WAL và chữ D trong ACID.</figcaption>
+</figure>
+<p><code>fsync(fd)</code> = "ghi xuống đĩa thật, đừng trả về cho tới khi xong". Toàn bộ chương WAL, toàn bộ khái niệm độ bền (durability) đều sinh ra từ sự thật này. Nếu <code>write()</code> ghi thẳng xuống đĩa thì cơ sở dữ liệu đã đơn giản hơn nhiều — và chậm hơn 1000 lần.</p>
+
+<h3>4. Trên đĩa không có "sửa", chỉ có "ghi đè cả khối"</h3>
+<p>Đĩa không cho bạn sửa 1 byte. Đơn vị nhỏ nhất là một <strong>sector</strong> (512B hoặc 4KB). Sửa 1 byte = đọc cả khối vào RAM, sửa, ghi cả khối xuống.</p>
+<p>Hệ quả trực tiếp: nếu cấu trúc dữ liệu của bạn không thẳng hàng với biên page, mỗi lần ghi nhỏ biến thành hai lần đọc-sửa-ghi. Đó là lý do page 4KB, và là lý do cả B-Tree lẫn LSM đều tổ chức theo khối.</p>
+
+<h3>5. Hai loại "chạy song song"</h3>
+<div class="tw"><table><thead><tr><th></th><th>Tiến trình (process)</th><th>Luồng (thread)</th></tr></thead><tbody>
+<tr><td>Bộ nhớ</td><td>Riêng hoàn toàn</td><td><b>Dùng chung</b></td></tr>
+<tr><td>Tạo ra bằng</td><td><code>fork()</code></td><td><code>pthread_create()</code></td></tr>
+<tr><td>Giá tạo</td><td>đắt (~100µs)</td><td>rẻ (~10µs)</td></tr>
+<tr><td>Một thằng crash</td><td>Thằng kia sống</td><td><b>Chết cả đám</b></td></tr>
+<tr><td>Chia sẻ dữ liệu</td><td>Phải qua IPC</td><td>Đọc thẳng — và đó là nguồn mọi bug</td></tr>
+</tbody></table></div>
+<p>Container cô lập <strong>tiến trình</strong>. Server đa luồng dùng <strong>luồng</strong>. Goroutine của Go là loại thứ ba — nhẹ hơn cả hai, do runtime của Go quản lý chứ không phải kernel.</p>
+
+<h3>6. Vì sao ghi tuần tự nhanh hơn ghi ngẫu nhiên</h3>
+<div class="tw"><table><thead><tr><th></th><th>HDD</th><th>SSD</th></tr></thead><tbody>
+<tr><td>Đọc tuần tự</td><td>~150 MB/s</td><td>~3.000 MB/s</td></tr>
+<tr><td>Đọc ngẫu nhiên 4KB</td><td>~0,7 MB/s</td><td>~400 MB/s</td></tr>
+<tr><td><b>Chênh lệch</b></td><td><b>~200 lần</b></td><td><b>~7 lần</b></td></tr>
+</tbody></table></div>
+<p>HDD: đầu đọc phải bay tới đúng rãnh (~5ms). SSD không có bộ phận chuyển động nhưng vẫn có wear leveling và write amplification.</p>
+<p>Đây là lý do LSM Tree tồn tại: nó biến mọi lần ghi ngẫu nhiên thành ghi tuần tự, trả giá bằng việc đọc phải xem nhiều chỗ hơn. <strong>Mọi thiết kế lưu trữ đều là một lựa chọn trên đường cân bằng ghi-nhanh ↔ đọc-nhanh.</strong></p>
+
+<h3>7. Runtime là gì (cho người chưa từng viết Go)</h3>
+<p>Chương trình C: <code>main()</code> chạy, nói chuyện thẳng với kernel. Không có ai ở giữa.</p>
+<p>Chương trình Go: trước <code>main()</code>, runtime khởi động. Nó gồm bộ thu gom rác (bạn không <code>free()</code> nữa), bộ lập lịch (xoay vòng goroutine trên vài OS thread), và netpoller (epoll gói lại, bạn không thấy).</p>
+<p><strong>Cái giá:</strong> mất quyền kiểm soát chi tiết, GC có thể gây khựng. <strong>Cái được:</strong> 1.500 dòng Go làm bằng 2.500 dòng C, và ít bug hơn nhiều.</p>
+<div class="box b-key"><span class="bh">Vì sao Ouroboros dùng cả hai</span>
+<p>C ở tầng dưới nơi cần kiểm soát từng byte. Go ở tầng trên nơi cần đi nhanh và an toàn. Đúng như ngành công nghiệp thật làm.</p></div>
+
+<!-- ══════════ PHẦN VI ══════════ -->
+<h2 id="p6">Phần VI — Dòng code đầu tiên</h2>
+<p>Đọc xong Phần II bạn đã biết mình đang bò về đâu. Giờ là lúc bò.</p>
+
+<h3>Thứ Hai 21/09 — buổi đầu tiên</h3>
+<p><strong>Không</strong> mở B-Tree. <strong>Không</strong> vẽ kiến trúc. Làm đúng bốn việc:</p>
+
+<h4>1. Dựng môi trường · 30 phút</h4>
+<pre><code>wsl --install -d Ubuntu
+sudo apt update &amp;&amp; sudo apt install -y build-essential gdb valgrind linux-tools-generic git</code></pre>
+
+<h4>2. Tạo repo · 10 phút</h4>
+<pre><code>mkdir -p /mnt/d/Code/ouroboros &amp;&amp; <span class="kw">cd</span> /mnt/d/Code/ouroboros
+git init &amp;&amp; mkdir -p store/src store/include store/tests docs scratch
+<span class="kw">echo</span> <span class="st">"scratch/"</span> &gt; .gitignore</code></pre>
+
+<h4>3. Viết <code>util.c</code> · 2 giờ</h4>
+<p>File này sẽ theo bạn suốt hai năm. Nó giải quyết một vấn đề C không lo hộ: <strong>mọi syscall đều có thể lỗi, và bạn phải xử lý.</strong></p>
+<pre><code><span class="cm">// Đọc cho ĐỦ n byte. read() có thể trả về ít hơn yêu cầu — đó</span>
+<span class="cm">// không phải lỗi, đó là bình thường. Phải gọi lại cho tới khi đủ.</span>
+ssize_t read_full(<span class="kw">int</span> fd, <span class="kw">void</span> *buf, size_t n);
+
+<span class="cm">// Ghi cho ĐỦ n byte. write() cũng vậy.</span>
+ssize_t write_full(<span class="kw">int</span> fd, <span class="kw">const void</span> *buf, size_t n);</code></pre>
+<p>Ba thứ phải xử lý đúng, không được bỏ qua cái nào:</p>
+<ul>
+<li>Trả về <strong>ít hơn</strong> yêu cầu → gọi lại phần còn thiếu</li>
+<li>Trả về <code>-1</code> với <code>errno == EINTR</code> → bị signal ngắt, <strong>thử lại</strong>, không phải lỗi</li>
+<li>Trả về <code>0</code> khi đọc → hết file / đầu kia đóng kết nối</li>
+</ul>
+<div class="box b-warn"><span class="bh">Đừng coi thường hai hàm này</span>
+<p>Chúng nhìn tầm thường. Chúng là nguồn bug số một của code hệ thống do người mới viết. Viết đúng một lần, dùng hai năm.</p></div>
+
+<h4>4. Đọc CSAPP Ch1 · 1 giờ</h4>
+<p>Đọc như xem bản đồ trước chuyến đi. Không sa đà, không làm bài tập. Chỉ để biết vùng đất có những gì.</p>
+
+<h3>Tuần 6 — dòng code đầu tiên của <code>ouro-store</code></h3>
+<p>Gõ đúng 60 dòng ở <a href="#n0">Nấc 0</a>. Chạy cho được. Ăn mừng.</p>
+<p>Rồi đo: bỏ vào 100.000 bản ghi, đo <code>get</code> mất bao lâu. Thấy nó chậm. <strong>Sự chậm đó là giáo viên của bạn</strong> — nó đẩy bạn sang Nấc 1, và bạn sẽ hiểu chỉ mục để làm gì theo cách không bài giảng nào dạy được.</p>
+
+<h3>Câu hỏi tự kiểm mỗi cuối tuần</h3>
+<ol class="steps">
+<li>Tuần này tôi thêm <b>năng lực</b> gì mà hệ thống tuần trước không có?</li>
+<li>Nó giải bài toán nào mà tôi <b>tự cảm nhận được</b>, không phải sách bảo có?</li>
+<li>Tôi giải thích được cho người khác <b>trong 2 phút</b> không?</li>
+</ol>
+<p>Nếu câu 2 trả lời không được — bạn đang code theo sách chứ không theo nhu cầu. Dừng lại, lùi một bước, đo lại hệ thống hiện tại để tìm ra chỗ đau thật.</p>
+
+<hr>
+<h3>Lời cuối</h3>
+<p>Thứ khiến dự án này khó <strong>không</strong> phải là B-Tree hay Raft. Sách có hết.</p>
+<p>Thứ khó là <strong>đi đủ lâu</strong> — 87 tuần.</p>
+<p>Và cách duy nhất đi đủ lâu là luôn luôn có một thứ đang chạy. Nấc 0 chạy được ở tuần 6. Nấc 5 chạy được ở tuần 13. Không bao giờ có giai đoạn ba tháng liền "đang xây, chưa chạy được". Đó là lý do lộ trình chia theo nấc chứ không chia theo mô-đun.</p>
+
+<footer>
+  <p>🐍 <b>Ouroboros</b> · Kiến trúc chi tiết · Đọc kèm <a href="so-do.html">so-do.html</a> (17 sơ đồ kiến trúc &amp; tuần tự) · <a href="lo-trinh.html">lo-trinh.html</a> (tiến độ) · <code>SACH.md</code> (bản đồ sách) · <code>SPEC.md</code> (thiết kế) · <code>PROGRESS.md</code> (checklist)</p>
+</footer>
+</main>
+</div>
+
+<script>
+function tog(){
+  const d=document.documentElement;
+  const cur=d.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");
+  d.dataset.theme=cur==="dark"?"light":"dark";
+}
+const links=[...document.querySelectorAll('nav a')];
+const targets=links.map(a=>document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    links.forEach(a=>a.classList.toggle('act', a.getAttribute('href')==='#'+e.target.id));
+  });
+},{rootMargin:'-10% 0px -75% 0px'});
+targets.forEach(t=>io.observe(t));
+</script>
+</body>
+</html>

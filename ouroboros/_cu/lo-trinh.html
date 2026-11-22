@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ouroboros</title>
+<style>
+:root{
+  --bg:#faf9f7; --surface:#fff; --surface-2:#f2f0ec; --border:#e2ddd5;
+  --ink:#1c1a17; --ink-2:#5c564e; --ink-3:#8a8379;
+  --accent:#b4622a; --accent-soft:#f5e6dc; --done:#3f7a4d; --done-soft:#e4f0e6;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#16151a; --surface:#1e1d23; --surface-2:#26252c; --border:#34323b;
+    --ink:#eceaf0; --ink-2:#a9a5b3; --ink-3:#76727f;
+    --accent:#e08c54; --accent-soft:#3a2a1f; --done:#6bbd80; --done-soft:#1f3326;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16151a; --surface:#1e1d23; --surface-2:#26252c; --border:#34323b;
+  --ink:#eceaf0; --ink-2:#a9a5b3; --ink-3:#76727f;
+  --accent:#e08c54; --accent-soft:#3a2a1f; --done:#6bbd80; --done-soft:#1f3326;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.65 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:900px; margin:0 auto; padding:0 16px 96px}
+
+/* ── header ── */
+header{padding:56px 0 32px; border-bottom:1px solid var(--border); margin-bottom:36px}
+.snake{font-size:40px; line-height:1; margin-bottom:14px}
+h1{font-size:clamp(30px,6vw,44px); margin:0 0 8px; letter-spacing:-.02em; font-weight:650}
+.tag{color:var(--ink-2); font-size:17px; margin:0 0 28px; max-width:56ch}
+.meta{display:flex; flex-wrap:wrap; gap:8px 28px; font-size:13.5px; color:var(--ink-3)}
+.meta b{color:var(--ink-2); font-weight:600}
+
+/* ── overall ── */
+.overall{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:22px; margin-bottom:34px}
+.overall-top{display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:14px; flex-wrap:wrap}
+.overall-lbl{font-size:13px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-3); font-weight:600}
+.overall-num{font:650 30px/1 var(--mono); color:var(--accent)}
+.bar{height:9px; background:var(--surface-2); border-radius:99px; overflow:hidden}
+.bar>i{display:block; height:100%; width:0; background:var(--accent); border-radius:99px; transition:width .45s cubic-bezier(.4,0,.2,1)}
+.overall-sub{margin-top:11px; font-size:13.5px; color:var(--ink-3)}
+
+/* ── phases ── */
+h2{font-size:13px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-3); font-weight:650; margin:40px 0 14px}
+.ph{background:var(--surface); border:1px solid var(--border); border-radius:12px; margin-bottom:10px; overflow:hidden}
+.ph.on{border-color:var(--accent)}
+.ph.fin{border-color:var(--done)}
+.ph-hd{display:flex; align-items:center; gap:14px; padding:15px 18px; cursor:pointer; user-select:none}
+.ph-hd:hover{background:var(--surface-2)}
+.ph-n{font:650 13px/1 var(--mono); color:var(--ink-3); min-width:22px}
+.ph.on .ph-n{color:var(--accent)}
+.ph.fin .ph-n{color:var(--done)}
+.ph-body{flex:1; min-width:0}
+.ph-title{font-weight:600; font-size:16px; display:flex; align-items:center; gap:9px; flex-wrap:wrap}
+.ph-sub{font-size:12.5px; color:var(--ink-3); margin-top:3px}
+.chip{font:600 10.5px/1 var(--mono); letter-spacing:.04em; padding:3px 7px; border-radius:5px; background:var(--surface-2); color:var(--ink-3); text-transform:uppercase}
+.chip.c{background:var(--accent-soft); color:var(--accent)}
+.chip.g{background:var(--done-soft); color:var(--done)}
+.ph-pct{font:600 13px/1 var(--mono); color:var(--ink-3); min-width:42px; text-align:right}
+.ph-caret{color:var(--ink-3); transition:transform .22s; font-size:12px}
+.ph.open .ph-caret{transform:rotate(90deg)}
+.ph-mini{height:3px; background:var(--surface-2)}
+.ph-mini>i{display:block; height:100%; width:0; background:var(--accent); transition:width .4s}
+.ph.fin .ph-mini>i{background:var(--done)}
+.ph-tasks{display:none; padding:4px 18px 18px; border-top:1px solid var(--border)}
+.ph.open .ph-tasks{display:block}
+.wk{font:650 11px/1 var(--mono); letter-spacing:.06em; color:var(--ink-3); text-transform:uppercase; margin:16px 0 8px}
+.wk:first-child{margin-top:12px}
+
+/* ── tasks ── */
+label.t{display:flex; gap:11px; align-items:flex-start; padding:5px 0; cursor:pointer; font-size:14.5px; line-height:1.55}
+label.t:hover{color:var(--accent)}
+label.t input{appearance:none; flex:none; width:17px; height:17px; margin-top:3px; border:1.5px solid var(--border); border-radius:5px; background:var(--surface); cursor:pointer; transition:.15s}
+label.t input:hover{border-color:var(--accent)}
+label.t input:checked{background:var(--done); border-color:var(--done)}
+label.t input:checked::after{content:"✓"; display:block; color:#fff; font-size:12px; line-height:14px; text-align:center; font-weight:700}
+label.t input:checked+span{color:var(--ink-3); text-decoration:line-through; text-decoration-thickness:1px}
+label.t.gate{font-weight:600}
+label.t.gate span{color:var(--accent)}
+label.t.gate input:checked+span{color:var(--ink-3)}
+.gate-hd{margin-top:20px; padding-top:14px; border-top:1px dashed var(--border)}
+
+/* ── notes ── */
+.note{background:var(--surface-2); border-left:3px solid var(--accent); border-radius:0 8px 8px 0; padding:13px 16px; margin:14px 0; font-size:14px; color:var(--ink-2)}
+.note b{color:var(--ink)}
+.later{padding:26px 20px; text-align:center; color:var(--ink-3); font-size:14px; background:var(--surface); border:1px dashed var(--border); border-radius:12px}
+
+/* ── laws ── */
+.laws{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:8px 20px 18px}
+.laws ol{margin:0; padding-left:22px}
+.laws li{margin:11px 0; font-size:14.5px; color:var(--ink-2)}
+.laws b{color:var(--ink); display:block; margin-bottom:1px}
+
+/* ── footer ── */
+footer{margin-top:44px; padding-top:22px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; font-size:13px; color:var(--ink-3)}
+button{font:inherit; font-size:13px; padding:7px 13px; border:1px solid var(--border); background:var(--surface); color:var(--ink-2); border-radius:8px; cursor:pointer}
+button:hover{border-color:var(--accent); color:var(--accent)}
+code{font:13px var(--mono); background:var(--surface-2); padding:1.5px 5px; border-radius:4px}
+@media(max-width:560px){ .ph-pct{display:none} header{padding-top:36px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="snake">🐍</div>
+  <h1>Ouroboros</h1>
+  <p class="tag">Tự xây một đám mây thu nhỏ — từ mặt đĩa cứng lên tới API — rồi bắt nó tự host chính nó.</p>
+  <div class="meta">
+    <span><b>Bắt đầu</b> 21/09/2026</span>
+    <span><b>Xong</b> ~05/2028</span>
+    <span><b>Nhịp</b> 15–20h/tuần</span>
+    <span><b>87 tuần</b> · 8 tuần đệm</span>
+  </div>
+</header>
+
+<div class="overall">
+  <div class="overall-top">
+    <span class="overall-lbl">Tiến độ tổng</span>
+    <span class="overall-num" id="pct">0%</span>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="overall-sub" id="sub">Chưa bắt đầu — Phase 0 khởi động Thứ Hai 21/09/2026</div>
+</div>
+
+<h2>Tám giai đoạn</h2>
+<div id="phases"></div>
+
+<h2>Luật đi đường</h2>
+<div class="laws"><ol>
+  <li><b>Không đọc hết sách rồi mới code.</b> Đọc 3–5 chương → code ngay → đọc tiếp. Sách là tài liệu tra cứu, không phải hàng rào.</li>
+  <li><b>Mỗi phase kết thúc bằng thứ chạy được.</b> Không có "code dở dang chờ phase sau".</li>
+  <li><b>Không copy code từ sách vào dự án.</b> Gõ theo ở <code>scratch/</code>, rồi đóng sách và viết lại từ đầu.</li>
+  <li><b>Commit mỗi ngày có học</b>, dù chỉ 20 dòng. History 2 năm là thứ recruiter đọc được — chứng chỉ thì không.</li>
+  <li><b>Xong mỗi phase → một bài blog.</b> Kể cả chỗ làm sai. Đặc biệt là chỗ làm sai.</li>
+  <li><b>Bí quá 2 tiếng → ghi vào <code>NHATKY.md</code></b> rồi mới đi hỏi. Viết ra câu hỏi thường tự giải được nó.</li>
+</ol></div>
+
+<footer>
+  <span id="saved">Tiến độ lưu trong trình duyệt này</span>
+  <span>
+    <button onclick="tog()">Sáng / tối</button>
+    <button onclick="reset()">Xoá tiến độ</button>
+  </span>
+</footer>
+
+</div>
+<script>
+const DATA=[
+ {n:0,t:"Biết cái máy của mình",d:"21/09/26 → 25/10/26",w:5,lang:"c",
+  note:"<b>Đây là phase học C thật sự.</b> Không học C qua sách C — học C qua CSAPP.",
+  g:[["Tuần 1 · Bit và byte",[
+     "CSAPP Ch1 — đọc nhanh, coi như bản đồ","CSAPP Ch2.1–2.3 — biểu diễn thông tin, integer",
+     "Bài tập CSAPP 2.5 → 2.30","Viết <code>hexdump.c</code> — tự viết, không xem bản có sẵn",
+     "TLPI Ch1–3 — khái niệm nền","Viết <code>util.c</code>: wrapper syscall, xử lý <code>errno</code> + retry <code>EINTR</code>",
+     "<code>git init</code> repo <code>D:/Code/ouroboros</code>, push GitHub công khai"]],
+    ["Tuần 2 · Số thực và assembly",[
+     "CSAPP Ch2.4 — floating point","In bit pattern của <code>float</code> và <code>double</code>",
+     "CSAPP Ch3.1–3.7 — machine-level representation","Đọc được <code>objdump -d</code> của hàm mình viết",
+     "Bắt đầu Bomb Lab (CMU, miễn phí)"]],
+    ["Tuần 3 · Bomb Lab + cache",[
+     "Hoàn thành Bomb Lab","CSAPP Ch6 — memory hierarchy",
+     "Viết <code>mountain.c</code> — đo memory mountain","Vẽ biểu đồ, giải thích từng vùng trên đồ thị"]],
+    ["Tuần 4 · Tối ưu",[
+     "CSAPP Ch5 — optimizing program performance",
+     "Đo và giải thích: vì sao duyệt mảng 2D theo cột chậm hơn theo hàng ~6 lần",
+     "Học <code>perf stat</code>, đọc cache-miss counter","Ghi kết quả vào <code>docs/bench/phase0.md</code>"]],
+    ["Tuần 5 · Allocator",[
+     "CSAPP Ch9.9 — dynamic memory allocation","OSTEP Ch17 — free-space management","TLPI Ch7 — memory allocation",
+     "Viết <code>myalloc</code>: implicit → explicit → segregated fit","Pass CSAPP malloc lab, utilization &gt; 70%","Valgrind sạch"]],
+    ["GATE · Cổng ra Phase 0",[
+     "<code>myalloc</code> pass test, utilization &gt; 70%",
+     "Giải thích hiệu ứng cache bằng <b>số đo của chính mình</b>","Đọc <code>objdump -d</code> không hoảng",
+     "Repo có ít nhất 25 commit","Viết blog #1: “Tôi viết lại malloc và học được gì về bộ nhớ”"]]]},
+
+ {n:1,t:"Storage engine",d:"26/10/26 → 27/12/26",w:9,lang:"c",
+  note:"Viết B-Tree + WAL + buffer pool đồ chơi trước, rồi mở <b>PostgreSQL 14 Internals</b> xem engine sản xuất thật làm y hệt thứ đó thế nào.",
+  g:[["Tuần 6–7 · File format & page layout",[
+     "DB Internals Ch1–3","TLPI Ch4, Ch5, Ch13 (I/O buffering), Ch14 (file systems)","CSAPP Ch10 (system-level I/O)",
+     "Thiết kế page layout → <code>docs/page-format.md</code>","Cài <code>page.c</code> — slotted page, header, checksum",
+     "Trả lời: page size bao nhiêu, vì sao?"]],
+    ["Tuần 8–10 · B-Tree",[
+     "DB Internals Ch2, Ch4, Ch6","<code>btree.c</code> — insert, split","<code>btree.c</code> — delete, merge, rebalance",
+     "Test 10 triệu key, <code>store_scan</code> đúng thứ tự","OSTEP Ch39–41"]],
+    ["Tuần 11 · Buffer pool",[
+     "<code>bufpool.c</code> — page cache, pin/unpin, CLOCK","PostgreSQL 14 Internals Part II — đối chiếu hàng thật",
+     "Phụ: page-replacement simulator FIFO/LRU/CLOCK (lấp OSTEP Ch21–22)","Trả lời: <code>mmap</code> hay <code>pread</code>/<code>pwrite</code>? Ghi lý do."]],
+    ["Tuần 12–13 · WAL & recovery",[
+     "DB Internals Ch5","PostgreSQL 14 Internals Part I (MVCC) + Part II (WAL)",
+     "OSTEP Ch42 — crash consistency &amp; journaling (quan trọng nhất phase này)",
+     "<code>wal.c</code> — append-only log, LSN, group commit","<code>recovery.c</code> — redo, checkpoint, torn page",
+     "TLPI Ch55 (file locking), Ch49 (memory mappings)","<b>Test tra tấn: 1000 lần <code>kill -9</code> ngẫu nhiên</b>"]],
+    ["Tuần 14 · LSM & đối đầu",[
+     "DB Internals Ch7","OSTEP Ch43 (LFS), Ch44 (SSD)","<code>lsm.c</code> — memtable, SSTable, compaction",
+     "Benchmark B-Tree vs LSM trên 3 workload, vẽ biểu đồ","Phụ: build system + shared library (lấp CSAPP Ch7)"]],
+    ["GATE · Cổng ra Phase 1",[
+     "1000 lần <code>kill -9</code> → không mất dữ liệu đã ack","Biểu đồ B-Tree vs LSM trên 3 workload",
+     "Valgrind sạch, ThreadSanitizer sạch","Viết blog #2"]]]},
+
+ {n:2,t:"Process & concurrency",d:"28/12/26 → 14/02/27",w:7,lang:"c",later:1,
+  g:[["Cổng ra",["<code>ouro-store</code> chạy dạng daemon, đa luồng","Graceful shutdown khi nhận <code>SIGTERM</code>",
+     "Thread pool hoạt động, ThreadSanitizer sạch","Phụ: viết một shell có job control","Blog #3"]]]},
+
+ {n:3,t:"Mạng",d:"01/03/27 → 02/05/27",w:9,lang:"c",later:1,
+  note:"<b>UNP Ch30</b> so sánh 9 kiến trúc server kèm số đo thật. Chương đọc kỹ nhất cả lộ trình.",
+  g:[["Cổng ra",["Bốn bản server (iterative → fork → thread pool → epoll), đo cả bốn",
+     "Giữ 10.000 kết nối đồng thời","Đọc <code>tcpdump</code>, giải thích một gói retransmit cụ thể",
+     "Xử lý đúng partial read/write, <code>EINTR</code>, <code>EAGAIN</code>, backpressure","Blog #4"]]]},
+
+ {n:4,t:"Go",d:"03/05/27 → 13/06/27",w:6,lang:"go",later:1,
+  note:"⚠️ <b>Làn B khởi động từ đây</b> (tháng thứ 8): DS&amp;A 3–5h/tuần, đều đặn, không cày dồn.",
+  g:[["Cổng ra",["<code>ouro-net</code> viết lại bằng Go, cùng bộ test integration, cùng pass",
+     "Bảng so sánh C vs Go: LOC, throughput, p50/p99/p999, bộ nhớ, giờ công",
+     "Trả lời: Go scheduler khác OS scheduler chỗ nào?","Blog #5","Làn B (DS&amp;A) khởi động"]]]},
+
+ {n:5,t:"Phân tán · Raft",d:"28/06/27 → 12/09/27",w:11,lang:"go",later:1,
+  note:"⚠️ Gõ theo <i>Distributed Services with Go</i> ở <code>scratch/</code>, rồi <b>đóng sách</b> và viết lại từ đầu. Copy code = Phase 5 vô nghĩa.",
+  g:[["Cổng ra",["Gõ hết <i>Distributed Services with Go</i> ở <code>scratch/</code>","<code>ouro-dist</code> viết lại từ đầu, sách đóng",
+     "3 node: giết leader → bầu lại dưới 1 giây, không mất commit","Thêm/bớt node khi đang chạy, không downtime",
+     "Test kiểu Jepsen đơn giản","Chuẩn bị 3 VM Linux thật","Blog #6"]]]},
+
+ {n:6,t:"Container runtime",d:"13/09/27 → 28/11/27",w:11,lang:"both",later:1,
+  note:"TLPI viết 2010 nên <b>không</b> dạy namespace/cgroup đầy đủ. Lấp bằng Liz Rice + man pages. Nói trước để bạn khỏi hoang mang khi tra không thấy.",
+  g:[["Cổng ra",["<code>ouro-run run alpine /bin/sh</code> → shell cô lập thật sự","Giới hạn 256MB RAM có hiệu lực",
+     "Container ping ra ngoài và ping được nhau","Rootless qua user namespace",
+     "<b>Kể được từng syscall đã gọi và vì sao thứ tự đó</b>","Blog #7"]]]},
+
+ {n:7,t:"Orchestrator · khép vòng",d:"13/12/27 → 27/02/28",w:11,lang:"go",later:1,
+  note:"🐍 Chỗ con rắn cắn đuôi. Toàn bộ Kubernetes chỉ là vòng lặp reconcile lặp lại ở 30 chỗ khác nhau.",
+  g:[["Cổng ra",["<code>ouroctl apply -f ouro-cluster.yaml</code> khởi động 3 replica",
+     "Giết container bằng tay → tự tạo lại trong 10 giây","Rolling update không downtime",
+     "🐍 <b>Trạng thái <code>ouro-ctl</code> nằm trong chính cluster nó quản lý</b>",
+     "Reboot cả cụm → tự phục hồi","Blog #8 + video demo — thứ đưa vào CV"]]]},
+
+ {n:8,t:"AI Infrastructure",d:"13/03/28 → 21/05/28",w:10,lang:"go",later:1,
+  note:"AI infra <b>chính là</b> cloud infra, cộng GPU scheduling + distributed training + inference serving. Mở rộng Ouroboros, không viết lại.",
+  g:[["Cổng ra",["Scheduler nhận diện và xếp theo GPU","Train phân tán 3 node, máy chết giữa chừng vẫn resume",
+     "Inference server có dynamic batching, đạt mục tiêu p99","Blog #9 + bài tổng kết hành trình"]]]}
+];
+
+const K="ouroboros.v1";
+let S={};
+try{S=JSON.parse(localStorage.getItem(K)||"{}")}catch(e){S={}}
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){
+  document.getElementById("saved").textContent="Không lưu được (trình duyệt chặn lưu trữ)"}}
+
+const LANG={c:["C","c"],go:["Go","g"],both:["Go + C","g"]};
+let id=0;
+
+document.getElementById("phases").innerHTML=DATA.map(p=>{
+  const[ln,lc]=LANG[p.lang];
+  const tasks=p.g.map(([wk,items])=>{
+    const gate=wk.startsWith("GATE");
+    return `<div class="wk${gate?" gate-hd":""}">${gate?wk.slice(7):wk}</div>`+
+      items.map(x=>{const i="t"+(id++);
+        return `<label class="t${gate?" gate":""}"><input type="checkbox" data-i="${i}" data-p="${p.n}"${S[i]?" checked":""}><span>${x}</span></label>`
+      }).join("");
+  }).join("");
+  return `<div class="ph" id="ph${p.n}">
+    <div class="ph-hd" onclick="this.parentNode.classList.toggle('open')">
+      <span class="ph-n">${p.n}</span>
+      <div class="ph-body">
+        <div class="ph-title">${p.t} <span class="chip ${lc}">${ln}</span>${p.later?'<span class="chip">chi tiết mở sau</span>':''}</div>
+        <div class="ph-sub">${p.d} · ${p.w} tuần</div>
+      </div>
+      <span class="ph-pct" id="pp${p.n}">0%</span>
+      <span class="ph-caret">▶</span>
+    </div>
+    <div class="ph-mini"><i id="pm${p.n}"></i></div>
+    <div class="ph-tasks">
+      ${p.note?`<div class="note">${p.note}</div>`:""}
+      ${tasks}
+      ${p.later?'<div class="later" style="margin-top:16px">Checklist từng tuần sẽ mở rộng khi sắp tới phase này.<br>Lập kế hoạch chi tiết cho 18 tháng sau là viết tiểu thuyết — nó sẽ sai.</div>':""}
+    </div></div>`;
+}).join("");
+
+function refresh(){
+  let all=0,done=0;
+  DATA.forEach(p=>{
+    const b=document.querySelectorAll(`input[data-p="${p.n}"]`);
+    const d=[...b].filter(x=>x.checked).length;
+    all+=b.length; done+=d;
+    const pc=b.length?Math.round(d/b.length*100):0;
+    document.getElementById("pp"+p.n).textContent=pc+"%";
+    document.getElementById("pm"+p.n).style.width=pc+"%";
+    const el=document.getElementById("ph"+p.n);
+    el.classList.toggle("fin",pc===100);
+    el.classList.toggle("on",pc>0&&pc<100);
+  });
+  const pc=all?Math.round(done/all*100):0;
+  document.getElementById("pct").textContent=pc+"%";
+  document.getElementById("bar").style.width=pc+"%";
+  const cur=DATA.find(p=>{
+    const b=document.querySelectorAll(`input[data-p="${p.n}"]`);
+    return [...b].filter(x=>x.checked).length<b.length;
+  });
+  document.getElementById("sub").textContent = done===0
+    ? "Chưa bắt đầu — Phase 0 khởi động Thứ Hai 21/09/2026"
+    : cur ? `Đang ở Phase ${cur.n} — ${cur.t} · ${done}/${all} việc đã xong`
+          : "🐍 Xong toàn bộ. Con rắn đã cắn được đuôi.";
+}
+
+document.addEventListener("change",e=>{
+  if(e.target.matches("input[data-i]")){
+    const i=e.target.dataset.i;
+    if(e.target.checked)S[i]=1; else delete S[i];
+    save(); refresh();
+  }
+});
+function tog(){
+  const d=document.documentElement;
+  const cur=d.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");
+  d.dataset.theme=cur==="dark"?"light":"dark";
+}
+function reset(){
+  if(!confirm("Xoá toàn bộ tiến độ đã tick?"))return;
+  S={}; save();
+  document.querySelectorAll("input[data-i]").forEach(x=>x.checked=false);
+  refresh();
+}
+document.getElementById("ph0").classList.add("open");
+refresh();
+</script>
+</body>
+</html>

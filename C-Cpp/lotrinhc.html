@@ -1,0 +1,1530 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lộ trình C tới socket</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f1f3f5; --surface:#ffffff; --ink:#161a1f; --muted:#5b6673;
+  --line:#dce0e6; --accent:#1d4f91; --accent-soft:#e6eef8;
+  --warn:#a8560a; --warn-soft:#fdf1e3; --ok:#0d6b5a; --ok-soft:#e3f1ee;
+  --code-bg:#1b2027; --code-ink:#d7dee7; --code-dim:#7c8b9c; --code-key:#8ab4f8;
+  --hover:#e9edf1;
+  --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151a; --surface:#191e25; --ink:#e4e8ed; --muted:#8b97a5;
+    --line:#2a313b; --accent:#7fb0e8; --accent-soft:#15263a;
+    --warn:#d9963f; --warn-soft:#33260f; --ok:#4bbfa5; --ok-soft:#16302b;
+    --code-bg:#0f1318; --hover:#222932;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151a; --surface:#191e25; --ink:#e4e8ed; --muted:#8b97a5;
+  --line:#2a313b; --accent:#7fb0e8; --accent-soft:#15263a;
+  --warn:#d9963f; --warn-soft:#33260f; --ok:#4bbfa5; --ok-soft:#16302b;
+  --code-bg:#0f1318; --hover:#222932;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding:30px 20px 80px;
+  display:flex;flex-direction:column;gap:22px}
+code{font-family:var(--mono);font-size:.88em;background:var(--accent-soft);
+  color:var(--accent);padding:1px 5px;border-radius:3px}
+
+header{border-bottom:2px solid var(--ink);padding-bottom:15px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+h1{margin:7px 0 6px;font-size:clamp(23px,3.6vw,32px);font-weight:600;
+  letter-spacing:-.018em;text-wrap:balance}
+.sub{color:var(--muted);font-size:14px;margin:0;max-width:68ch}
+
+/* thanh tien do */
+.prog{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  padding:14px 18px;position:sticky;top:0;z-index:5}
+.prog-top{display:flex;align-items:baseline;gap:12px;margin-bottom:9px}
+.prog-top b{font-size:14px;font-weight:600}
+.prog-top .pct{margin-left:auto;font-family:var(--mono);font-size:13px;
+  font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+.bar{height:7px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);
+  transition:width .25s ease}
+.prog button{margin-top:10px;font-family:var(--sans);font-size:12px;cursor:pointer;
+  background:transparent;border:1px solid var(--line);color:var(--muted);
+  padding:3px 10px;border-radius:4px}
+.prog button:hover{border-color:var(--accent);color:var(--accent)}
+
+/* giai doan */
+.phase{display:flex;align-items:baseline;gap:12px;margin:16px 0 2px;
+  padding-bottom:8px;border-bottom:1px solid var(--line)}
+.phase .k{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--accent)}
+.phase h2{margin:0;font-size:19px;font-weight:600;letter-spacing:-.012em}
+.phase .meta{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.phase-lead{color:var(--muted);font-size:13.5px;margin:8px 0 12px;max-width:70ch}
+
+/* don vi */
+details.u{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  margin-bottom:9px;overflow:hidden}
+details.u[open]{border-color:var(--accent)}
+details.u summary{list-style:none;cursor:pointer;padding:12px 16px;
+  display:flex;align-items:center;gap:11px}
+details.u summary::-webkit-details-marker{display:none}
+details.u summary:hover{background:var(--hover)}
+summary .id{font-family:var(--mono);font-size:11.5px;font-weight:600;
+  color:var(--accent);background:var(--accent-soft);padding:2px 7px;border-radius:3px;
+  flex:none}
+summary .ttl{font-weight:500;font-size:15px}
+summary .time{margin-left:auto;font-family:var(--mono);font-size:11px;
+  color:var(--muted);flex:none}
+summary .chev{color:var(--muted);font-size:12px;flex:none;transition:transform .18s}
+details.u[open] summary .chev{transform:rotate(90deg)}
+summary input[type=checkbox]{width:16px;height:16px;accent-color:var(--ok);
+  cursor:pointer;flex:none;margin:0}
+details.u.done summary .ttl{color:var(--muted);text-decoration:line-through}
+
+.body{padding:4px 18px 18px;border-top:1px solid var(--line);font-size:14.5px}
+.body h5{margin:16px 0 6px;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.body h5:first-child{margin-top:14px}
+.body p{margin:0 0 10px}
+.body ul,.body ol{margin:0 0 10px;padding-left:22px}
+.body li{margin-bottom:5px}
+.goal{background:var(--ok-soft);border-radius:5px;padding:9px 12px;font-size:14px}
+.goal b{color:var(--ok)}
+pre{background:var(--code-bg);color:var(--code-ink);border-radius:5px;
+  padding:12px 14px;overflow-x:auto;margin:0 0 10px;
+  font-family:var(--mono);font-size:12.5px;line-height:1.6}
+pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.cmt{color:var(--code-dim)}
+.trap{background:var(--warn-soft);border-left:3px solid var(--warn);
+  border-radius:0 5px 5px 0;padding:10px 13px;font-size:13.8px;margin:0 0 10px}
+.trap b{color:var(--warn)}
+.ref{font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line);
+  padding-top:9px;margin:14px 0 0}
+.ex{counter-reset:e}
+.ex li{margin-bottom:7px}
+
+footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);
+  padding-top:15px;max-width:74ch}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Từ số 0 tới đọc được UNP · TLPI · APUE</div>
+  <h1>Lộ trình C — 26 đơn vị, không nhảy cóc</h1>
+  <p class="sub">Mỗi đơn vị là một buổi học. Bấm vào để mở phần chi tiết: khái niệm,
+  ví dụ chạy được, bẫy hay gặp, và bài tập. Học xong thì tick vào ô vuông —
+  tiến độ lưu lại trong trình duyệt.</p>
+</header>
+
+<div class="prog">
+  <div class="prog-top"><b>Tiến độ</b>
+    <span class="muted" id="cnt"></span>
+    <span class="pct" id="pct">0%</span></div>
+  <div class="bar"><i id="fill"></i></div>
+  <button id="reset">Xóa tiến độ</button>
+</div>
+
+<!-- ================= A ================= -->
+<div class="phase"><span class="k">A</span><h2>Nền C</h2>
+  <span class="meta">6 đơn vị · ~5 ngày</span></div>
+<p class="phase-lead">Biết Java rồi thì phần này đi nhanh, nhưng đừng bỏ qua: C khác
+Java ở những chỗ rất nhỏ mà gây lỗi rất lớn.</p>
+
+<details class="u" id="A1"><summary><input type="checkbox"><span class="id">A1</span>
+  <span class="ttl">Biên dịch và chạy chương trình đầu tiên</span>
+  <span class="time">1 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Gõ được một chương trình, biên dịch, chạy, và
+    hiểu mỗi bước làm gì.</p>
+
+    <h5>Khái niệm</h5>
+    <p>C là ngôn ngữ <b>biên dịch trước, chạy sau</b>. Không có máy ảo như Java. Mã
+    nguồn <code>.c</code> đi qua bốn bước: tiền xử lý, biên dịch, hợp dịch, liên kết —
+    ra một file thực thi chạy thẳng trên hệ điều hành.</p>
+    <p><code>main</code> trả về <code>int</code>: 0 nghĩa là thành công, khác 0 là lỗi.
+    Hệ điều hành đọc con số này.</p>
+
+    <pre><code><span class="cmt">/* xinchao.c */</span>
+#include &lt;stdio.h&gt;      <span class="cmt">// khai báo printf, không phải "nhập thư viện"</span>
+
+int main(void)
+{
+    printf("Xin chao\n");
+    return 0;              <span class="cmt">// 0 = chạy tốt</span>
+}</code></pre>
+
+    <pre><code>gcc -Wall -g xinchao.c -o xinchao
+./xinchao
+echo $?                    <span class="cmt"># in ra mã thoát: 0</span></code></pre>
+
+    <div class="trap"><b>Bẫy.</b> <code>#include</code> <b>không</b> giống
+    <code>import</code> của Java. Nó chỉ dán nội dung file header vào — tức là dán
+    các <i>khai báo</i> hàm. Mã thật của <code>printf</code> nằm trong thư viện C,
+    được ghép vào ở bước liên kết. Đây là lý do có lỗi "undefined reference" dù đã
+    <code>#include</code> đúng.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>In ra tên bạn và năm sinh trên hai dòng.</li>
+      <li>Bỏ dòng <code>#include &lt;stdio.h&gt;</code> rồi biên dịch. Đọc kỹ cảnh báo
+      gcc đưa ra và giải thích nó nói gì.</li>
+      <li>Đổi <code>return 0</code> thành <code>return 3</code>, chạy rồi kiểm tra
+      <code>echo $?</code>.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 1, 2</p>
+  </div>
+</details>
+
+<details class="u" id="A2"><summary><input type="checkbox"><span class="id">A2</span>
+  <span class="ttl">Kiểu dữ liệu, biến, và sizeof</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Biết mỗi kiểu chiếm bao nhiêu byte và vì sao
+    điều đó quan trọng.</p>
+
+    <h5>Khái niệm</h5>
+    <p>Khác Java, kích thước kiểu trong C <b>không cố định theo chuẩn</b>, chỉ có ràng
+    buộc tối thiểu. Trên máy 64 bit thông thường: <code>char</code> 1 byte,
+    <code>short</code> 2, <code>int</code> 4, <code>long</code> 8 trên Linux nhưng 4
+    trên Windows. Vì thế mọi code mạng đều dùng kiểu có kích thước cố định.</p>
+    <p><code>sizeof</code> là <b>toán tử</b>, không phải hàm, và tính lúc biên dịch.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    char  c = 'A';
+    int   i = 42;
+    long  l = 42L;
+    double d = 3.14;
+
+    printf("char=%zu int=%zu long=%zu double=%zu\n",
+           sizeof(c), sizeof(i), sizeof(l), sizeof(d));
+    printf("c duoi dang so = %d\n", c);   <span class="cmt">// 65 — char LÀ số</span>
+    return 0;
+}</code></pre>
+
+    <div class="trap"><b>Bẫy.</b> <code>char</code> trong C là <b>số nguyên 1 byte</b>,
+    không phải ký tự Unicode như Java. <code>'A'</code> chính là 65. Và
+    <code>char</code> có dấu hay không dấu là <i>tùy trình biên dịch</i> — khi đọc byte
+    từ mạng luôn dùng <code>unsigned char</code>.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>In kích thước của tất cả kiểu cơ bản trên máy bạn, kể cả con trỏ
+      <code>sizeof(int *)</code>.</li>
+      <li>Gán <code>char c = 200;</code> rồi in bằng <code>%d</code>. Giải thích kết quả.</li>
+      <li>Cho <code>int i = 3, j = 2;</code> — in <code>i / j</code>. Vì sao ra 1?
+      Sửa thế nào để ra 1.5?</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 3</p>
+  </div>
+</details>
+
+<details class="u" id="A3"><summary><input type="checkbox"><span class="id">A3</span>
+  <span class="ttl">printf, scanf và chuỗi định dạng</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Nhập xuất thành thạo, và hiểu vì sao sai chuỗi
+    định dạng lại nguy hiểm.</p>
+
+    <h5>Khái niệm</h5>
+    <p><code>printf</code> nhận số tham số tùy ý. Nó <b>không biết</b> bạn truyền kiểu
+    gì — nó tin vào chuỗi định dạng. Sai một ký tự là đọc nhầm vùng nhớ.</p>
+
+    <pre><code>int   n = 42;
+char  s[] = "chuoi";
+double x = 2.5;
+
+printf("%d\n", n);        <span class="cmt">// int</span>
+printf("%s\n", s);        <span class="cmt">// chuỗi</span>
+printf("%f  %.2f\n", x, x);
+printf("%c\n", s[0]);     <span class="cmt">// một ký tự</span>
+printf("%p\n", (void *)s);<span class="cmt">// địa chỉ</span>
+printf("%5d|%-5d|\n", n, n);  <span class="cmt">// canh phải / canh trái</span>
+
+<span class="cmt">// scanf CẦN dấu &amp; vì phải sửa biến của bạn — xem B4</span>
+int tuoi;
+scanf("%d", &amp;tuoi);</code></pre>
+
+    <div class="trap"><b>Bẫy.</b> <code>printf("%d", x)</code> với <code>x</code> là
+    <code>double</code> không báo lỗi lúc chạy, chỉ in ra số rác. Luôn bật
+    <code>gcc -Wall</code> — nó bắt được lỗi này lúc biên dịch.
+    Và <b>không bao giờ</b> viết <code>printf(bien_chuoi)</code>; phải là
+    <code>printf("%s", bien_chuoi)</code>, nếu không là lỗ hổng format string.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Viết chương trình hỏi tên và tuổi rồi in ra một câu chào.</li>
+      <li>Cố tình dùng <code>%d</code> để in một <code>double</code>, biên dịch có và
+      không có <code>-Wall</code>, so sánh.</li>
+      <li>In một bảng 3 cột thẳng hàng bằng <code>%-10s%5d%8.2f</code>.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 4</p>
+  </div>
+</details>
+
+<details class="u" id="A4"><summary><input type="checkbox"><span class="id">A4</span>
+  <span class="ttl">Toán tử, ép kiểu, tràn số</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Đoán đúng kết quả của biểu thức trộn kiểu.</p>
+
+    <h5>Khái niệm</h5>
+    <p>C tự động nâng kiểu trong biểu thức: kiểu nhỏ nâng lên kiểu lớn. Nhưng phép chia
+    hai số nguyên vẫn là <b>chia nguyên</b>, cắt phần thập phân, ngay cả khi gán vào
+    <code>double</code>.</p>
+
+    <pre><code>int a = 7, b = 2;
+double d1 = a / b;          <span class="cmt">// 3.0  — chia nguyên TRƯỚC rồi mới gán</span>
+double d2 = (double)a / b;  <span class="cmt">// 3.5  — ép một vế là đủ</span>
+
+unsigned int u = 0;
+u = u - 1;                  <span class="cmt">// 4294967295, KHÔNG phải -1</span>
+
+int big = 2147483647;
+big = big + 1;              <span class="cmt">// tràn số có dấu = hành vi không xác định</span></code></pre>
+
+    <div class="trap"><b>Bẫy.</b> So sánh giữa số có dấu và không dấu là nguồn lỗi
+    kinh điển trong code mạng: <code>if (len &lt; sizeof(buf))</code> với
+    <code>len</code> là <code>int</code> âm sẽ cho kết quả <b>đúng</b> một cách bất ngờ,
+    vì <code>sizeof</code> trả về kiểu không dấu nên <code>len</code> bị chuyển thành
+    số dương khổng lồ.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Đoán rồi kiểm chứng: <code>printf("%d\n", 5 / 2 * 2);</code></li>
+      <li>Viết chương trình đổi độ C sang độ F, chú ý không để dính chia nguyên.</li>
+      <li>Cho <code>int n = -1; unsigned u = 1;</code> — in kết quả của
+      <code>n &lt; u</code>. Giải thích.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 5</p>
+  </div>
+</details>
+
+<details class="u" id="A5"><summary><input type="checkbox"><span class="id">A5</span>
+  <span class="ttl">Rẽ nhánh và vòng lặp</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Viết được vòng lặp đọc dữ liệu tới khi hết —
+    khuôn mẫu dùng suốt trong code mạng.</p>
+
+    <h5>Khái niệm</h5>
+    <p>C <b>không có kiểu boolean</b> theo nghĩa Java. Số 0 là sai, mọi giá trị khác
+    là đúng. Vì thế con trỏ, số nguyên, ký tự đều đặt thẳng vào <code>if</code> được.</p>
+
+    <pre><code>int c;
+<span class="cmt">/* Khuôn mẫu đọc tới hết đầu vào.
+   getchar() trả về int chứ không phải char, để chứa được EOF (-1). */</span>
+while ((c = getchar()) != EOF) {
+    putchar(c);
+}
+
+<span class="cmt">/* Vòng lặp vô tận của server — bạn sẽ gặp lại ở F2 */</span>
+for (;;) {
+    <span class="cmt">/* accept, xử lý, đóng */</span>
+    break;   <span class="cmt">// tạm thời</span>
+}</code></pre>
+
+    <div class="trap"><b>Bẫy.</b> <code>if (x = 5)</code> — một dấu bằng — là <b>phép
+    gán</b>, luôn đúng, và C không báo lỗi. Java bắt được vì <code>if</code> đòi
+    boolean; C thì không. Bật <code>-Wall</code> để gcc cảnh báo.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Đếm số ký tự, số dòng, số từ trong đầu vào — bài <code>wc</code> kinh điển.</li>
+      <li>In bảng cửu chương bằng hai vòng lặp lồng nhau.</li>
+      <li>Viết vòng lặp đọc số tới khi người dùng nhập 0 thì dừng, rồi in tổng.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 6, 7, 8</p>
+  </div>
+</details>
+
+<details class="u" id="A6"><summary><input type="checkbox"><span class="id">A6</span>
+  <span class="ttl">Hàm, nguyên mẫu, truyền theo giá trị</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Hiểu vì sao hàm C <b>không thể</b> đổi biến của
+    người gọi — đây là lý do con trỏ tồn tại.</p>
+
+    <h5>Khái niệm</h5>
+    <p>C truyền tham số <b>theo giá trị</b>, luôn luôn. Hàm nhận một bản sao. Sửa bản
+    sao thì bên ngoài không biết gì. Đây là nền tảng để hiểu đơn vị B4.</p>
+    <p><b>Nguyên mẫu hàm</b> phải khai trước khi dùng, thường đặt trong file header.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+
+int cong(int a, int b);        <span class="cmt">// nguyên mẫu</span>
+void thu_doi(int x);
+
+int main(void)
+{
+    int n = 10;
+    printf("%d\n", cong(2, 3));
+
+    thu_doi(n);
+    printf("n van la %d\n", n);   <span class="cmt">// vẫn 10!</span>
+    return 0;
+}
+
+int cong(int a, int b) { return a + b; }
+
+void thu_doi(int x) { x = 999; }  <span class="cmt">// chỉ đổi bản sao</span></code></pre>
+
+    <div class="trap"><b>Bẫy.</b> Quên nguyên mẫu thì trình biên dịch cũ tự đoán hàm
+    trả về <code>int</code>, sinh lỗi rất khó tìm. Luôn khai nguyên mẫu, và luôn ghi
+    <code>void</code> khi hàm không nhận tham số: <code>int main(void)</code> chứ không
+    phải <code>int main()</code>.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Viết hàm tính giai thừa, gọi từ <code>main</code>.</li>
+      <li>Viết hàm <code>doi_cho(int a, int b)</code> cố hoán đổi hai số. Chứng minh
+      nó không hoạt động. <b>Giữ lại bài này</b>, đơn vị B4 sẽ sửa nó.</li>
+      <li>Tách chương trình thành hai file: <code>main.c</code> và
+      <code>toan.c</code>, biên dịch bằng <code>gcc main.c toan.c -o ct</code>.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 9</p>
+  </div>
+</details>
+
+<!-- ================= B ================= -->
+<div class="phase"><span class="k">B</span><h2>Con trỏ — nút cổ chai</h2>
+  <span class="meta">6 đơn vị · ~7 ngày</span></div>
+<p class="phase-lead">Đây là phần quyết định. Ai bỏ cuộc với C đều bỏ ở đây. Đi chậm,
+vẽ hình ra giấy, đừng vội sang phần sau.</p>
+
+<details class="u" id="B1"><summary><input type="checkbox"><span class="id">B1</span>
+  <span class="ttl">Bộ nhớ là gì, địa chỉ là gì</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Hình dung được bộ nhớ như một dãy ô đánh số, và
+    biến nằm ở đâu trong dãy đó.</p>
+
+    <h5>Khái niệm</h5>
+    <p>Bộ nhớ là một dãy byte liên tiếp, mỗi byte có một <b>địa chỉ</b> là số nguyên.
+    Khai báo <code>int n;</code> nghĩa là xin 4 byte liên tiếp và đặt tên
+    <code>n</code> cho chúng. Toán tử <code>&amp;</code> cho biết địa chỉ đó.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int  a = 10;
+    int  b = 20;
+    char c = 'X';
+
+    printf("a = %d, nam o dia chi %p\n", a, (void *)&amp;a);
+    printf("b = %d, nam o dia chi %p\n", b, (void *)&amp;b);
+    printf("c = %c, nam o dia chi %p\n", c, (void *)&amp;c);
+    printf("a chiem %zu byte\n", sizeof(a));
+    return 0;
+}</code></pre>
+
+    <p>Chạy vài lần và để ý: địa chỉ đổi mỗi lần chạy (do hệ điều hành ngẫu nhiên hóa),
+    nhưng <b>khoảng cách</b> giữa <code>&amp;a</code> và <code>&amp;b</code> thì ổn định.</p>
+
+    <div class="trap"><b>Bẫy.</b> In địa chỉ phải dùng <code>%p</code> và ép sang
+    <code>(void *)</code>. Dùng <code>%d</code> để in địa chỉ là sai kiểu, trên máy
+    64 bit sẽ in ra số cụt.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Khai báo một mảng <code>int arr[5]</code>, in địa chỉ từng phần tử. Khoảng
+      cách giữa hai phần tử liền nhau là bao nhiêu? Vì sao?</li>
+      <li>Làm lại với <code>char arr[5]</code> và so sánh.</li>
+      <li>Vẽ ra giấy sơ đồ bộ nhớ của chương trình ví dụ trên.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 10, phần đầu</p>
+  </div>
+</details>
+
+<details class="u" id="B2"><summary><input type="checkbox"><span class="id">B2</span>
+  <span class="ttl">Con trỏ: khai báo, gán, lấy giá trị</span>
+  <span class="time">3 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Đọc trôi chảy <code>int *p = &amp;a;</code> và
+    <code>*p = 5;</code> mà không phải nghĩ.</p>
+
+    <h5>Khái niệm</h5>
+    <p>Con trỏ là <b>một biến chứa địa chỉ</b>. Hai toán tử ngược nhau:</p>
+    <ul>
+      <li><code>&amp;x</code> — <i>lấy địa chỉ của</i> x</li>
+      <li><code>*p</code> — <i>giá trị nằm tại địa chỉ</i> p</li>
+    </ul>
+    <p>Dấu <code>*</code> có hai nghĩa khác nhau tùy chỗ: lúc khai báo nó nói "đây là
+    con trỏ", lúc dùng nó nói "lấy giá trị tại đó".</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int a = 10;
+    int *p;          <span class="cmt">// p là con trỏ tới int (chưa trỏ đâu cả)</span>
+
+    p = &amp;a;          <span class="cmt">// giờ p chứa địa chỉ của a</span>
+
+    printf("a  = %d\n", a);      <span class="cmt">// 10</span>
+    printf("*p = %d\n", *p);     <span class="cmt">// 10 — cùng một ô nhớ</span>
+    printf("p  = %p\n", (void *)p);
+    printf("&amp;a = %p\n", (void *)&amp;a);   <span class="cmt">// hai dòng này giống nhau</span>
+
+    *p = 99;                     <span class="cmt">// ghi qua con trỏ</span>
+    printf("a gio la %d\n", a);  <span class="cmt">// 99 — a đã đổi!</span>
+    return 0;
+}</code></pre>
+
+    <div class="trap"><b>Bẫy.</b> Con trỏ chưa gán trỏ vào chỗ ngẫu nhiên. Viết
+    <code>int *p; *p = 5;</code> là ghi vào một địa chỉ vô nghĩa — chương trình sập
+    hoặc, tệ hơn, không sập mà phá dữ liệu khác. Luôn khởi tạo:
+    <code>int *p = NULL;</code></div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Khai báo hai biến, hai con trỏ, cho chúng trỏ chéo nhau rồi in ra để kiểm chứng.</li>
+      <li>Viết <code>int **pp = &amp;p;</code> và in <code>**pp</code>. Vẽ sơ đồ ba ô
+      nhớ nối nhau.</li>
+      <li>Thử <code>int *p = NULL; printf("%d", *p);</code> — quan sát chương trình
+      sập, và nhớ thông báo lỗi đó.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 10</p>
+  </div>
+</details>
+
+<details class="u" id="B3"><summary><input type="checkbox"><span class="id">B3</span>
+  <span class="ttl">Con trỏ và mảng, số học con trỏ</span>
+  <span class="time">3 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Hiểu vì sao <code>arr[i]</code> và
+    <code>*(arr + i)</code> là một.</p>
+
+    <h5>Khái niệm</h5>
+    <p>Tên mảng, khi dùng trong biểu thức, <b>tự chuyển thành địa chỉ phần tử đầu</b>.
+    Cộng 1 vào con trỏ không cộng 1 byte mà cộng <b>một phần tử</b> — trình biên dịch
+    tự nhân với <code>sizeof</code> kiểu.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    int arr[5] = {10, 20, 30, 40, 50};
+    int *p = arr;            <span class="cmt">// không cần &amp;, tên mảng đã là địa chỉ</span>
+
+    printf("%d %d\n", arr[2], *(arr + 2));  <span class="cmt">// 30 30 — như nhau</span>
+    printf("%d %d\n", p[2],   *(p + 2));    <span class="cmt">// 30 30</span>
+
+    <span class="cmt">// duyệt bằng con trỏ</span>
+    for (int i = 0; i &lt; 5; i++)
+        printf("%d ", *(p + i));
+    printf("\n");
+
+    printf("sizeof(arr) = %zu\n", sizeof(arr));  <span class="cmt">// 20 — cả mảng</span>
+    printf("sizeof(p)   = %zu\n", sizeof(p));    <span class="cmt">// 8  — chỉ con trỏ</span>
+    return 0;
+}</code></pre>
+
+    <div class="trap"><b>Bẫy.</b> Khi truyền mảng vào hàm, nó <b>suy biến thành con
+    trỏ</b> và mất thông tin kích thước. Bên trong hàm, <code>sizeof(arr)</code> trả
+    về kích thước con trỏ chứ không phải mảng. Vì thế mọi hàm C nhận mảng đều phải
+    kèm thêm tham số độ dài — chính là lý do <code>read(fd, buf, len)</code> có
+    tham số <code>len</code>.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Viết hàm <code>int tong(int *a, int n)</code> tính tổng mảng.</li>
+      <li>In <code>arr</code>, <code>&amp;arr[0]</code>, <code>p</code>,
+      <code>p + 1</code> — giải thích khoảng cách giữa <code>p</code> và
+      <code>p + 1</code>.</li>
+      <li>Viết hàm đảo ngược mảng tại chỗ, dùng hai con trỏ chạy từ hai đầu vào giữa.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 10</p>
+  </div>
+</details>
+
+<details class="u" id="B4"><summary><input type="checkbox"><span class="id">B4</span>
+  <span class="ttl">Con trỏ làm tham số — sửa biến của người gọi</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Sửa được bài hoán đổi ở A6, và hiểu tham số kiểu
+    "giá trị-kết quả" mà API socket dùng.</p>
+
+    <h5>Khái niệm</h5>
+    <p>Hàm không đổi được biến của người gọi, nhưng đổi được <b>thứ mà con trỏ trỏ
+    tới</b>. Truyền địa chỉ thay vì giá trị.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+
+void doi_cho(int *a, int *b)
+{
+    int tam = *a;
+    *a = *b;
+    *b = tam;
+}
+
+int main(void)
+{
+    int x = 1, y = 2;
+    doi_cho(&amp;x, &amp;y);            <span class="cmt">// truyền ĐỊA CHỈ</span>
+    printf("x=%d y=%d\n", x, y); <span class="cmt">// x=2 y=1</span>
+    return 0;
+}</code></pre>
+
+    <p>Đây chính là lý do <code>scanf("%d", &amp;tuoi)</code> phải có dấu
+    <code>&amp;</code>: <code>scanf</code> cần ghi vào biến của bạn.</p>
+
+    <div class="trap"><b>Đây là chỗ nối sang lập trình mạng.</b> Hàm
+    <code>accept()</code> dùng kiểu tham số "giá trị-kết quả":
+    <pre style="margin-top:8px"><code>socklen_t len = sizeof(cliaddr);
+connfd = accept(fd, (struct sockaddr *)&amp;cliaddr, &amp;len);</code></pre>
+    <code>len</code> vừa là đầu vào (bộ đệm to bao nhiêu) vừa là đầu ra (thực tế điền
+    bao nhiêu). Truyền <code>&amp;len</code> để hàm ghi ngược lại được. Java không có
+    khái niệm này.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Sửa bài <code>doi_cho</code> ở A6 cho chạy đúng.</li>
+      <li>Viết hàm <code>void min_max(int *a, int n, int *min, int *max)</code> trả về
+      <b>hai</b> giá trị qua tham số.</li>
+      <li>Viết hàm <code>int chia(int a, int b, int *ket_qua)</code> trả về 0 nếu ổn,
+      -1 nếu chia cho 0 — đúng phong cách trả lỗi của C.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 9, 10</p>
+  </div>
+</details>
+
+<details class="u" id="B5"><summary><input type="checkbox"><span class="id">B5</span>
+  <span class="ttl">Chuỗi C và tràn bộ đệm</span>
+  <span class="time">3 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Xử lý chuỗi an toàn — kỹ năng sống còn khi nhận
+    dữ liệu từ mạng.</p>
+
+    <h5>Khái niệm</h5>
+    <p>C <b>không có kiểu chuỗi</b>. Chuỗi chỉ là mảng <code>char</code> kết thúc bằng
+    byte 0 (<code>'\0'</code>). Mọi hàm chuỗi đều dựa vào byte kết thúc đó. Thiếu nó
+    là hàm chạy quá vùng nhớ.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+int main(void)
+{
+    char s1[] = "abc";       <span class="cmt">// chiếm 4 byte: a b c \0</span>
+    char s2[10];
+
+    printf("do dai = %zu, kich thuoc = %zu\n", strlen(s1), sizeof(s1));
+
+    strcpy(s2, s1);          <span class="cmt">// nguy hiểm nếu s1 dài hơn s2</span>
+    strncpy(s2, s1, sizeof(s2) - 1);
+    s2[sizeof(s2) - 1] = '\0';   <span class="cmt">// strncpy KHÔNG tự thêm '\0'</span>
+
+    printf("%s\n", s2);
+    return 0;
+}</code></pre>
+
+    <div class="trap"><b>Bẫy chết người.</b> <code>char buf[8]; strcpy(buf, "chuoi rat dai");</code>
+    ghi đè ra ngoài mảng, phá stack. Đây chính là lỗ hổng tràn bộ đệm — và là lý do
+    code mạng luôn phải kiểm độ dài trước khi sao chép. Không bao giờ dùng
+    <code>gets()</code>; nó đã bị loại khỏi chuẩn C11.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Tự viết lại <code>strlen</code> và <code>strcpy</code> bằng con trỏ.</li>
+      <li>Viết hàm đếm số lần xuất hiện của một ký tự trong chuỗi.</li>
+      <li>Cố tình tràn một mảng <code>char buf[4]</code> rồi biên dịch với
+      <code>gcc -fsanitize=address</code>, đọc báo cáo lỗi.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 11</p>
+  </div>
+</details>
+
+<details class="u" id="B6"><summary><input type="checkbox"><span class="id">B6</span>
+  <span class="ttl">Con trỏ tới con trỏ, argv</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Đọc được <code>char **argv</code> và mảng con trỏ.</p>
+
+    <h5>Khái niệm</h5>
+    <p><code>char **argv</code> là con trỏ tới con trỏ tới <code>char</code>: một mảng
+    các chuỗi. Đây là cách chương trình C nhận tham số dòng lệnh.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+
+int main(int argc, char **argv)
+{
+    printf("So tham so: %d\n", argc);
+    for (int i = 0; i &lt; argc; i++)
+        printf("argv[%d] = %s\n", i, argv[i]);
+    return 0;
+}
+<span class="cmt">/* ./ct alpha beta
+   argv[0] = ./ct
+   argv[1] = alpha
+   argv[2] = beta   */</span></code></pre>
+
+    <div class="trap"><b>Bẫy.</b> <code>argv[0]</code> là tên chương trình, không phải
+    tham số đầu tiên. Và mọi phần tử đều là <b>chuỗi</b> — muốn số phải đổi bằng
+    <code>atoi()</code> hoặc <code>strtol()</code>. Mọi ví dụ trong UNP đều nhận địa
+    chỉ IP qua <code>argv[1]</code>.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Viết chương trình cộng tất cả số truyền vào dòng lệnh.</li>
+      <li>Khai báo <code>char *ten[] = {"an", "binh", "chi"};</code> rồi duyệt in ra.
+      Vẽ sơ đồ bộ nhớ.</li>
+      <li>Viết chương trình nhận cổng qua <code>argv[1]</code>, kiểm tra nó nằm trong
+      1024–65535, báo lỗi nếu không.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 10, 11</p>
+  </div>
+</details>
+
+<!-- ================= C ================= -->
+<div class="phase"><span class="k">C</span><h2>Bộ nhớ</h2>
+  <span class="meta">3 đơn vị · ~4 ngày</span></div>
+<p class="phase-lead">Java có bộ dọn rác. C thì bạn tự quản. Đây là phần khiến chương
+trình chạy sai sau nhiều giờ chứ không sai ngay.</p>
+
+<details class="u" id="C1"><summary><input type="checkbox"><span class="id">C1</span>
+  <span class="ttl">Ba vùng nhớ: stack, heap, tĩnh</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Biết biến của mình nằm vùng nào và sống được
+    bao lâu.</p>
+
+    <h5>Khái niệm</h5>
+    <ul>
+      <li><b>Stack</b> — biến cục bộ. Tự sinh khi vào hàm, tự mất khi ra. Nhanh, nhỏ.</li>
+      <li><b>Heap</b> — vùng bạn xin bằng <code>malloc</code>. Sống tới khi bạn
+      <code>free</code>. To, chậm hơn.</li>
+      <li><b>Tĩnh</b> — biến toàn cục và <code>static</code>. Sống suốt chương trình.</li>
+    </ul>
+
+    <pre><code>#include &lt;stdio.h&gt;
+
+int toan_cuc = 1;               <span class="cmt">// vùng tĩnh</span>
+
+char *sai_lam(void)
+{
+    char buf[16] = "tam thoi";  <span class="cmt">// stack — CHẾT khi hàm kết thúc</span>
+    return buf;                 <span class="cmt">// LỖI: trả về địa chỉ đã hết hiệu lực</span>
+}
+
+int main(void)
+{
+    static int dem = 0;         <span class="cmt">// vùng tĩnh, giữ giá trị giữa các lần gọi</span>
+    int cuc_bo = 5;             <span class="cmt">// stack</span>
+    printf("%d %d %d\n", toan_cuc, dem, cuc_bo);
+    return 0;
+}</code></pre>
+
+    <div class="trap"><b>Bẫy.</b> Trả về con trỏ tới biến cục bộ là lỗi kinh điển.
+    Chương trình có thể vẫn "chạy được" một lúc vì vùng nhớ chưa bị ghi đè — rồi hỏng
+    ngẫu nhiên về sau. gcc với <code>-Wall</code> cảnh báo được ca này.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Biên dịch hàm <code>sai_lam</code> ở trên với <code>-Wall</code>, đọc cảnh báo.</li>
+      <li>Viết hàm có biến <code>static int dem</code> tăng mỗi lần gọi, gọi 5 lần.</li>
+      <li>Vẽ sơ đồ ba vùng nhớ và đặt từng biến trong ví dụ vào đúng vùng.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 12</p>
+  </div>
+</details>
+
+<details class="u" id="C2"><summary><input type="checkbox"><span class="id">C2</span>
+  <span class="ttl">malloc, free, và bốn lỗi bộ nhớ</span>
+  <span class="time">3 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Cấp phát và giải phóng đúng, nhận diện được bốn
+    loại lỗi bộ nhớ.</p>
+
+    <h5>Khái niệm</h5>
+    <p><code>malloc(n)</code> xin <code>n</code> byte, trả về <code>void *</code> hoặc
+    <code>NULL</code> nếu thất bại. <code>free(p)</code> trả lại. Mỗi
+    <code>malloc</code> phải có đúng một <code>free</code>.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(void)
+{
+    int n = 5;
+    int *a = malloc(n * sizeof(int));   <span class="cmt">// KHÔNG cần ép kiểu trong C</span>
+    if (a == NULL) {                    <span class="cmt">// LUÔN kiểm tra</span>
+        fprintf(stderr, "het bo nho\n");
+        return 1;
+    }
+
+    for (int i = 0; i &lt; n; i++) a[i] = i * i;
+    for (int i = 0; i &lt; n; i++) printf("%d ", a[i]);
+    printf("\n");
+
+    free(a);
+    a = NULL;      <span class="cmt">// gán NULL sau khi free, tránh dùng nhầm</span>
+    return 0;
+}</code></pre>
+
+    <h5>Bốn lỗi phải thuộc tên</h5>
+    <ul>
+      <li><b>Rò rỉ bộ nhớ</b> — xin mà không trả. Server chạy vài ngày rồi hết RAM.</li>
+      <li><b>Dùng sau khi giải phóng</b> — <code>free(p)</code> rồi vẫn đọc
+      <code>*p</code>.</li>
+      <li><b>Giải phóng hai lần</b> — <code>free</code> cùng con trỏ hai lượt.</li>
+      <li><b>Ghi quá vùng</b> — xin 5 phần tử mà ghi phần tử thứ 6.</li>
+    </ul>
+
+    <div class="trap"><b>Bẫy.</b> <code>malloc</code> <b>không xóa</b> vùng nhớ; nội
+    dung là rác của chương trình trước. Cần vùng sạch thì dùng
+    <code>calloc(n, size)</code>.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Viết hàm đọc n số từ bàn phím vào mảng cấp phát động rồi in ngược lại.</li>
+      <li>Cố tình tạo một chỗ rò rỉ, biên dịch với
+      <code>gcc -fsanitize=address</code> và đọc báo cáo.</li>
+      <li>Viết hàm <code>char *noi_chuoi(const char *a, const char *b)</code> nối hai
+      chuỗi vào vùng nhớ mới. Ai chịu trách nhiệm <code>free</code>?</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 12</p>
+  </div>
+</details>
+
+<details class="u" id="C3"><summary><input type="checkbox"><span class="id">C3</span>
+  <span class="ttl">Lớp lưu trữ, phạm vi, liên kết</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Chia chương trình thành nhiều file mà không đụng
+    tên nhau.</p>
+
+    <h5>Khái niệm</h5>
+    <ul>
+      <li><code>static</code> ở cấp file — biến hoặc hàm <b>chỉ dùng trong file đó</b>,
+      giống <code>private</code>.</li>
+      <li><code>static</code> trong hàm — biến sống suốt chương trình nhưng chỉ hàm đó
+      thấy.</li>
+      <li><code>extern</code> — báo rằng biến này định nghĩa ở file khác.</li>
+      <li><code>const</code> — không được sửa. Trong API socket rất hay gặp:
+      <code>const struct sockaddr *</code> nghĩa là "hàm này chỉ đọc, không sửa".</li>
+    </ul>
+
+    <pre><code><span class="cmt">/* toan.c */</span>
+static int bo_dem = 0;           <span class="cmt">// chỉ toan.c thấy</span>
+
+int tang(void) { return ++bo_dem; }
+
+<span class="cmt">/* toan.h */</span>
+#ifndef TOAN_H
+#define TOAN_H
+int tang(void);
+#endif</code></pre>
+
+    <div class="trap"><b>Bẫy.</b> Đặt định nghĩa biến trong file <code>.h</code> rồi
+    <code>#include</code> vào nhiều file <code>.c</code> sẽ gây lỗi "multiple
+    definition" lúc liên kết. Header chỉ chứa <b>khai báo</b>, còn định nghĩa nằm
+    trong <code>.c</code>.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Tách chương trình thành <code>main.c</code>, <code>toan.c</code>,
+      <code>toan.h</code> có đủ include guard.</li>
+      <li>Bỏ <code>static</code> trước <code>bo_dem</code>, khai lại cùng tên ở file
+      khác, xem lỗi liên kết.</li>
+      <li>Viết hàm nhận <code>const char *</code> rồi thử sửa nội dung — đọc lỗi biên dịch.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 12</p>
+  </div>
+</details>
+
+<!-- ================= D ================= -->
+<div class="phase"><span class="k">D</span><h2>Cấu trúc dữ liệu</h2>
+  <span class="meta">4 đơn vị · ~4 ngày</span></div>
+<p class="phase-lead">Toàn bộ API socket xoay quanh struct. Phần này ngắn nhưng dùng
+nhiều nhất.</p>
+
+<details class="u" id="D1"><summary><input type="checkbox"><span class="id">D1</span>
+  <span class="ttl">struct: khai báo, truy cập, gán</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Gom nhiều trường thành một kiểu, như
+    <code>struct sockaddr_in</code>.</p>
+
+    <h5>Khái niệm</h5>
+    <p><code>struct</code> gộp các biến khác kiểu vào một khối liên tiếp trong bộ nhớ.
+    Truy cập trường bằng dấu chấm.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+struct sinh_vien {
+    char ten[32];
+    int  tuoi;
+    double diem;
+};
+
+int main(void)
+{
+    struct sinh_vien a;
+    strcpy(a.ten, "An");
+    a.tuoi = 20;
+    a.diem = 8.5;
+
+    struct sinh_vien b = a;      <span class="cmt">// gán struct = SAO CHÉP toàn bộ</span>
+    b.tuoi = 21;
+
+    printf("%s %d %.1f\n", a.ten, a.tuoi, a.diem);   <span class="cmt">// An 20 8.5</span>
+    printf("%s %d %.1f\n", b.ten, b.tuoi, b.diem);   <span class="cmt">// An 21 8.5</span>
+    printf("kich thuoc = %zu\n", sizeof(struct sinh_vien));
+    return 0;
+}</code></pre>
+
+    <div class="trap"><b>Bẫy.</b> <code>sizeof</code> của struct thường <b>lớn hơn</b>
+    tổng các trường, do trình biên dịch chèn byte đệm để căn chỉnh địa chỉ. Đây là lý
+    do không được gửi thẳng struct qua mạng — hai máy có thể đệm khác nhau.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Khai báo struct điểm <code>{int x, y;}</code>, viết hàm tính khoảng cách.</li>
+      <li>In <code>sizeof</code> của <code>struct {char a; int b;}</code> và giải thích
+      vì sao không phải 5.</li>
+      <li>Khai báo mảng 3 sinh viên, nhập rồi tìm người điểm cao nhất.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 14</p>
+  </div>
+</details>
+
+<details class="u" id="D2"><summary><input type="checkbox"><span class="id">D2</span>
+  <span class="ttl">Con trỏ tới struct và toán tử -&gt;</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Dùng thành thạo <code>-&gt;</code>, vì mọi hàm
+    socket đều nhận con trỏ struct.</p>
+
+    <h5>Khái niệm</h5>
+    <p><code>p-&gt;ten</code> là cách viết ngắn của <code>(*p).ten</code>. Truyền struct
+    vào hàm bằng con trỏ thì không phải sao chép cả khối, và hàm sửa được bản gốc.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+struct sinh_vien { char ten[32]; int tuoi; };
+
+void tang_tuoi(struct sinh_vien *p)
+{
+    p-&gt;tuoi++;                <span class="cmt">// tương đương (*p).tuoi++</span>
+}
+
+int main(void)
+{
+    struct sinh_vien a;
+    strcpy(a.ten, "An");
+    a.tuoi = 20;
+
+    tang_tuoi(&amp;a);            <span class="cmt">// truyền địa chỉ</span>
+    printf("%s %d\n", a.ten, a.tuoi);   <span class="cmt">// An 21</span>
+    return 0;
+}</code></pre>
+
+    <div class="trap"><b>Đây chính là hình dạng của code socket.</b> So sánh:
+    <pre style="margin-top:8px"><code>struct sockaddr_in servaddr;
+memset(&amp;servaddr, 0, sizeof(servaddr));
+servaddr.sin_family = AF_INET;
+servaddr.sin_port   = htons(5000);
+bind(fd, (struct sockaddr *)&amp;servaddr, sizeof(servaddr));</code></pre>
+    Khai một struct, xóa sạch bằng <code>memset</code>, điền trường, rồi truyền
+    <b>địa chỉ</b> của nó vào hàm. Nắm D2 là đọc được dòng này.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Viết hàm <code>void in_sv(const struct sinh_vien *p)</code> — vì sao nên
+      để <code>const</code>?</li>
+      <li>Cấp phát động một struct bằng <code>malloc</code>, điền, in, rồi
+      <code>free</code>.</li>
+      <li>Viết hàm nhận mảng struct và số phần tử, trả về con trỏ tới phần tử lớn nhất.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 14</p>
+  </div>
+</details>
+
+<details class="u" id="D3"><summary><input type="checkbox"><span class="id">D3</span>
+  <span class="ttl">typedef, union, enum</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Đọc được <code>socklen_t</code>,
+    <code>struct sockaddr_storage</code> và các hằng <code>AF_INET</code>.</p>
+
+    <h5>Khái niệm</h5>
+    <ul>
+      <li><code>typedef</code> — đặt tên khác cho một kiểu. <code>socklen_t</code> thực
+      chất chỉ là <code>unsigned int</code> được đặt tên lại.</li>
+      <li><code>union</code> — nhiều trường <b>dùng chung một vùng nhớ</b>, chỉ một
+      trường có nghĩa tại một thời điểm. Kích thước bằng trường lớn nhất.</li>
+      <li><code>enum</code> — tập hằng số nguyên có tên.</li>
+    </ul>
+
+    <pre><code>#include &lt;stdio.h&gt;
+
+typedef unsigned int uint;
+
+union so {
+    int    i;
+    float  f;
+    char   b[4];
+};
+
+enum trang_thai { CHO, DANG_CHAY, XONG };
+
+int main(void)
+{
+    union so s;
+    s.i = 65;
+    printf("i=%d, byte dau=%d\n", s.i, s.b[0]);  <span class="cmt">// thấy được từng byte</span>
+    printf("sizeof(union) = %zu\n", sizeof(s));  <span class="cmt">// 4, không phải 12</span>
+
+    enum trang_thai t = DANG_CHAY;
+    printf("t = %d\n", t);                       <span class="cmt">// 1</span>
+    return 0;
+}</code></pre>
+
+    <div class="trap"><b>Bẫy.</b> Ghi vào một trường của <code>union</code> rồi đọc
+    trường khác là hành vi phụ thuộc máy. Nhưng chính thủ thuật này lại là cách nhanh
+    nhất để xem endianness — bạn sẽ dùng ở E2.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Dùng <code>union</code> in ra bốn byte của số <code>int 1</code>. Byte nào
+      bằng 1?</li>
+      <li>Viết <code>typedef struct {int x, y;} Diem;</code> rồi dùng
+      <code>Diem</code> mà không cần từ khóa <code>struct</code>.</li>
+      <li>Khai <code>enum</code> cho các mã lỗi rồi viết hàm trả về chuỗi mô tả.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 14</p>
+  </div>
+</details>
+
+<details class="u" id="D4"><summary><input type="checkbox"><span class="id">D4</span>
+  <span class="ttl">Cấu trúc tự tham chiếu — danh sách liên kết</span>
+  <span class="time">3 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Ghép con trỏ và struct lại — bài kiểm tra tổng
+    hợp của giai đoạn B, C, D.</p>
+
+    <h5>Khái niệm</h5>
+    <p>Một struct chứa con trỏ tới chính kiểu của nó. Đây là nền của mọi cấu trúc dữ
+    liệu động, và server thật dùng nó để giữ danh sách client đang kết nối.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+struct nut {
+    int          gia_tri;
+    struct nut  *tiep;      <span class="cmt">// trỏ tới chính kiểu này</span>
+};
+
+int main(void)
+{
+    struct nut *dau = NULL;
+
+    <span class="cmt">/* thêm 3 nút vào đầu danh sách */</span>
+    for (int i = 1; i &lt;= 3; i++) {
+        struct nut *moi = malloc(sizeof(struct nut));
+        if (!moi) return 1;
+        moi-&gt;gia_tri = i;
+        moi-&gt;tiep    = dau;
+        dau          = moi;
+    }
+
+    for (struct nut *p = dau; p != NULL; p = p-&gt;tiep)
+        printf("%d ", p-&gt;gia_tri);
+    printf("\n");
+
+    <span class="cmt">/* giải phóng — phải giữ con trỏ tiếp trước khi free */</span>
+    while (dau) {
+        struct nut *tam = dau-&gt;tiep;
+        free(dau);
+        dau = tam;
+    }
+    return 0;
+}</code></pre>
+
+    <div class="trap"><b>Bẫy.</b> <code>free(dau); dau = dau-&gt;tiep;</code> là lỗi
+    dùng sau khi giải phóng — đọc trường của vùng nhớ vừa trả lại. Phải lưu
+    <code>tiep</code> vào biến tạm <b>trước</b> khi <code>free</code>.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Thêm hàm <code>them_cuoi</code> chèn vào cuối danh sách.</li>
+      <li>Viết hàm <code>xoa(struct nut **dau, int gia_tri)</code> — vì sao cần con
+      trỏ tới con trỏ?</li>
+      <li>Viết hàm đảo ngược danh sách bằng ba con trỏ chạy.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 17, phần danh sách liên kết</p>
+  </div>
+</details>
+
+<!-- ================= E ================= -->
+<div class="phase"><span class="k">E</span><h2>Đặc thù hệ thống</h2>
+  <span class="meta">5 đơn vị · ~5 ngày</span></div>
+<p class="phase-lead">Phần này không có trong sách Java. Đây là chỗ C chạm vào phần
+cứng và hệ điều hành — và cũng là chỗ code mạng sống.</p>
+
+<details class="u" id="E1"><summary><input type="checkbox"><span class="id">E1</span>
+  <span class="ttl">Thao tác bit và mặt nạ cờ</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Đọc được <code>flags | O_NONBLOCK</code> và
+    <code>flags &amp; O_NONBLOCK</code>.</p>
+
+    <h5>Khái niệm</h5>
+    <p>Sáu toán tử: <code>&amp;</code> và, <code>|</code> hoặc, <code>^</code> xor,
+    <code>~</code> đảo, <code>&lt;&lt;</code> dịch trái, <code>&gt;&gt;</code> dịch phải.
+    Hệ thống Unix gói nhiều tùy chọn nhị phân vào một số nguyên gọi là <b>cờ</b>.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+
+#define DOC   (1 &lt;&lt; 0)   <span class="cmt">// 0001</span>
+#define GHI   (1 &lt;&lt; 1)   <span class="cmt">// 0010</span>
+#define CHAY  (1 &lt;&lt; 2)   <span class="cmt">// 0100</span>
+
+int main(void)
+{
+    int quyen = 0;
+
+    quyen |= DOC;              <span class="cmt">// bật cờ</span>
+    quyen |= GHI;
+
+    if (quyen &amp; DOC)  printf("co quyen doc\n");     <span class="cmt">// kiểm tra</span>
+    if (!(quyen &amp; CHAY)) printf("khong duoc chay\n");
+
+    quyen &amp;= ~GHI;             <span class="cmt">// tắt cờ</span>
+    printf("quyen = %d\n", quyen);   <span class="cmt">// 1</span>
+    return 0;
+}</code></pre>
+
+    <div class="trap"><b>Bẫy.</b> Đừng nhầm <code>&amp;</code> với <code>&amp;&amp;</code>,
+    <code>|</code> với <code>||</code>. Cặp một ký tự làm việc trên từng bit, cặp hai ký
+    tự làm việc trên đúng/sai. Viết nhầm thì chương trình vẫn biên dịch và cho kết quả
+    sai âm thầm.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Viết hàm đếm số bit 1 trong một <code>unsigned int</code>.</li>
+      <li>Viết hàm in một số dưới dạng nhị phân 32 bit.</li>
+      <li>Dùng dịch bit tách bốn byte của một <code>uint32_t</code> ra riêng.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 15</p>
+  </div>
+</details>
+
+<details class="u" id="E2"><summary><input type="checkbox"><span class="id">E2</span>
+  <span class="ttl">Kiểu kích thước cố định và thứ tự byte</span>
+  <span class="time">3 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Hiểu vì sao code mạng luôn gọi
+    <code>htons()</code>.</p>
+
+    <h5>Khái niệm</h5>
+    <p>Vì <code>int</code> không cố định kích thước, giao thức mạng dùng kiểu chính xác:
+    <code>uint8_t</code>, <code>uint16_t</code>, <code>uint32_t</code> trong
+    <code>&lt;stdint.h&gt;</code>. Ngoài ra còn <code>size_t</code> (kích thước, không
+    dấu) và <code>ssize_t</code> (kích thước có dấu, để trả về -1 khi lỗi).</p>
+    <p><b>Endianness</b> — thứ tự các byte của một số nhiều byte. x86 dùng
+    <b>little-endian</b> (byte thấp trước), còn mạng quy ước <b>big-endian</b>. Nên mọi
+    số nhiều byte gửi đi đều phải đổi.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdint.h&gt;
+
+int main(void)
+{
+    uint32_t x = 0x01020304;
+    unsigned char *b = (unsigned char *)&amp;x;
+
+    printf("byte: %02x %02x %02x %02x\n", b[0], b[1], b[2], b[3]);
+    <span class="cmt">// x86 in ra: 04 03 02 01  -> little-endian
+    // mạng cần:  01 02 03 04  -> big-endian</span>
+
+    if (b[0] == 0x04) printf("may nay little-endian\n");
+    else              printf("may nay big-endian\n");
+    return 0;
+}</code></pre>
+
+    <p>Trong code mạng: <code>htons</code> = host to network short (16 bit),
+    <code>htonl</code> = host to network long (32 bit), và hai hàm ngược lại
+    <code>ntohs</code>, <code>ntohl</code>.</p>
+
+    <div class="trap"><b>Bẫy.</b> Quên <code>htons(5000)</code> thì cổng gửi đi thành
+    <b>34835</b> — server nghe ở cổng khác hẳn cổng bạn nghĩ, và không có thông báo lỗi
+    nào cả.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Chạy ví dụ trên, xác định máy bạn thuộc loại nào.</li>
+      <li>Tự viết hàm <code>uint16_t doi_16(uint16_t x)</code> đảo hai byte, so kết quả
+      với <code>htons</code>.</li>
+      <li>In <code>htons(5000)</code> dưới dạng thập phân. Con số đó nói lên điều gì?</li>
+    </ol>
+    <p class="ref">CS:APP Chương 2, mục biểu diễn số · TLPI Ch 59</p>
+  </div>
+</details>
+
+<details class="u" id="E3"><summary><input type="checkbox"><span class="id">E3</span>
+  <span class="ttl">Con trỏ hàm</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Đọc được <code>signal(SIGINT, xu_ly)</code> và
+    tham số so sánh của <code>qsort</code>.</p>
+
+    <h5>Khái niệm</h5>
+    <p>Tên hàm cũng là một địa chỉ. Con trỏ hàm cho phép truyền <i>hành vi</i> vào hàm
+    khác — chính là callback. Trong lập trình mạng, bộ xử lý tín hiệu là con trỏ hàm.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int tang_dan(const void *a, const void *b)
+{
+    int x = *(const int *)a;
+    int y = *(const int *)b;
+    return (x &gt; y) - (x &lt; y);
+}
+
+int main(void)
+{
+    int arr[5] = {5, 2, 9, 1, 7};
+    qsort(arr, 5, sizeof(int), tang_dan);   <span class="cmt">// truyền tên hàm</span>
+
+    for (int i = 0; i &lt; 5; i++) printf("%d ", arr[i]);
+    printf("\n");
+
+    int (*ham)(const void *, const void *) = tang_dan;  <span class="cmt">// biến con trỏ hàm</span>
+    printf("%d\n", ham(&amp;arr[0], &amp;arr[1]));
+    return 0;
+}</code></pre>
+
+    <div class="trap"><b>Bẫy.</b> Cú pháp khai báo rất khó đọc.
+    <code>int (*p)(int)</code> là con trỏ tới hàm nhận int trả int; còn
+    <code>int *p(int)</code> là hàm trả về con trỏ int. Dấu ngoặc quyết định tất cả.
+    Dùng <code>typedef</code> cho dễ đọc.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Sửa hàm so sánh để sắp giảm dần.</li>
+      <li>Viết hàm <code>ap_dung(int *a, int n, int (*f)(int))</code> áp dụng
+      <code>f</code> lên từng phần tử.</li>
+      <li>Dùng <code>typedef int (*SoSanh)(const void *, const void *);</code> viết lại
+      cho gọn.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 14, mục con trỏ hàm</p>
+  </div>
+</details>
+
+<details class="u" id="E4"><summary><input type="checkbox"><span class="id">E4</span>
+  <span class="ttl">Tiền xử lý, nhiều file, Makefile</span>
+  <span class="time">2 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Tổ chức dự án nhiều file — mọi ví dụ trong UNP đều
+    dùng header <code>unp.h</code> riêng.</p>
+
+    <h5>Khái niệm</h5>
+    <p>Tiền xử lý chạy <b>trước</b> trình biên dịch, làm việc trên văn bản thuần:
+    <code>#include</code> dán file, <code>#define</code> thay thế chuỗi,
+    <code>#ifdef</code> bật tắt đoạn mã.</p>
+
+    <pre><code><span class="cmt">/* tienich.h */</span>
+#ifndef TIENICH_H          <span class="cmt">// include guard: tránh dán hai lần</span>
+#define TIENICH_H
+
+#define MAX_BUF 1024
+#define BAO_LOI(msg) fprintf(stderr, "%s:%d %s\n", __FILE__, __LINE__, msg)
+
+int tong(const int *a, int n);
+
+#endif</code></pre>
+
+    <pre><code><span class="cmt"># Makefile — chú ý phải là ký tự TAB, không phải dấu cách</span>
+CC     = gcc
+CFLAGS = -Wall -Wextra -g
+
+ct: main.o tienich.o
+	$(CC) $(CFLAGS) -o ct main.o tienich.o
+
+main.o: main.c tienich.h
+	$(CC) $(CFLAGS) -c main.c
+
+clean:
+	rm -f *.o ct</code></pre>
+
+    <div class="trap"><b>Bẫy.</b> Macro chỉ là thay thế văn bản, không phải hàm.
+    <code>#define BINH(x) x*x</code> rồi gọi <code>BINH(2+3)</code> ra
+    <code>2+3*2+3</code> = 11 chứ không phải 25. Luôn bọc ngoặc:
+    <code>#define BINH(x) ((x)*(x))</code>.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Viết macro <code>MAX(a,b)</code> đúng cách, thử với <code>MAX(1+1, 3)</code>.</li>
+      <li>Tạo dự án ba file có Makefile, chạy <code>make</code> rồi
+      <code>make clean</code>.</li>
+      <li>Dùng <code>gcc -E main.c</code> xem kết quả sau tiền xử lý.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 16</p>
+  </div>
+</details>
+
+<details class="u" id="E5"><summary><input type="checkbox"><span class="id">E5</span>
+  <span class="ttl">File I/O và cách C báo lỗi</span>
+  <span class="time">3 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Xử lý lỗi đúng phong cách Unix — vì socket dùng
+    y hệt cách này.</p>
+
+    <h5>Khái niệm</h5>
+    <p>Có hai tầng: <code>FILE *</code> với <code>fopen/fread</code> (thư viện chuẩn C,
+    có bộ đệm) và <b>mô tả file</b> là số nguyên với <code>open/read/write</code> (lời
+    gọi hệ thống). <b>Socket là mô tả file</b>, nên tầng thứ hai mới là thứ bạn cần.</p>
+    <p>Quy ước Unix: hàm trả về <b>-1 khi lỗi</b> và đặt biến toàn cục
+    <code>errno</code> cho biết lỗi gì.</p>
+
+    <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;errno.h&gt;
+
+int main(void)
+{
+    FILE *f = fopen("khong_co_file_nay.txt", "r");
+    if (f == NULL) {
+        <span class="cmt">/* ba cách in lỗi, chọn một */</span>
+        perror("fopen");
+        fprintf(stderr, "errno = %d: %s\n", errno, strerror(errno));
+        return 1;
+    }
+
+    char dong[256];
+    while (fgets(dong, sizeof(dong), f) != NULL)
+        fputs(dong, stdout);
+
+    fclose(f);
+    return 0;
+}</code></pre>
+
+    <p>Bản dùng mô tả file, gần với socket hơn:</p>
+    <pre><code>#include &lt;fcntl.h&gt;
+#include &lt;unistd.h&gt;
+
+int fd = open("a.txt", O_RDONLY);
+if (fd == -1) { perror("open"); return 1; }
+
+char buf[1024];
+ssize_t n;
+while ((n = read(fd, buf, sizeof(buf))) &gt; 0)
+    write(STDOUT_FILENO, buf, n);   <span class="cmt">// ghi đúng n byte, không phải sizeof</span>
+
+if (n == -1) perror("read");
+close(fd);</code></pre>
+
+    <div class="trap"><b>Bẫy quan trọng nhất cho lập trình mạng.</b>
+    <code>read()</code> có thể trả về <b>ít hơn</b> số byte bạn xin, dù chưa hết dữ
+    liệu. Trên socket điều này xảy ra thường xuyên. Luôn dùng vòng lặp và luôn dùng
+    giá trị <code>n</code> trả về, không giả định đã đọc đủ.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Viết chương trình sao chép file, dùng <code>open/read/write</code>.</li>
+      <li>Mở file không tồn tại rồi in <code>errno</code> và
+      <code>strerror(errno)</code>.</li>
+      <li>Viết hàm <code>ssize_t doc_du(int fd, void *buf, size_t n)</code> lặp cho tới
+      khi đọc đủ <code>n</code> byte — đây chính là hàm <code>readn</code> trong UNP.</li>
+    </ol>
+    <p class="ref">C Primer Plus — Chương 13 · TLPI Ch 4, 5</p>
+  </div>
+</details>
+
+<!-- ================= F ================= -->
+<div class="phase"><span class="k">F</span><h2>Sẵn sàng đọc sách socket</h2>
+  <span class="meta">2 đơn vị · ~2 ngày</span></div>
+<p class="phase-lead">Ghép tất cả lại và kiểm chứng bằng một chương trình mạng thật.</p>
+
+<details class="u" id="F1"><summary><input type="checkbox"><span class="id">F1</span>
+  <span class="ttl">Công cụ: gcc, gdb, man, sanitizer</span>
+  <span class="time">3 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Tự tìm ra lỗi thay vì đoán.</p>
+
+    <h5>Khái niệm</h5>
+    <pre><code>gcc -Wall -Wextra -g prog.c -o prog     <span class="cmt"># luôn bật cảnh báo + thông tin gỡ lỗi</span>
+gcc -fsanitize=address -g prog.c -o prog  <span class="cmt"># bắt lỗi bộ nhớ lúc chạy</span>
+
+gdb ./prog
+  break main          <span class="cmt"># đặt điểm dừng</span>
+  run
+  next / step         <span class="cmt"># chạy từng dòng / bước vào hàm</span>
+  print bien          <span class="cmt"># xem giá trị</span>
+  print *p            <span class="cmt"># xem thứ con trỏ trỏ tới</span>
+  backtrace           <span class="cmt"># chuỗi lời gọi khi sập</span>
+  quit
+
+man 2 read           <span class="cmt"># mục 2 = lời gọi hệ thống</span>
+man 3 printf         <span class="cmt"># mục 3 = hàm thư viện</span></code></pre>
+
+    <p>Biết phân biệt <b>mục 2 và mục 3</b> của man rất quan trọng: mục 2 là lời gọi
+    hệ thống (<code>read</code>, <code>write</code>, <code>socket</code>), mục 3 là
+    hàm thư viện C (<code>printf</code>, <code>malloc</code>). TLPI và UNP tra man
+    suốt.</p>
+
+    <div class="trap"><b>Bẫy.</b> Không có <code>-g</code> thì gdb chỉ hiện địa chỉ
+    máy chứ không hiện tên biến và số dòng. Luôn biên dịch kèm <code>-g</code> khi
+    đang phát triển.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Chạy một chương trình cố tình sập trong gdb, dùng <code>backtrace</code> tìm
+      dòng gây lỗi.</li>
+      <li>Đọc <code>man 2 read</code> — nó trả về gì khi hết dữ liệu? Khi lỗi?</li>
+      <li>Biên dịch lại toàn bộ bài tập cũ với <code>-Wall -Wextra</code>, sửa hết
+      cảnh báo.</li>
+    </ol>
+    <p class="ref">UNP Phụ lục C · TLPI Ch 3</p>
+  </div>
+</details>
+
+<details class="u" id="F2"><summary><input type="checkbox"><span class="id">F2</span>
+  <span class="ttl">Giải mã code socket và viết server đầu tiên</span>
+  <span class="time">4 giờ</span><span class="chev">›</span></summary>
+  <div class="body">
+    <p class="goal"><b>Mục tiêu.</b> Đọc trôi dòng <code>bind()</code> và viết được
+    một server echo bằng C.</p>
+
+    <h5>Giải mã dòng kiểm tra</h5>
+    <pre><code>if (bind(sockfd, (struct sockaddr *)&amp;servaddr, sizeof(servaddr)) &lt; 0)
+    perror("bind");</code></pre>
+    <ul>
+      <li><code>sockfd</code> — mô tả file, một số nguyên → <b>E5</b></li>
+      <li><code>&amp;servaddr</code> — lấy địa chỉ của struct → <b>B1, D2</b></li>
+      <li><code>(struct sockaddr *)</code> — ép kiểu con trỏ → <b>B2, D1</b></li>
+      <li><code>sizeof(servaddr)</code> — kích thước struct → <b>A2, D1</b></li>
+      <li><code>&lt; 0</code> — quy ước trả lỗi của Unix → <b>E5</b></li>
+      <li><code>perror</code> — in <code>errno</code> → <b>E5</b></li>
+    </ul>
+    <p>Sáu đơn vị bạn đã học hội tụ vào một dòng. Nếu chỗ nào còn mơ hồ, quay lại đúng
+    đơn vị đó.</p>
+
+    <h5>Khung server echo</h5>
+    <pre><code>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;arpa/inet.h&gt;
+
+#define CONG 5000
+
+int main(void)
+{
+    int listenfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (listenfd &lt; 0) { perror("socket"); return 1; }
+
+    struct sockaddr_in servaddr;
+    memset(&amp;servaddr, 0, sizeof(servaddr));      <span class="cmt">// xóa sạch trước khi điền</span>
+    servaddr.sin_family      = AF_INET;
+    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    servaddr.sin_port        = htons(CONG);      <span class="cmt">// E2: đổi thứ tự byte</span>
+
+    if (bind(listenfd, (struct sockaddr *)&amp;servaddr, sizeof(servaddr)) &lt; 0) {
+        perror("bind"); return 1;
+    }
+    if (listen(listenfd, 10) &lt; 0) { perror("listen"); return 1; }
+
+    printf("Dang nghe o cong %d...\n", CONG);
+
+    for (;;) {
+        struct sockaddr_in cli;
+        socklen_t len = sizeof(cli);             <span class="cmt">// B4: giá trị-kết quả</span>
+        int connfd = accept(listenfd, (struct sockaddr *)&amp;cli, &amp;len);
+        if (connfd &lt; 0) { perror("accept"); continue; }
+
+        char buf[1024];
+        ssize_t n;
+        while ((n = read(connfd, buf, sizeof(buf))) &gt; 0)
+            write(connfd, buf, n);               <span class="cmt">// E5: ghi đúng n byte</span>
+
+        close(connfd);
+    }
+    return 0;
+}</code></pre>
+
+    <div class="trap"><b>Lưu ý.</b> Chương trình này cần Linux — trên WSL2 biên dịch
+    <code>gcc -Wall server.c -o server</code> rồi thử bằng
+    <code>telnet localhost 5000</code> hoặc <code>nc localhost 5000</code>.
+    Trên Windows thuần thì <code>&lt;arpa/inet.h&gt;</code> không tồn tại.</div>
+
+    <h5>Bài tập</h5>
+    <ol class="ex">
+      <li>Biên dịch và chạy server trên, kết nối bằng <code>nc</code>.</li>
+      <li>Thêm in ra địa chỉ IP client bằng <code>inet_ntoa(cli.sin_addr)</code>.</li>
+      <li>Bỏ <code>htons</code> đi, chạy lại, dùng <code>ss -tlnp</code> xem server
+      thật sự nghe ở cổng nào. Đây là bài học đắt giá nhất của E2.</li>
+    </ol>
+    <p class="ref">UNP Ch 4, 5 · TLPI Ch 56, 59 · CS:APP 11.4</p>
+  </div>
+</details>
+
+<footer>
+  Tổng 26 đơn vị, khoảng <b>60 giờ học</b> — chừng 5 đến 7 tuần nếu mỗi ngày 1–2 tiếng.
+  Xong F2 là bạn mở được UNP, TLPI, APUE mà không tắc ở trang thứ ba.
+  Sách nền: <b>C Primer Plus 5th</b> (<code>_repo-technical-books\C book 1.pdf</code>) —
+  chỉ đọc các chương được ghi ở cuối mỗi đơn vị, không đọc cả 800 trang.
+</footer>
+</div>
+
+<script>
+(function(){
+  var KEY = "lotrinh-c-v1";
+  var units = Array.prototype.slice.call(document.querySelectorAll("details.u"));
+  var done = {};
+  try { done = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch(e){ done = {}; }
+
+  function ve(){
+    var n = 0;
+    units.forEach(function(u){
+      var ok = !!done[u.id];
+      u.classList.toggle("done", ok);
+      u.querySelector("input").checked = ok;
+      if(ok) n++;
+    });
+    var pct = units.length ? Math.round(n * 100 / units.length) : 0;
+    document.getElementById("pct").textContent = pct + "%";
+    document.getElementById("cnt").textContent = n + "/" + units.length + " đơn vị";
+    document.getElementById("fill").style.width = pct + "%";
+  }
+
+  units.forEach(function(u){
+    var box = u.querySelector("input");
+    // bấm ô tick thì không mở/đóng phần chi tiết
+    box.addEventListener("click", function(ev){ ev.stopPropagation(); });
+    box.addEventListener("change", function(){
+      if(box.checked) done[u.id] = 1; else delete done[u.id];
+      try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e){}
+      ve();
+    });
+  });
+
+  document.getElementById("reset").addEventListener("click", function(){
+    done = {};
+    try { localStorage.removeItem(KEY); } catch(e){}
+    ve();
+  });
+
+  ve();
+})();
+</script>
+</body>
+</html>

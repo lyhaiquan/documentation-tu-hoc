@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Lộ trình đọc Lập trình mạng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Be+Vietnam+Pro:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+
+  /* reset toi thieu cho file doc lap */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { color-scheme: light dark; }
+  body { margin: 0; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+
+  /* ---------- tokens: light (bare :root = complete palette) ---------- */
+  :root {
+    --ground:      #EDF1F4;
+    --surface:     #FFFFFF;
+    --surface-2:   #F5F8FA;
+    --ink:         #0F1C26;
+    --ink-2:       #3D5261;
+    --ink-3:       #6B8090;
+    --rule:        #D3DDE4;
+    --rule-soft:   #E3EAEF;
+    --client:      #10529E;   /* xanh của quân X trong GameFrame.java */
+    --client-soft: #E4EDF8;
+    --server:      #B23127;   /* đỏ của quân O trong GameFrame.java */
+    --server-soft: #FAE7E4;
+    --focus:       #10529E;
+    --shadow:      0 1px 2px rgba(15,28,38,.06), 0 8px 24px -16px rgba(15,28,38,.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0D161D;
+      --surface:     #14212B;
+      --surface-2:   #182733;
+      --ink:         #DEE8EF;
+      --ink-2:       #A8BCC9;
+      --ink-3:       #7C929F;
+      --rule:        #263945;
+      --rule-soft:   #1E2F3A;
+      --client:      #6BA9EE;
+      --client-soft: #16293C;
+      --server:      #EE8279;
+      --server-soft: #33211F;
+      --focus:       #6BA9EE;
+      --shadow:      0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0D161D;
+    --surface:     #14212B;
+    --surface-2:   #182733;
+    --ink:         #DEE8EF;
+    --ink-2:       #A8BCC9;
+    --ink-3:       #7C929F;
+    --rule:        #263945;
+    --rule-soft:   #1E2F3A;
+    --client:      #6BA9EE;
+    --client-soft: #16293C;
+    --server:      #EE8279;
+    --server-soft: #33211F;
+    --focus:       #6BA9EE;
+    --shadow:      0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+
+  /* ---------- base ---------- */
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 40px 24px 72px; }
+  h1, h2, h3 { font-family: Bitter, Georgia, serif; text-wrap: balance; margin: 0; }
+  p { margin: 0; }
+  code, .mono { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; }
+  a { color: var(--client); }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 3px; }
+
+  /* ---------- masthead ---------- */
+  .mast { display: flex; flex-direction: column; gap: 14px; padding-bottom: 26px; border-bottom: 2px solid var(--ink); }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  h1 { font-size: clamp(30px, 5.2vw, 44px); font-weight: 700; line-height: 1.1; letter-spacing: -.015em; }
+  .dek { max-width: 62ch; color: var(--ink-2); font-size: 17px; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: 4px; }
+  .fact { display: flex; align-items: baseline; gap: 7px; font-size: 13.5px; color: var(--ink-2); }
+  .fact b { font-family: "IBM Plex Mono", monospace; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  /* ---------- banner cho ban chay tren web ---------- */
+  .banner {
+    display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start;
+    margin-top: 22px; padding: 13px 16px;
+    background: var(--server-soft); border: 1px solid var(--server); border-radius: 4px;
+    font-size: 13.5px; color: var(--ink-2); line-height: 1.55;
+  }
+  .banner .mark {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .08em;
+    color: var(--server); text-transform: uppercase; padding-top: 2px;
+  }
+  .banner b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- section headers ---------- */
+  section { margin-top: 52px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 20px; }
+  .sec-head h2 { font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+  .sec-head .rule { flex: 1; height: 1px; background: var(--rule); }
+  .sec-note { max-width: 64ch; color: var(--ink-2); font-size: 14.5px; margin-bottom: 22px; }
+
+  /* ---------- bookshelf ---------- */
+  .shelf { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+  .book {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 4px;
+    padding: 16px 18px; display: flex; flex-direction: column; gap: 9px;
+  }
+  .book-top { display: flex; align-items: flex-start; gap: 11px; }
+  .sigil {
+    flex: none; width: 30px; height: 30px; border-radius: 3px;
+    display: grid; place-items: center;
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; font-weight: 500; letter-spacing: .04em;
+    background: var(--client-soft); color: var(--client);
+  }
+  .sigil-hr { background: var(--server-soft); color: var(--server); }
+  .book h3 { font-size: 16px; font-weight: 600; line-height: 1.3; }
+  .book .who { font-size: 13px; color: var(--ink-3); margin-top: 2px; }
+  a.path {
+    display: block; font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+    font-size: 11.5px; color: var(--ink-3); word-break: break-all; text-decoration: none;
+    background: var(--surface-2); border: 1px solid transparent; border-radius: 3px;
+    padding: 6px 8px; line-height: 1.45;
+  }
+  a.path:hover { color: var(--client); border-color: var(--client); }
+  .book-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: auto; }
+  .tag {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .03em;
+    border: 1px solid var(--rule); border-radius: 999px; padding: 2px 9px; color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .tag-vi { border-color: var(--client); color: var(--client); }
+  a.tag { text-decoration: none; transition: background .12s; }
+  a.tag:hover { background: var(--client-soft); }
+
+  /* ---------- stages ---------- */
+  .stages { display: flex; flex-direction: column; gap: 16px; }
+  .stage {
+    display: grid; grid-template-columns: 62px 1fr; gap: 0;
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden;
+  }
+  .stage--core { border-color: var(--server); box-shadow: var(--shadow); }
+  .rail {
+    background: var(--surface-2); border-right: 1px solid var(--rule);
+    display: flex; flex-direction: column; align-items: center; padding: 18px 0; gap: 10px;
+  }
+  .stage--core .rail { background: var(--server-soft); border-right-color: var(--server); }
+  .rail-num {
+    font-family: "IBM Plex Mono", monospace; font-size: 19px; font-weight: 500;
+    color: var(--ink-3); font-variant-numeric: tabular-nums;
+  }
+  .stage--core .rail-num { color: var(--server); }
+  .rail-line { flex: 1; width: 1px; background: var(--rule); min-height: 20px; }
+  .stage--core .rail-line { background: var(--server); opacity: .4; }
+  .stage-main { padding: 18px 20px 16px; display: flex; flex-direction: column; gap: 13px; min-width: 0; }
+  .stage-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .stage-head h3 { font-size: 19px; font-weight: 600; letter-spacing: -.01em; }
+  .chip {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+    background: var(--server); color: #fff; border-radius: 999px; padding: 3px 10px;
+  }
+  :root[data-theme="dark"] .chip { color: #14212B; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .chip { color: #14212B; } }
+  .goal { color: var(--ink-2); font-size: 14.5px; max-width: 66ch; }
+
+  /* ---------- reading rows (clickable) ---------- */
+  .reads { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .read {
+    display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: baseline;
+    padding: 11px 0; border-top: 1px solid var(--rule-soft);
+  }
+  .read:first-child { border-top: 1px solid var(--rule); }
+  .read .sigil { width: 34px; height: 20px; border-radius: 3px; font-size: 10.5px; }
+  a.read-title {
+    display: inline; font-size: 14.5px; font-weight: 500; line-height: 1.4;
+    color: var(--ink); text-decoration: none;
+    border-bottom: 1px solid var(--rule); transition: color .12s, border-color .12s;
+  }
+  a.read-title::after {
+    content: "\2197"; font-family: "IBM Plex Mono", monospace; font-size: 10px;
+    color: var(--ink-3); margin-left: 6px; vertical-align: 2px;
+  }
+  a.read-title:hover { color: var(--client); border-bottom-color: var(--client); }
+  a.read-title:hover::after { color: var(--client); }
+  .read-sub { font-size: 13px; color: var(--ink-3); line-height: 1.5; margin-top: 3px; }
+  .read-page {
+    display: flex; align-items: center; gap: 7px;
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-2);
+    white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  a.pill-vi {
+    font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .06em;
+    border: 1px solid var(--client); color: var(--client); border-radius: 999px;
+    padding: 1px 7px; text-decoration: none;
+  }
+  a.pill-vi:hover { background: var(--client-soft); }
+
+  .unlock {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px;
+    border-top: 1px solid var(--rule); padding-top: 12px; font-size: 13.5px; color: var(--ink-2);
+  }
+  .unlock .label {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .unlock code { font-size: 12.5px; color: var(--client); background: var(--client-soft); padding: 2px 6px; border-radius: 3px; }
+
+  /* ---------- khi mo tren web: khong the mo file tren o D ---------- */
+  [data-env="web"] a.read-title,
+  [data-env="web"] a.pill-vi,
+  [data-env="web"] a.path { pointer-events: none; }
+  [data-env="web"] a.read-title { border-bottom-color: transparent; }
+  [data-env="web"] a.read-title::after { content: none; }
+  [data-env="web"] a.pill-vi { border-color: var(--rule); color: var(--ink-3); }
+  [data-env="web"] a.tag,
+  [data-env="web"] a.title-link { pointer-events: none; }
+  [data-env="web"] a.tag { border-color: var(--rule); color: var(--ink-3); }
+  [data-env="web"] a.title-link { border-bottom-color: transparent; }
+
+  /* ---------- lookup table ---------- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 14px; }
+  th, td { text-align: left; padding: 11px 16px; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  thead th {
+    font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-3); font-weight: 500; background: var(--surface-2); border-bottom: 1px solid var(--rule);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td code { font-size: 12.5px; color: var(--client); white-space: nowrap; }
+  td .what { display: block; font-size: 12.5px; color: var(--ink-3); margin-top: 3px; }
+
+  /* ---------- extras ---------- */
+  .extras { display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--rule); }
+  .extra { display: grid; grid-template-columns: 1fr auto; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--rule-soft); align-items: baseline; }
+  .extra p { font-size: 14px; }
+  .extra a.title-link { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); font-size: 14px; }
+  .extra a.title-link:hover { color: var(--client); border-bottom-color: var(--client); }
+  .extra .why { font-size: 13px; color: var(--ink-3); margin-top: 3px; max-width: 62ch; }
+  .extra .where { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+
+  .note {
+    margin-top: 44px; padding: 16px 18px; background: var(--surface-2);
+    border: 1px solid var(--rule); border-radius: 4px; font-size: 13.5px; color: var(--ink-2); max-width: 72ch;
+  }
+  .note b { color: var(--ink); font-weight: 600; }
+  .note p + p { margin-top: 10px; }
+
+  @media (max-width: 620px) {
+    .stage { grid-template-columns: 1fr; }
+    .rail { flex-direction: row; border-right: none; border-bottom: 1px solid var(--rule); padding: 8px 16px; }
+    .stage--core .rail { border-right: none; border-bottom-color: var(--server); }
+    .rail-line { width: auto; height: 1px; flex: 1; min-height: 0; }
+    .read { grid-template-columns: 34px 1fr; }
+    .read-page { grid-column: 2; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <p class="eyebrow">Kế hoạch tự học · Học kỳ đang diễn ra</p>
+    <h1>Lộ trình đọc Lập trình mạng</h1>
+    <p class="dek">
+      Năm chặng đọc, ghép từ bốn cuốn đã có sẵn trong <span class="mono">D:\Documentation</span>.
+      Bấm vào tên chương là mở thẳng file PDF đúng trang. Mỗi chặng gắn với một phần cụ thể của project
+      cờ ca-rô ở <span class="mono">D:\UBUNTU\tictactoe-network</span>.
+    </p>
+    <div class="facts">
+      <span class="fact"><b>5</b> cuốn chính</span>
+      <span class="fact"><b>4</b> cuốn có bản song ngữ VI-EN</span>
+      <span class="fact"><b>5</b> chặng</span>
+      <span class="fact">trọng tâm ở <b>chặng 03</b></span>
+    </div>
+  </header>
+
+  <div class="banner" id="webNote" hidden>
+    <span class="mark">Lưu ý</span>
+    <span>
+      Bạn đang xem bản trên web nên các liên kết tới sách đã bị tắt — trình duyệt không cho phép một trang
+      <span class="mono">https://</span> mở file trên ổ đĩa. Muốn bấm là ra sách thì mở bản lưu trên máy:
+      <b><span class="mono">D:\Documentation\lo-trinh-lap-trinh-mang.html</span></b>
+    </span>
+  </div>
+
+  <!-- ================= TỦ SÁCH ================= -->
+  <section>
+    <div class="sec-head"><h2>Tủ sách</h2><span class="rule"></span></div>
+    <p class="sec-note">
+      Ký hiệu bên dưới được dùng lại trong toàn bộ lộ trình để bạn biết mỗi mục đọc nằm ở cuốn nào.
+      Bấm vào đường dẫn để mở sách từ trang đầu; bấm vào thẻ <span class="mono">song ngữ VI-EN</span> để mở
+      thẳng bản dịch. Bốn trong năm cuốn có bản dịch nằm sẵn cùng thư mục.
+    </p>
+    <div class="shelf">
+
+      <article class="book">
+        <div class="book-top">
+          <span class="sigil">GT</span>
+          <div>
+            <h3>Lập trình mạng</h3>
+            <p class="who">Nguyễn Mạnh Hùng &amp; Nguyễn Trọng Khánh</p>
+          </div>
+        </div>
+        <a class="path" target="_blank" rel="noopener"
+           href="file:///D:/Documentation/Giao-trinh-Tieng-Viet/L%E1%BA%ADp%20tr%C3%ACnh%20m%E1%BA%A1ng.pdf">D:\Documentation\Giao-trinh-Tieng-Viet\Lập trình mạng.pdf</a>
+        <div class="book-meta">
+          <span class="tag">248 trang</span>
+          <span class="tag">11 chương</span>
+          <span class="tag tag-vi">tiếng Việt</span>
+        </div>
+      </article>
+
+      <article class="book">
+        <div class="book-top">
+          <span class="sigil sigil-hr">HR</span>
+          <div>
+            <h3>Java Network Programming, 4th Ed.</h3>
+            <p class="who">Elliotte Rusty Harold</p>
+          </div>
+        </div>
+        <a class="path" target="_blank" rel="noopener"
+           href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20%28Elliotte%20Rusty%20Harold%29.pdf">D:\Documentation\Java\Java Network Programming 4th Ed (Elliotte Rusty Harold).pdf</a>
+        <div class="book-meta">
+          <span class="tag">502 trang</span>
+          <span class="tag">13 chương</span>
+          <a class="tag tag-vi" target="_blank" rel="noopener"
+             href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20-%20song%20ngu%20VI-EN.pdf">song ngữ VI-EN ↗</a>
+        </div>
+      </article>
+
+      <article class="book">
+        <div class="book-top">
+          <span class="sigil">GB</span>
+          <div>
+            <h3>An Introduction to Network Programming with Java</h3>
+            <p class="who">Jan Graba</p>
+          </div>
+        </div>
+        <a class="path" target="_blank" rel="noopener"
+           href="file:///D:/Documentation/OS-Linux-Networking/An%20Introduction%20to%20Network%20Programming%20with%20Java.pdf">D:\Documentation\OS-Linux-Networking\An Introduction to Network Programming with Java.pdf</a>
+        <div class="book-meta">
+          <span class="tag">433 trang</span>
+          <span class="tag">13 chương</span>
+          <a class="tag tag-vi" target="_blank" rel="noopener"
+             href="file:///D:/Documentation/OS-Linux-Networking/An%20Introduction%20to%20Network%20Programming%20-%20song%20ngu%20VI-EN.pdf">song ngữ VI-EN ↗</a>
+        </div>
+      </article>
+
+      <article class="book">
+        <div class="book-top">
+          <span class="sigil">CJ2</span>
+          <div>
+            <h3>Core Java Vol. II — Advanced Features</h3>
+            <p class="who">Cay S. Horstmann · bản 11th Ed.</p>
+          </div>
+        </div>
+        <a class="path" target="_blank" rel="noopener"
+           href="file:///D:/Documentation/Java/Core%20Java%20Vol%20II%20-%20Advanced%20Features%2011th%20Ed%20%28Horstmann%29.pdf">D:\Documentation\Java\Core Java Vol II - Advanced Features 11th Ed (Horstmann).pdf</a>
+        <div class="book-meta">
+          <span class="tag">1416 trang</span>
+          <span class="tag">tra cứu</span>
+          <a class="tag tag-vi" target="_blank" rel="noopener"
+             href="file:///D:/Documentation/Java/Core%20Java%20Vol%20II%2010th%20Ed%20-%20song%20ngu%20VI-EN.pdf">song ngữ VI-EN ↗</a>
+        </div>
+      </article>
+
+      <article class="book">
+        <div class="book-top">
+          <span class="sigil">CJ1</span>
+          <div>
+            <h3>Core Java Vol. I — Fundamentals</h3>
+            <p class="who">Cay S. Horstmann · bản 12th Ed., chỉ có bản song ngữ</p>
+          </div>
+        </div>
+        <a class="path" target="_blank" rel="noopener"
+           href="file:///D:/Documentation/Java/Core%20Java%20Vol%20I%20-%20Fundamentals%2012th%20Ed%20-%20song%20ngu%20VI-EN.pdf">D:\Documentation\Java\Core Java Vol I - Fundamentals 12th Ed - song ngu VI-EN.pdf</a>
+        <div class="book-meta">
+          <span class="tag">1198 trang</span>
+          <span class="tag">Thread &amp; Swing</span>
+          <span class="tag tag-vi">song ngữ VI-EN</span>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= NĂM CHẶNG ================= -->
+  <section>
+    <div class="sec-head"><h2>Năm chặng</h2><span class="rule"></span></div>
+    <p class="sec-note">
+      Thứ tự này có ràng buộc thật, không phải đánh số cho đẹp: không đọc được chương socket nếu chưa nắm luồng
+      vào/ra, và chương đa luồng chỉ có nghĩa khi đã có một server chạy được để mà nhân bản nó lên.
+      Nút <span class="mono">VI</span> mở bản song ngữ ở đúng trang tương ứng.
+    </p>
+
+    <div class="stages">
+
+      <!-- CHẶNG 1 -->
+      <article class="stage">
+        <div class="rail"><span class="rail-num">01</span><span class="rail-line"></span></div>
+        <div class="stage-main">
+          <div class="stage-head"><h3>Nền: cổng, địa chỉ, socket là cái gì</h3></div>
+          <p class="goal">
+            Trả lời được ba câu: vì sao một chương trình mạng phải chia làm hai phía, port 5000 thực chất là gì,
+            và socket khác gì với địa chỉ IP. Chưa cần viết dòng code nào.
+          </p>
+          <ul class="reads">
+            <li class="read">
+              <span class="sigil">GT</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Giao-trinh-Tieng-Viet/L%E1%BA%ADp%20tr%C3%ACnh%20m%E1%BA%A1ng.pdf#page=10">Chương 1 — Giới thiệu về lập trình mạng</a>
+                <p class="read-sub">1.2.1 Mô hình OSI/ISO và họ giao thức TCP/IP · 1.2.3 Địa chỉ IP, mặt nạ · 1.2.4 Địa chỉ cổng · 1.2.5 Giao diện socket · 1.3.1 Mô hình client/server</p>
+              </div>
+              <span class="read-page">tr. 3–11</span>
+            </li>
+            <li class="read">
+              <span class="sigil">GB</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/OS-Linux-Networking/An%20Introduction%20to%20Network%20Programming%20with%20Java.pdf#page=11">Chapter 1 — Basic Concepts, Protocols and Terminology</a>
+                <p class="read-sub">1.1 Clients, Servers and Peers · 1.2 Ports and Sockets · 1.5 TCP · 1.6 UDP</p>
+              </div>
+              <span class="read-page">tr. 1–8
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/OS-Linux-Networking/An%20Introduction%20to%20Network%20Programming%20-%20song%20ngu%20VI-EN.pdf#page=11">VI</a>
+              </span>
+            </li>
+            <li class="read">
+              <span class="sigil sigil-hr">HR</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20%28Elliotte%20Rusty%20Harold%29.pdf#page=25">Chapter 1 — Basic Network Concepts</a>
+                <p class="read-sub">The Layers of a Network · IP, TCP, and UDP · The Client/Server Model</p>
+              </div>
+              <span class="read-page">PDF 25
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20-%20song%20ngu%20VI-EN.pdf#page=25">VI</a>
+              </span>
+            </li>
+          </ul>
+          <p class="unlock">
+            <span class="label">Mở ra</span>
+            <span>phần đầu <code>README.md</code> và lý do project chia ba package <code>common</code> / <code>server</code> / <code>client</code>.</span>
+          </p>
+        </div>
+      </article>
+
+      <!-- CHẶNG 2 -->
+      <article class="stage">
+        <div class="rail"><span class="rail-num">02</span><span class="rail-line"></span></div>
+        <div class="stage-main">
+          <div class="stage-head"><h3>Luồng vào/ra và khung thông điệp</h3></div>
+          <p class="goal">
+            Phần hay bị bỏ qua nhất, và cũng là chỗ sinh nhiều lỗi nhất: quên <span class="mono">flush</span> thì dữ liệu
+            không bao giờ rời máy, quên đặt bảng mã thì tiếng Việt thành ký tự lạ, và TCP thì không tự biết đâu là
+            ranh giới một thông điệp.
+          </p>
+          <ul class="reads">
+            <li class="read">
+              <span class="sigil">GT</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Giao-trinh-Tieng-Viet/L%E1%BA%ADp%20tr%C3%ACnh%20m%E1%BA%A1ng.pdf#page=19">Chương 2, mục 2.1 — Lập trình vào ra với Java</a>
+                <p class="read-sub">2.1.1 Các lớp Java hỗ trợ nhập dữ liệu · 2.1.3 Các lớp hỗ trợ xuất dữ liệu</p>
+              </div>
+              <span class="read-page">tr. 12–18</span>
+            </li>
+            <li class="read">
+              <span class="sigil sigil-hr">HR</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20%28Elliotte%20Rusty%20Harold%29.pdf#page=49">Chapter 2 — Streams</a>
+                <p class="read-sub">Output Streams · Input Streams · Filter Streams · Readers and Writers (PDF 68)</p>
+              </div>
+              <span class="read-page">PDF 49
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20-%20song%20ngu%20VI-EN.pdf#page=49">VI</a>
+              </span>
+            </li>
+            <li class="read">
+              <span class="sigil">CJ2</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Core%20Java%20Vol%20II%20-%20Advanced%20Features%2011th%20Ed%20%28Horstmann%29.pdf#page=93">Chapter 2 — Input and Output</a>
+                <p class="read-sub">Tra cứu khi vướng: đọc/ghi text, bảng mã, buffer. Bản song ngữ 10th Ed. để chương này ở PDF 68.</p>
+              </div>
+              <span class="read-page">PDF 93
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Core%20Java%20Vol%20II%2010th%20Ed%20-%20song%20ngu%20VI-EN.pdf#page=68">VI</a>
+              </span>
+            </li>
+          </ul>
+          <p class="unlock">
+            <span class="label">Mở ra</span>
+            <span><code>Protocol.java</code> và phần dựng stream trong <code>ClientHandler.java</code>. Luyện tay ngay bằng loạt bài <span class="mono">TCPByte</span> / <span class="mono">TCPChar</span> / <span class="mono">TCPData</span> bạn đã có trong <span class="mono">D:\LapTrinhMang-BaiTap</span>.</span>
+          </p>
+        </div>
+      </article>
+
+      <!-- CHẶNG 3 -->
+      <article class="stage stage--core">
+        <div class="rail"><span class="rail-num">03</span><span class="rail-line"></span></div>
+        <div class="stage-main">
+          <div class="stage-head">
+            <h3>TCP socket: client trước, server sau</h3>
+            <span class="chip">Lõi của môn</span>
+          </div>
+          <p class="goal">
+            Chặng dài nhất và cũng là phần gần như chắc chắn vào đề. Đọc theo đúng thứ tự client rồi mới server:
+            <span class="mono">Socket</span> dễ hiểu hơn <span class="mono">ServerSocket</span>, và hiểu client rồi thì
+            server chỉ là chuyện thêm một vòng lặp <span class="mono">accept()</span>.
+          </p>
+          <ul class="reads">
+            <li class="read">
+              <span class="sigil">GT</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Giao-trinh-Tieng-Viet/L%E1%BA%ADp%20tr%C3%ACnh%20m%E1%BA%A1ng.pdf#page=53">Chương 4 — Lập trình với giao thức TCP/IP</a>
+                <p class="read-sub">4.2.1 Lớp InetAddress (tr. 47) · 4.2.2 Lớp Socket (tr. 49) · 4.2.3 Lớp ServerSocket · 4.3.1 Chương trình phía server · 4.3.2 Chương trình client · 4.3.3 Luồng nhập/xuất mạng · 4.4 Case study: login từ xa</p>
+              </div>
+              <span class="read-page">tr. 46–68</span>
+            </li>
+            <li class="read">
+              <span class="sigil">GB</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/OS-Linux-Networking/An%20Introduction%20to%20Network%20Programming%20with%20Java.pdf#page=19">Chapter 2 — Starting Network Programming in Java</a>
+                <p class="read-sub">2.1 The InetAddress Class · 2.2.1 TCP Sockets · 2.3 Network Programming with GUIs (tr. 28)</p>
+              </div>
+              <span class="read-page">tr. 9–50
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/OS-Linux-Networking/An%20Introduction%20to%20Network%20Programming%20-%20song%20ngu%20VI-EN.pdf#page=19">VI</a>
+              </span>
+            </li>
+            <li class="read">
+              <span class="sigil sigil-hr">HR</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20%28Elliotte%20Rusty%20Harold%29.pdf#page=261">Chapter 8 — Sockets for Clients</a>
+                <p class="read-sub">Using Sockets · Constructing and Connecting Sockets · Setting Socket Options (PDF 283) · Socket Exceptions · Sockets in GUI Applications (PDF 292)</p>
+              </div>
+              <span class="read-page">PDF 261
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20-%20song%20ngu%20VI-EN.pdf#page=261">VI</a>
+              </span>
+            </li>
+            <li class="read">
+              <span class="sigil sigil-hr">HR</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20%28Elliotte%20Rusty%20Harold%29.pdf#page=307">Chapter 9 — Sockets for Servers</a>
+                <p class="read-sub">Using ServerSockets · Logging (PDF 321) · Constructing Server Sockets · Socket Options</p>
+              </div>
+              <span class="read-page">PDF 307
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20-%20song%20ngu%20VI-EN.pdf#page=307">VI</a>
+              </span>
+            </li>
+            <li class="read">
+              <span class="sigil">CJ2</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Core%20Java%20Vol%20II%20-%20Advanced%20Features%2011th%20Ed%20%28Horstmann%29.pdf#page=369">Chapter 4 — Networking</a>
+                <p class="read-sub">4.1 Connecting to a Server · 4.2 Implementing Servers · 4.3 Interruptible Sockets. Nút VI mở bản song ngữ 10th Ed. ở PDF 254.</p>
+              </div>
+              <span class="read-page">PDF 369
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Core%20Java%20Vol%20II%2010th%20Ed%20-%20song%20ngu%20VI-EN.pdf#page=254">VI</a>
+              </span>
+            </li>
+          </ul>
+          <p class="unlock">
+            <span class="label">Mở ra</span>
+            <span><code>GameClient.connect()</code>, <code>GameServer.start()</code> và vòng lặp <code>accept()</code> — đọc xong là hiểu trọn hai file này.</span>
+          </p>
+        </div>
+      </article>
+
+      <!-- CHẶNG 4 -->
+      <article class="stage">
+        <div class="rail"><span class="rail-num">04</span><span class="rail-line"></span></div>
+        <div class="stage-main">
+          <div class="stage-head"><h3>Đa luồng: thứ biến một server thành server thật</h3></div>
+          <p class="goal">
+            Một server chỉ chạy được một luồng thì chỉ phục vụ được một người. Chặng này giải thích vì sao mọi
+            phương thức đổi trạng thái ván cờ đều phải <span class="mono">synchronized</span>, và vì sao luồng đọc
+            mạng không được phép tự tay vẽ lên giao diện.
+          </p>
+          <ul class="reads">
+            <li class="read">
+              <span class="sigil">GT</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Giao-trinh-Tieng-Viet/L%E1%BA%ADp%20tr%C3%ACnh%20m%E1%BA%A1ng.pdf#page=26">Chương 2, mục 2.2 — Lập trình Thread với Java</a>
+                <p class="read-sub">2.2.1 Giới thiệu về Thread · 2.2.2 Lập trình với Thread (tr. 20) · 2.2.3 Ví dụ</p>
+              </div>
+              <span class="read-page">tr. 19–29</span>
+            </li>
+            <li class="read">
+              <span class="sigil">GB</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/OS-Linux-Networking/An%20Introduction%20to%20Network%20Programming%20with%20Java.pdf#page=61">Chapter 3 — Multithreading and Multiplexing</a>
+                <p class="read-sub">3.3 Multithreaded Servers (tr. 60) · 3.4 Locks and Deadlock (tr. 65) · 3.5 Synchronising Threads (tr. 67)</p>
+              </div>
+              <span class="read-page">tr. 51–74
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/OS-Linux-Networking/An%20Introduction%20to%20Network%20Programming%20-%20song%20ngu%20VI-EN.pdf#page=61">VI</a>
+              </span>
+            </li>
+            <li class="read">
+              <span class="sigil sigil-hr">HR</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20%28Elliotte%20Rusty%20Harold%29.pdf#page=77">Chapter 3 — Threads</a>
+                <p class="read-sub">Running Threads · Synchronization (PDF 94) · Deadlock (PDF 101) · Thread Pools and Executors (PDF 113)</p>
+              </div>
+              <span class="read-page">PDF 77
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20-%20song%20ngu%20VI-EN.pdf#page=77">VI</a>
+              </span>
+            </li>
+            <li class="read">
+              <span class="sigil">CJ1</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Core%20Java%20Vol%20I%20-%20Fundamentals%2012th%20Ed%20-%20song%20ngu%20VI-EN.pdf#page=1044">Chapter 12 — Concurrency</a>
+                <p class="read-sub">12.1 What Are Threads? · 12.4 Synchronization (PDF 1067) · 12.6 Tasks and Thread Pools (PDF 1140) · 12.7 Asynchronous Computations (PDF 1160). Muốn hiểu Swing thì đọc kèm Chapter 11 (PDF 911).</p>
+              </div>
+              <span class="read-page">PDF 1044
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Core%20Java%20Vol%20I%20-%20Fundamentals%2012th%20Ed%20-%20song%20ngu%20VI-EN.pdf#page=1044">VI</a>
+              </span>
+            </li>
+          </ul>
+          <p class="unlock">
+            <span class="label">Mở ra</span>
+            <span><code>GameSession.java</code> (mọi phương thức <span class="mono">synchronized</span>), thread pool trong <code>GameServer.java</code>, và <code>invokeLater</code> trong <code>GameFrame.java</code>.</span>
+          </p>
+        </div>
+      </article>
+
+      <!-- CHẶNG 5 -->
+      <article class="stage">
+        <div class="rail"><span class="rail-num">05</span><span class="rail-line"></span></div>
+        <div class="stage-main">
+          <div class="stage-head"><h3>Mở rộng: UDP, NIO, RMI, WebSocket</h3></div>
+          <p class="goal">
+            Đọc sau khi game XO đã chạy được. Đây là phần cho bài tập lớn và cho nửa sau của giáo trình —
+            mỗi mục ứng với một hướng nâng cấp project chứ không phải kiến thức rời.
+          </p>
+          <ul class="reads">
+            <li class="read">
+              <span class="sigil">GT</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Giao-trinh-Tieng-Viet/L%E1%BA%ADp%20tr%C3%ACnh%20m%E1%BA%A1ng.pdf#page=76">Chương 5 — Lập trình với giao thức UDP</a>
+                <p class="read-sub">5.2.1 DatagramPacket (tr. 70) · 5.2.2 DatagramSocket (tr. 71) · 5.4 Case study: login từ xa dùng UDP</p>
+              </div>
+              <span class="read-page">tr. 69–86</span>
+            </li>
+            <li class="read">
+              <span class="sigil">GT</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Giao-trinh-Tieng-Viet/L%E1%BA%ADp%20tr%C3%ACnh%20m%E1%BA%A1ng.pdf#page=94">Chương 6 — Lập trình chuyên sâu với socket</a>
+                <p class="read-sub">6.1 Socket vào/ra không chặn dừng (Java NIO, bộ đệm, kênh) · 6.2 Giao tiếp mạng (tr. 102) · 6.3 Lập trình mạng ngang hàng P2P</p>
+              </div>
+              <span class="read-page">tr. 87–139</span>
+            </li>
+            <li class="read">
+              <span class="sigil sigil-hr">HR</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20%28Elliotte%20Rusty%20Harold%29.pdf#page=417">Chapter 12 — UDP</a>
+                <p class="read-sub">The DatagramPacket Class · The DatagramSocket Class · Socket Options · DatagramChannel</p>
+              </div>
+              <span class="read-page">PDF 417
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20-%20song%20ngu%20VI-EN.pdf#page=417">VI</a>
+              </span>
+            </li>
+            <li class="read">
+              <span class="sigil sigil-hr">HR</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20%28Elliotte%20Rusty%20Harold%29.pdf#page=371">Chapter 11 — Nonblocking I/O</a>
+                <p class="read-sub">An Example Server (PDF 377) · Buffers · Channels · Readiness Selection (PDF 412)</p>
+              </div>
+              <span class="read-page">PDF 371
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/Java/Java%20Network%20Programming%204th%20Ed%20-%20song%20ngu%20VI-EN.pdf#page=371">VI</a>
+              </span>
+            </li>
+            <li class="read">
+              <span class="sigil">GB</span>
+              <div>
+                <a class="read-title" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/OS-Linux-Networking/An%20Introduction%20to%20Network%20Programming%20with%20Java.pdf#page=84">Mục 3.6 — Non-Blocking Servers</a>
+                <p class="read-sub">Đọc kèm giáo trình Chương 8 RMI (tr. 159) và Chương 9 WebSocket (tr. 179). Graba Chapter 5 RMI ở tr. 136.</p>
+              </div>
+              <span class="read-page">tr. 74
+                <a class="pill-vi" target="_blank" rel="noopener"
+                   href="file:///D:/Documentation/OS-Linux-Networking/An%20Introduction%20to%20Network%20Programming%20-%20song%20ngu%20VI-EN.pdf#page=84">VI</a>
+              </span>
+            </li>
+          </ul>
+          <p class="unlock">
+            <span class="label">Mở ra</span>
+            <span>kế hoạch 88 mục trong <span class="mono">D:\CaroOnline\KE-HOACH.md</span> — nâng bàn cờ 3×3 lên caro 15×15, thêm dò server bằng UDP, hoặc đổi server sang NIO.</span>
+          </p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= TRA CỨU NGƯỢC ================= -->
+  <section>
+    <div class="sec-head"><h2>Tra cứu ngược</h2><span class="rule"></span></div>
+    <p class="sec-note">
+      Khi đang đọc code mà vướng một chỗ, tra bảng này để biết chương nào giải thích chỗ đó.
+      Đường dẫn tính từ <span class="mono">D:\UBUNTU\tictactoe-network\src\</span>.
+    </p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Trong project</th><th>Đọc chương</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>server/GameServer.java</code><span class="what">ServerSocket, vòng lặp accept, thread pool</span></td>
+            <td>HR Ch.9 · GB 3.3 · GT 4.3.1</td>
+          </tr>
+          <tr>
+            <td><code>client/GameClient.java</code><span class="what">Socket, connect có timeout, luồng đọc nền</span></td>
+            <td>HR Ch.8 · GB 2.2.1 · GT 4.3.2</td>
+          </tr>
+          <tr>
+            <td><code>common/Protocol.java</code><span class="what">khung thông điệp một dòng, readLine, autoflush</span></td>
+            <td>HR Ch.2 · GT 2.1 · GT Ch.7 (giao thức tầng ứng dụng)</td>
+          </tr>
+          <tr>
+            <td><code>server/GameSession.java</code><span class="what">synchronized, tránh tranh chấp hai người bấm cùng ô</span></td>
+            <td>HR Ch.3 (Synchronization, Deadlock) · GB 3.4–3.5 · CJ1 12.4</td>
+          </tr>
+          <tr>
+            <td><code>client/GameFrame.java</code><span class="what">Swing, invokeLater, tách luồng mạng khỏi EDT</span></td>
+            <td>GB 2.3 · HR Ch.8 (Sockets in GUI Applications) · CJ1 Ch.11, 12.7</td>
+          </tr>
+          <tr>
+            <td><code>GameServer.listLocalIPv4()</code><span class="what">NetworkInterface, liệt kê IP của máy</span></td>
+            <td>HR Ch.4 (The NetworkInterface Class, PDF 132) · GT 6.2</td>
+          </tr>
+          <tr>
+            <td><code>socket.setTcpNoDelay(true)</code><span class="what">tuỳ chọn socket, thuật toán Nagle</span></td>
+            <td>HR Ch.8 (Setting Socket Options) · HR Ch.9 (Socket Options)</td>
+          </tr>
+          <tr>
+            <td><code>ClientHandler.run()</code><span class="what">một luồng cho mỗi kết nối, xử lý ngắt kết nối</span></td>
+            <td>GB 3.3 · HR Ch.3 (Thread Pools and Executors) · CJ1 12.6</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= ĐỌC THÊM ================= -->
+  <section>
+    <div class="sec-head"><h2>Đọc thêm khi cần đào sâu</h2><span class="rule"></span></div>
+    <div class="extras">
+      <div class="extra">
+        <div>
+          <a class="title-link" target="_blank" rel="noopener"
+             href="file:///D:/Documentation/OS-Linux-Networking/Stevens%20W.R.%20-%20TCP%20IP%20Illustrated%2C%20Vol.1%2C%20The%20Protocols.pdf">TCP/IP Illustrated, Vol. 1 — W. R. Stevens</a>
+          <p class="why">Khi muốn biết cái gì thật sự chạy dưới <span class="mono">Socket</span>: bắt tay ba bước, cửa sổ trượt, vì sao có thuật toán Nagle.</p>
+        </div>
+        <span class="where">OS-Linux-Networking\</span>
+      </div>
+      <div class="extra">
+        <div>
+          <a class="title-link" target="_blank" rel="noopener"
+             href="file:///D:/Documentation/_repo-technical-books/UNIX%20Network%20Programming%28Volume1%2C3rd%29.pdf">UNIX Network Programming, Vol. 1 — W. R. Stevens</a>
+          <p class="why">Cùng khái niệm nhưng bằng C, thấy rõ Java đã che giấu những gì cho mình.</p>
+        </div>
+        <span class="where">_repo-technical-books\</span>
+      </div>
+      <div class="extra">
+        <div>
+          <a class="title-link" target="_blank" rel="noopener"
+             href="file:///D:/Documentation/Go/Network%20Programming%20with%20Go%20%28Adam%20Woodbeck%29.pdf">Network Programming with Go — Adam Woodbeck</a>
+          <p class="why">Đối chiếu cách một ngôn ngữ khác giải cùng bài toán; hữu ích nếu sau này bạn chuyển sang Go.</p>
+        </div>
+        <span class="where">Go\</span>
+      </div>
+      <div class="extra">
+        <div>
+          <a class="title-link" target="_blank" rel="noopener"
+             href="file:///D:/Documentation/Giao-trinh-Tieng-Viet/M%E1%BA%A1ng%20m%C3%A1y%20t%C3%ADnh.pdf">Mạng máy tính</a>
+          <p class="why">Chỉ 9 trang — là bản tóm tắt hoặc đề cương, không phải giáo trình đầy đủ. Đừng trông chờ nhiều.</p>
+        </div>
+        <span class="where">Giao-trinh-Tieng-Viet\</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="note">
+    <p>
+      <b>Vì sao có hai kiểu số trang.</b> Với giáo trình tiếng Việt và cuốn Graba, số hiển thị là
+      <b>số trang in trong sách</b> — nhưng liên kết đã tự cộng bù phần đầu sách (giáo trình lệch 7 trang,
+      Graba lệch 10 trang) nên bấm vào là tới đúng chỗ. Với Harold và Core Java, số hiển thị chính là
+      <b>số trang của file PDF</b>, gõ thẳng vào ô số trang của trình đọc cũng ra.
+    </p>
+    <p>
+      <b>Bản dịch.</b> Bốn trong năm cuốn có bản song ngữ VI-EN nằm sẵn cùng thư mục — nút
+      <span class="mono">VI</span> mở đúng trang tương ứng, thẻ <span class="mono">song ngữ VI-EN</span>
+      ở phần Tủ sách mở từ trang đầu. Bản song ngữ của Harold và Graba <b>trùng số trang</b> với bản gốc nên
+      nhảy tới đâu cũng khớp. Riêng Core Java Vol. II bản song ngữ là ấn bản <b>10th Ed.</b> nên số trang lệch hẳn:
+      chương Networking ở PDF 254 (bản gốc 11th Ed. là 369) và chương Input and Output ở PDF 68 (bản gốc là 93) —
+      các liên kết đã trỏ đúng theo từng bản. Core Java Vol. I chỉ có mỗi bản song ngữ, không có bản tiếng Anh
+      riêng trong tủ sách. Ba cuốn ở mục Đọc thêm thì chưa có bản dịch nào.
+    </p>
+    <p>
+      <b>Nếu bấm không mở được.</b> Chrome và Edge mở PDF ngay trong tab và nhảy đúng trang. Firefox cũng được.
+      Nếu trình duyệt tải file về thay vì mở, kiểm tra phần cài đặt PDF của trình duyệt. Và liên kết chỉ hoạt động
+      ở bản lưu trên máy, không hoạt động ở bản trên web.
+    </p>
+  </div>
+
+</div>
+
+<script>
+  // Lien ket file:/// chi chay duoc khi trang duoc mo tu o dia.
+  // Neu dang xem qua https:// (ban artifact tren web) thi tat lien ket va hien canh bao.
+  (function () {
+    var isLocal = location.protocol === "file:";
+    document.documentElement.dataset.env = isLocal ? "local" : "web";
+    var note = document.getElementById("webNote");
+    if (note) { note.hidden = isLocal; }
+    if (!isLocal) {
+      document.querySelectorAll('a[href^="file:"]').forEach(function (a) {
+        a.setAttribute("aria-disabled", "true");
+        a.setAttribute("tabindex", "-1");
+        a.addEventListener("click", function (e) { e.preventDefault(); });
+      });
+    }
+  })();
+</script>
+</body>
+</html>

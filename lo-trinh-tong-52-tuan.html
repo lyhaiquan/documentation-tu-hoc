@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lộ trình tổng 52 tuần — Cloud · AI Infra · Distributed Systems</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1d1f23;--mute:#666b75;--line:#dedbd2;--acc:#0b6e4f;--acc2:#b4530a;--soft:#eef4f0;--warn:#fff4e0}
+@media (prefers-color-scheme:dark){:root{--bg:#15171a;--card:#1d2024;--ink:#e6e4de;--mute:#9aa0aa;--line:#33373d;--acc:#5fcf9f;--acc2:#f0a860;--soft:#1f2a26;--warn:#33291a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Segoe UI",system-ui,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:28px 18px 80px}
+h1{font-size:28px;line-height:1.25;margin:0 0 6px}
+h2{font-size:20px;margin:38px 0 10px;padding-top:10px;border-top:2px solid var(--line)}
+h3{font-size:16px;margin:18px 0 6px}
+p{margin:8px 0}
+a{color:var(--acc)}
+code{font:13px Consolas,monospace;background:var(--soft);padding:1px 5px;border-radius:4px}
+.sub{color:var(--mute)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
+.warn{background:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:6px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--mute);font-weight:600}
+.tw{overflow-x:auto}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.meter{flex:1;min-width:140px;height:8px;background:var(--line);border-radius:5px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--acc);width:0}
+button{font:inherit;padding:5px 10px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink);cursor:pointer}
+nav.ph{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+nav.ph a{font-size:13px;text-decoration:none;border:1px solid var(--line);border-radius:14px;padding:2px 10px;background:var(--card)}
+details.wk{background:var(--card);border:1px solid var(--line);border-radius:10px;margin:10px 0}
+details.wk>summary{cursor:pointer;padding:11px 14px;font-weight:600;display:flex;gap:10px;align-items:baseline}
+details.wk>summary .n{color:var(--acc2);white-space:nowrap}
+details.wk>summary .pc{margin-left:auto;color:var(--mute);font-weight:400;font-size:13px;white-space:nowrap}
+.in{padding:0 14px 14px}
+.goal{color:var(--mute);margin:0 0 8px}
+.day{display:grid;grid-template-columns:22px 34px 1fr;gap:6px;padding:7px 0;border-top:1px dashed var(--line)}
+.day b.dn{color:var(--acc2)}
+.day .rd{margin:0}.day .pr{margin:2px 0 0;color:var(--mute)}
+.day.done .rd,.day.done .pr{opacity:.5}
+.lk{margin:10px 0 0;padding:10px 12px;background:var(--soft);border-radius:8px}
+.lk ul{margin:4px 0 0;padding-left:18px}
+.tag{font-size:11px;border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-right:4px;color:var(--mute)}
+.ck{margin-top:10px;padding:8px 12px;border-left:3px solid var(--acc2)}
+.phd{margin-top:34px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Lộ trình tổng 52 tuần</h1>
+<p class="sub">Vận hành hạ tầng cloud · AI infrastructure · hệ phân tán — lịch theo tuần và theo ngày, xếp theo thứ tự ưu tiên. Lập ngày 16/11/2026. Nhịp: 6 ngày học + 1 ngày ôn mỗi tuần; mỗi ngày 2–3 giờ lý thuyết và 1–2 giờ thực hành.</p>
+
+<h2>Nói thẳng về chuyện bị AI thay thế</h2>
+<div class="box">
+<p>Bạn nói đúng: viết CRUD, viết Dockerfile, viết manifest Kubernetes, giải thích deadlock trên giấy — những việc đó AI làm trong vài chục giây, và đó chính là phần việc ngày xưa giao cho người mới ra trường. Tôi không thể hứa mảng nào là an toàn tuyệt đối; không ai dự đoán chắc được 5 năm tới. Cái tôi nói được là phần việc nào hiện giờ AI làm kém và vì sao:</p>
+<ul>
+<li><b>Trạng thái của một hệ thống đang chạy không nằm trong văn bản.</b> Sự cố thật nằm trong bộ đệm nhân, bảng conntrack, hàng đợi đĩa, một node lệch đồng hồ. Muốn hỏi AI đúng câu thì phải biết nhìn vào đâu, và muốn biết giả thuyết của nó sai thì phải có mô hình trong đầu về cách các tầng nối với nhau.</li>
+<li><b>Ai đó phải chịu trách nhiệm.</b> Quyết định xoá một volume, chuyển leader, cắt 30% lưu lượng lúc 2 giờ sáng là quyết định có tiền thật và dữ liệu thật. Công ty giao việc đó cho người họ tin là hiểu hậu quả.</li>
+<li><b>Giới hạn vật lý và kinh tế.</b> Băng thông, độ trễ đĩa, bộ nhớ GPU, tiền điện. AI infra càng lớn thì các ràng buộc này càng quyết định, và chúng không biến mất khi code được viết nhanh hơn.</li>
+</ul>
+<p>Hệ quả cho người mới: ngưỡng vào nghề cao hơn. Người chỉ biết dùng công cụ thì bị thay; người kiểm chứng được đầu ra của AI và vận hành được hệ thống thật thì làm được việc của ba người. Lộ trình này nhắm vào nhóm thứ hai, nên nó dành phần lớn thời gian cho hệ điều hành, mạng, lưu trữ và đồng thuận — những thứ nằm dưới mọi framework.</p>
+<p><b>Luật dùng AI trong lộ trình:</b> giờ thực hành tự làm trước, bí quá 30 phút mới hỏi; hỏi AI để giải thích và để soát bài, không để nó viết lab hộ. Cuối mỗi tuần có một câu tự kiểm — trả lời bằng miệng, không nhìn tài liệu, không hỏi AI.</p>
+</div>
+
+<h2>Thực tế về mục tiêu của bạn</h2>
+<div class="box warn">
+<ul>
+<li><b>15–20 triệu khi ra trường:</b> trong tầm với ở mảng hạ tầng/SRE/cloud nếu bạn có 2–3 dự án chứng minh được chiều sâu (ba cột mốc dự án ở tuần 12, 39, 50). Không có gì đảm bảo; hồ sơ và phỏng vấn quyết định.</li>
+<li><b>Công ty nước ngoài:</b> rào cản lớn nhất là tiếng Anh, không phải kỹ thuật. Từ 4.0 lên mức đọc tài liệu trôi chảy trong một năm là làm được bằng cách đọc mỗi ngày; nói và phỏng vấn bằng tiếng Anh cần luyện riêng. Coi đây là mục tiêu cho công việc thứ hai nếu sau tuần 40 bạn chưa nói được 3 phút liền về một dự án của mình.</li>
+<li><b>Tải thực tế:</b> 4–5 giờ mỗi ngày trong 52 tuần, cộng thêm đồ án trên trường và dự án DeepTutor bạn đang dẫn dắt, là rất nặng. Hãy gộp việc: phần hạ tầng phục vụ mô hình của DeepTutor có thể chính là dự án tuần 47–50.</li>
+<li><b>Mốc nộp hồ sơ:</b> thực tập từ tuần 26, fresher từ tuần 39. Đừng đợi học xong mới nộp.</li>
+</ul>
+</div>
+
+<h2>Lịch một ngày và cách xử lý tiếng Anh</h2>
+<div class="box">
+<div class="tw"><table>
+<tr><th>Khối</th><th>Thời lượng</th><th>Làm gì</th></tr>
+<tr><td>Khởi động</td><td>20–30 phút</td><td>Ôn thẻ từ vựng hôm trước (Anki, 10 từ chuyên ngành mới mỗi ngày, ghi cả câu ví dụ lấy từ sách). Đọc lướt phần hôm nay bằng bản tiếng Việt hoặc song ngữ nếu có.</td></tr>
+<tr><td>Đọc</td><td>90–120 phút</td><td>Đọc bản tiếng Anh của đúng phần đó. Không dịch từng câu; chỉ tra từ chặn nghĩa cả đoạn.</td></tr>
+<tr><td>Ghi</td><td>20–30 phút</td><td>Gấp sách, viết tay trả lời: cơ chế này giải quyết vấn đề gì, hỏng thì trông ra sao, lệnh nào để nhìn thấy nó.</td></tr>
+<tr><td>Thực hành</td><td>60–120 phút</td><td>Bài của ngày. Chạy thật, chụp kết quả vào sổ ghi (một repo <code>notes</code> trên GitHub).</td></tr>
+<tr><td>Ngày thứ 7</td><td>2–3 giờ</td><td>Trả lời câu tự kiểm của tuần, đọc/xem mục “Thực tế”, viết ghi chú tuần, bù phần còn nợ. Nợ quá 2 ngày thì lùi cả lịch một tuần, không học dồn.</td></tr>
+</table></div>
+<p><b>Thang tiếng Anh theo giai đoạn:</b> tuần 1–12 đọc Việt trước rồi Anh sau, xem video có phụ đề Anh ở tốc độ 0.75; tuần 13–26 ghi chú tuần viết bằng tiếng Anh (5–10 câu); tuần 27–39 README và design doc của dự án viết bằng tiếng Anh; tuần 40 trở đi mỗi tuần tự ghi âm 3 phút giải thích một chủ đề. Sách chưa có bản Việt thì dùng skill <code>pdf-translate</code> bạn đã cài để làm bản song ngữ cho đúng các chương cần đọc.</p>
+</div>
+
+<h2>Quan hệ với các lộ trình bạn đã có</h2>
+<div class="box">
+<p>Trong thư mục này bạn đã có năm lộ trình chuyên đề. Tệp này là <b>lịch tổng</b>: nó quyết định thứ tự và thời điểm; các tệp kia là phần đào sâu có số trang chính xác. Khi hai bên lệch nhau về thứ tự, theo tệp này.</p>
+<div class="tw"><table>
+<tr><th>Tệp cũ</th><th>Dùng ở</th><th>Cách dùng</th></tr>
+<tr><td><a href="ke-hoach-he-thong.html">ke-hoach-he-thong.html</a> (71 buổi chồng sách)</td><td>Tuần 2–9, 13–19, 27–30</td><td>Mở mô-đun tương ứng để lấy số trang và ô “Vì sao ghép”.</td></tr>
+<tr><td><a href="lo-trinh-c.html">lo-trinh-c.html</a> (55 đơn vị)</td><td>Tuần 2–9</td><td>Chỉ học đơn vị nào bài lab cần. Không học hết C trước rồi mới học hệ điều hành.</td></tr>
+<tr><td><a href="ke-hoach-vdt.html">ke-hoach-vdt.html</a></td><td>Tuần 1, 20–25, 40</td><td>Nếu đã xong VDT, các tuần này đi nhanh hơn; dùng thời gian dư cho lab.</td></tr>
+<tr><td><a href="lo-trinh-aws.html">lo-trinh-aws.html</a></td><td>Tuần 43–44</td><td>Đọc mục an toàn tài khoản trước khi tạo bất cứ thứ gì.</td></tr>
+<tr><td><a href="lo-trinh-ai-infrastructure.html">lo-trinh-ai-infrastructure.html</a></td><td>Tuần 45–50</td><td>Lấy số trang hai tập Machine Learning Systems từ đây.</td></tr>
+</table></div>
+</div>
+
+<h2>Sách dùng trong lộ trình</h2>
+<div class="box"><div class="tw"><table id="books"></table></div>
+<p class="sub">Số chương của Stevens tính theo bản 1 (1994). Nếu tệp của bạn là bản 2, tìm chương cùng tên. Số chương Learning Go theo bản 1 (2021), Container Security theo tên chương vì hai bản đánh số khác nhau.</p></div>
+
+<h2>Nếu trễ lịch thì cắt ở đâu</h2>
+<div class="box">
+<p>Không bao giờ cắt giai đoạn 1, 3, 4, 6 — đó là xương sống. Thứ tự cắt khi buộc phải cắt: tuần 44 (Terraform, học khi đi làm cũng kịp) → tuần 49 (huấn luyện phân tán) → tuần 28 (LSM) → tuần 30 → tuần 8. Tuần 51–52 là đệm: nếu trễ dưới hai tuần thì dùng chúng để bù.</p>
+</div>
+
+<div class="bar">
+<b id="pct">0%</b><div class="meter"><i id="mi"></i></div>
+<span class="sub" id="cnt"></span>
+<button id="go">Tới tuần đang học</button>
+<button id="rs">Xoá tiến độ</button>
+</div>
+<nav class="ph" id="phnav"></nav>
+<div id="plan"></div>
+
+<h2>Nguồn đọc thêm xuyên suốt</h2>
+<div class="box"><ul>
+<li><a href="https://github.com/danluu/post-mortems">danluu/post-mortems</a> — kho báo cáo sự cố thật của các công ty lớn. Mỗi ngày thứ 7 đọc một bài thuộc chủ đề của tuần.</li>
+<li><a href="https://www.cloudflare.com/learning/">Cloudflare Learning Center</a> — giải thích mạng bằng tiếng Anh đơn giản, hợp để luyện đọc ở giai đoạn đầu.</li>
+<li><a href="https://www.youtube.com/@hnasr">Hussein Nasser</a> — video về mạng, proxy, cơ sở dữ liệu nhìn từ phía vận hành; nói chậm, dễ nghe.</li>
+<li><a href="https://iximiuz.com/en/">iximiuz.com</a> và <a href="https://labs.iximiuz.com">labs.iximiuz.com</a> — container và mạng Linux có hình vẽ và lab chạy trên trình duyệt.</li>
+<li><a href="https://jvns.ca">jvns.ca</a> — Julia Evans, các bài ngắn về Linux, mạng, gỡ lỗi.</li>
+<li><a href="https://sadservers.com">SadServers</a> — máy Linux hỏng thật, bạn vào sửa. Làm một bài mỗi tuần từ tuần 9.</li>
+<li><a href="https://huyenchip.com/blog/">Chip Huyền</a> — blog về hệ thống ML, tác giả người Việt, viết tiếng Anh rõ ràng.</li>
+</ul></div>
+
+</div>
+<script>
+(function(){
+"use strict";
+var BOOKS=[
+["CSAPP","Computer Systems: A Programmer's Perspective 3e","OS-Linux-Networking/CSAPP_2016.pdf"],
+["OSTEP","Operating Systems: Three Easy Pieces","OS-Linux-Networking/Operating Systems - Three Easy Pieces.pdf"],
+["TLPI","The Linux Programming Interface (Kerrisk)","OS-Linux-Networking/The Linux Programming Interface (Kerrisk).pdf"],
+["Stevens","TCP/IP Illustrated Vol.1","OS-Linux-Networking/Stevens W.R. - TCP IP Illustrated, Vol.1, The Protocols.pdf"],
+["UNP","UNIX Network Programming Vol.1 3e","_repo-technical-books/UNIX Network Programming(Volume1,3rd).pdf"],
+["MMT","Mạng máy tính (giáo trình tiếng Việt)","Giao-trinh-Tieng-Viet/Mạng máy tính.pdf"],
+["LearnGo","Learning Go (Bodner)","Go/Learning Go 1st Ed 2021 (Jon Bodner).pdf"],
+["NetGo","Network Programming with Go (Woodbeck)","Go/Network Programming with Go (Adam Woodbeck).pdf"],
+["DSGo","Distributed Services with Go (Jeffery)","Go/Distributed Services with Go (Travis Jeffery).pdf"],
+["ConSec","Container Security 2e (Liz Rice)","Kubernetes/Container Security 2nd Ed (Liz Rice).pdf"],
+["KUAR","Kubernetes Up and Running 3e","Kubernetes/Kubernetes Up and Running - 3rd Ed 2022 (Early Release).pdf"],
+["DDIA","Designing Data-Intensive Applications","System-Design-Architecture/Designing Data-Intensive Applications (Kleppmann).pdf"],
+["DDIA-VI","DDIA bản tiếng Việt","System-Design-Architecture/Designing Data-Intensive Applications - ban tieng Viet.pdf"],
+["DBI","Database Internals (Petrov)","Database/Database Internals - A Deep Dive (Alex Petrov).pdf"],
+["PG14","PostgreSQL 14 Internals (Rogov)","Database/PostgreSQL 14 Internals (Egor Rogov).pdf"],
+["DEDS","Designing Event-Driven Systems (song ngữ)","System-Design-Architecture/Designing Event-Driven Systems - song ngu VI-EN.pdf"],
+["MLS1","Machine Learning Systems Vol 1","AI-ML/Machine Learning Systems Vol 1.pdf"],
+["MLS2","Machine Learning Systems Vol 2","AI-ML/Machine Learning Systems Vol 2.pdf"],
+["SDI2","System Design Interview Vol 2 (Alex Xu)","System-Design-Architecture/System Design Interview Vol 2 (Alex Xu).pdf"]
+];
+var PH=[
+["Giai đoạn 0 — Khởi động","Tuần 1–2","Dòng lệnh Linux và cái máy nhìn từ dưới lên. Mọi tuần sau đều dùng tới."],
+["Giai đoạn 1 — Hệ điều hành","Tuần 3–9","Tiến trình, bộ nhớ, tệp, đồng thời. Container, cơ sở dữ liệu, GPU đều là ứng dụng của các cơ chế này. Ưu tiên số một."],
+["Giai đoạn 2 — Go","Tuần 10–12","Ngôn ngữ của Kubernetes, etcd, Docker, Prometheus. Học đủ để tự viết dịch vụ mạng. Dự án số 1."],
+["Giai đoạn 3 — Mạng","Tuần 13–19","Từ khung Ethernet tới TLS và cân bằng tải. Phần lớn sự cố hạ tầng là sự cố mạng."],
+["Giai đoạn 4 — Container và Kubernetes","Tuần 20–26","Tự dựng container bằng tay, tự dựng cụm bằng tay, rồi tự viết controller. Học cơ chế, không học thuộc YAML."],
+["Giai đoạn 5 — Lưu trữ và cơ sở dữ liệu","Tuần 27–30","B-tree, LSM, WAL, MVCC, nhân bản. Nơi dữ liệu thật sự sống và mất."],
+["Giai đoạn 6 — Hệ phân tán","Tuần 31–39","Nhân bản, đồng hồ, nhất quán, Raft. Tự cài Raft và một commit log phân tán. Dự án số 2."],
+["Giai đoạn 7 — Độ tin cậy và vận hành","Tuần 40–42","Quan sát, quá tải, sự cố, postmortem. Đây là việc hằng ngày của SRE."],
+["Giai đoạn 8 — Cloud và hạ tầng dạng code","Tuần 43–44","AWS chỉ là các khái niệm mạng và hệ điều hành bạn đã học, có hoá đơn kèm theo."],
+["Giai đoạn 9 — AI infrastructure","Tuần 45–50","GPU, phục vụ mô hình, lập lịch GPU trên Kubernetes. Dự án số 3."],
+["Giai đoạn 10 — Hồ sơ và phỏng vấn","Tuần 51–52","Viết lại, trình bày, nộp. Cũng là hai tuần đệm."]
+];
+var T={v:"video",a:"bài viết",l:"lab",r:"repo",p:"paper",s:"sự cố thật"};
+var W=[
+{n:1,p:0,t:"Dòng lệnh Linux và thói quen học",g:"Sống được trong terminal: tìm, lọc, nối lệnh, đọc man page, theo dõi một tiến trình.",d:[
+["Missing Semester bài 1–2 (Shell, Shell Tools). TLPI ch.2 mục 2.1–2.6.","Cài Ubuntu trên WSL2 hoặc máy ảo. OverTheWire Bandit cấp 0–8."],
+["Missing Semester bài 4 (Data Wrangling). TLPI ch.2 phần còn lại.","Bandit cấp 9–15. Lấy một tệp log thật (<code>/var/log/syslog</code>), dùng <code>grep</code>, <code>awk</code>, <code>sort</code>, <code>uniq -c</code> đếm 10 dòng lặp nhiều nhất."],
+["TLPI ch.3 (System Programming Concepts): system call, mã lỗi, <code>errno</code>.","<code>strace ls</code>, <code>strace -c cat tệp</code>. Ghi lại 10 system call gặp nhiều nhất và đoán việc của từng cái trước khi tra."],
+["Missing Semester bài 5 (Command-line Environment) và 6 (Git).","Thiết lập tmux, khoá SSH, repo <code>notes</code> trên GitHub. Bandit cấp 16–20."],
+["Bài “Linux Performance Analysis in 60,000 Milliseconds” (Netflix). Đọc man của <code>top</code>, <code>vmstat</code>, <code>iostat</code>, <code>ss</code>.","Chạy đủ 10 lệnh trong bài trên máy mình, viết một dòng giải nghĩa cho mỗi cột quan trọng."],
+["Đọc <code>man proc</code> phần <code>/proc/[pid]</code>. Xem bài nói của Julia Evans.","SadServers: hai bài mức Easy. Ghi lại các lệnh đã dùng để chẩn đoán."]],
+r:[["l","Missing Semester (MIT)","https://missing.csail.mit.edu/"],["l","OverTheWire Bandit","https://overthewire.org/wargames/bandit/"],["a","Linux Performance Analysis in 60,000 ms","https://netflixtechblog.com/linux-performance-analysis-in-60-000-milliseconds-accc10403c55"],["l","SadServers","https://sadservers.com"],["v","Julia Evans — So you want to be a wizard","https://www.youtube.com/watch?v=FBMC9bm-KuU"]],
+c:"Máy chậm, bạn có 60 giây. Gõ những lệnh nào, theo thứ tự nào, mỗi lệnh loại trừ được giả thuyết gì?"},
+{n:2,p:0,t:"Cái máy bên dưới chương trình",g:"Biết một tệp C biến thành tiến trình thế nào; đọc được assembly ở mức nhận ra hàm, vòng lặp, ngăn xếp. Tương ứng mô-đun 1, 2, 4 của ke-hoach-he-thong.",d:[
+["CSAPP ch.1 (A Tour of Computer Systems), đọc trọn.","Viết <code>hello.c</code>; chạy <code>gcc -E</code>, <code>-S</code>, <code>-c</code>, rồi <code>objdump -d</code>. Mỗi bước sinh ra tệp gì?"],
+["CSAPP ch.2 mục 2.1 (bit, byte, thứ tự byte).","In từng byte của một <code>int</code> và một <code>struct</code>; đối chiếu với <code>xxd</code>. Giải thích vì sao gói tin mạng cần <code>htons</code>."],
+["CSAPP ch.2 mục 2.2–2.3 (số nguyên, tràn số).","Viết ba ví dụ tràn số gây lỗi thật (cộng kích thước, so sánh signed/unsigned, vòng lặp đếm lùi unsigned)."],
+["CSAPP ch.3 mục 3.1–3.6 (đọc mã máy, điều khiển).","Dùng Compiler Explorer: viết 5 hàm nhỏ, đoán assembly trước khi xem. So <code>-O0</code> với <code>-O2</code>."],
+["CSAPP ch.3 mục 3.7 và 3.10 (thủ tục, ngăn xếp, tràn bộ đệm).","<code>gdb</code>: đặt breakpoint, <code>bt</code>, xem khung ngăn xếp của hàm đệ quy. Cố ý gây segfault và đọc core dump."],
+["CSAPP ch.7 mục 7.1–7.7 và 7.10–7.12 (liên kết tĩnh, động).","<code>ldd</code>, <code>nm</code>, <code>LD_DEBUG=libs</code>. Tự tạo một thư viện <code>.so</code>, rồi làm chương trình hỏng vì không tìm thấy nó và sửa."]],
+r:[["l","Compiler Explorer","https://godbolt.org"],["l","CSAPP labs (Data Lab, Bomb Lab)","https://csapp.cs.cmu.edu/3e/labs.html"],["r","alex/what-happens-when","https://github.com/alex/what-happens-when"]],
+c:"Từ lúc gõ <code>./hello</code> tới lúc chữ hiện ra: kể tên những thành phần tham gia (shell, nhân, trình nạp, thư viện động) và việc của từng cái."},
+{n:3,p:1,t:"Tiến trình và system call",g:"Hiểu fork/exec/wait đủ để tự viết một shell. Mô-đun 5 của ke-hoach-he-thong.",d:[
+["OSTEP ch.4 (Processes) và ch.5 (Process API).","Làm homework ch.5 trong repo ostep-homework (8 bài về <code>fork</code>)."],
+["OSTEP ch.6 (Limited Direct Execution).","Homework ch.6: đo chi phí một system call và một lần chuyển ngữ cảnh trên máy bạn. Ghi con số."],
+["CSAPP ch.8 mục 8.1–8.4 (ngoại lệ, tiến trình, điều khiển tiến trình).","Giải các bài đố fork trong sách: vẽ cây tiến trình trước, chạy để kiểm sau."],
+["TLPI ch.24–26 (tạo, kết thúc, chờ tiến trình con).","Tạo một zombie và một tiến trình mồ côi; tìm chúng bằng <code>ps -ef --forest</code>. Ai nhận nuôi tiến trình mồ côi?"],
+["TLPI ch.27 (exec) và ch.44 mục 44.1–44.4 (pipe).","Bắt đầu viết shell bằng C: đọc dòng, tách đối số, <code>fork</code> + <code>execvp</code> + <code>waitpid</code>."],
+["Đọc bài của Stephen Brennan về viết shell. Ôn lại bảng file descriptor.","Thêm <code>cd</code>, chuyển hướng <code>&gt;</code> <code>&lt;</code> bằng <code>dup2</code>, và một pipe <code>|</code>. Đẩy lên GitHub."]],
+r:[["r","ostep-homework","https://github.com/remzi-arpacidusseau/ostep-homework"],["a","Write a Shell in C","https://brennan.io/2015/01/16/write-a-shell-in-c/"],["a","OSTEP bản web miễn phí","https://pages.cs.wisc.edu/~remzi/OSTEP/"]],
+c:"Vì sao Unix tách <code>fork</code> và <code>exec</code> thành hai bước? Việc tách đó cho phép shell làm chuyển hướng và pipe như thế nào?"},
+{n:4,p:1,t:"Tín hiệu và lập lịch CPU",g:"Biết tiến trình bị dừng, bị giết, bị nhường CPU ra sao — nền của graceful shutdown và giới hạn CPU trong container.",d:[
+["CSAPP ch.8 mục 8.5 (Signals).","Viết chương trình bắt <code>SIGINT</code> và <code>SIGTERM</code>, dọn dẹp rồi thoát. Thử <code>kill -9</code> và giải thích vì sao không bắt được."],
+["TLPI ch.20 (Signals: Fundamental Concepts), lướt ch.21 mục về hàm an toàn với tín hiệu.","Thêm xử lý <code>SIGCHLD</code> vào shell tuần trước để không còn zombie. Thêm chạy nền bằng <code>&amp;</code>."],
+["OSTEP ch.7 (Scheduling: Introduction) và ch.8 (MLFQ).","Homework ch.7 và 8 bằng trình mô phỏng: tính turnaround và response time bằng tay, so với kết quả."],
+["OSTEP ch.9 (Proportional Share) và ch.10 (Multiprocessor Scheduling).","Chạy 4 vòng lặp bận trên 2 nhân bằng <code>taskset</code>; đổi <code>nice</code>; xem <code>top</code> chia CPU thế nào."],
+["Tài liệu nhân Linux về cgroup v2, phần bộ điều khiển CPU (<code>cpu.max</code>, <code>cpu.weight</code>).","Tạo cgroup bằng tay trong <code>/sys/fs/cgroup</code>, đặt <code>cpu.max</code> = 20%, cho vòng lặp bận vào, đọc <code>cpu.stat</code> xem số lần bị bóp."],
+["Đọc README của tini: vấn đề PID 1 trong container.","Chạy một container Docker có tiến trình con chết; quan sát zombie khi không có init. Thêm <code>--init</code> và so sánh."]],
+r:[["r","krallin/tini — vì sao container cần init","https://github.com/krallin/tini"],["a","Kubernetes: vòng đời kết thúc của Pod (SIGTERM, grace period)","https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination"],["a","cgroup v2 (tài liệu nhân)","https://docs.kernel.org/admin-guide/cgroup-v2.html"]],
+c:"Kubernetes muốn tắt một Pod. Kể chuỗi sự kiện từ lúc gửi SIGTERM tới SIGKILL, và ứng dụng phải làm gì để không rơi request đang xử lý."},
+{n:5,p:1,t:"Bộ nhớ ảo (1): địa chỉ, trang, TLB",g:"Hiểu vì sao mỗi tiến trình thấy một không gian địa chỉ riêng và cái giá của điều đó. Mô-đun 6.",d:[
+["OSTEP ch.13 (Address Spaces) và ch.14 (Memory API).","Homework ch.14: dùng <code>valgrind</code> bắt rò rỉ, đọc ngoài mảng, dùng sau khi free."],
+["OSTEP ch.15 (Address Translation) và ch.16 (Segmentation).","Homework mô phỏng dịch địa chỉ: tự dịch bằng tay 10 địa chỉ."],
+["OSTEP ch.18 (Paging: Introduction).","In địa chỉ của biến stack, heap, hàm, biến toàn cục; đối chiếu với <code>/proc/self/maps</code>."],
+["OSTEP ch.19 (TLB).","Homework ch.19: đo thời gian truy cập khi số trang tăng dần, vẽ đồ thị, tìm chỗ gãy do TLB."],
+["OSTEP ch.20 (Smaller Tables: bảng trang nhiều cấp).","Tính bằng tay: tiến trình dùng 1 GB, trang 4 KB, cần bao nhiêu mục bảng trang? Với trang lớn 2 MB thì sao?"],
+["CSAPP ch.9 mục 9.1–9.6 (đọc lại cùng nội dung từ góc chương trình).","<code>perf stat -e page-faults,dTLB-load-misses</code> trên một chương trình duyệt mảng theo hàng rồi theo cột. Giải thích chênh lệch."]],
+r:[["a","Julia Evans — How much memory is my process using?","https://jvns.ca/blog/2016/12/03/how-much-memory-is-my-process-using-/"],["a","Tài liệu nhân: /proc/[pid]/maps và smaps","https://docs.kernel.org/filesystems/proc.html"]],
+c:"Hai tiến trình cùng in ra địa chỉ <code>0x7ffd…</code> cho biến của mình mà không đè lên nhau. Vì sao? Cái gì xảy ra trong CPU mỗi lần truy cập bộ nhớ?"},
+{n:6,p:1,t:"Bộ nhớ ảo (2): swap, mmap, cấp phát, OOM",g:"Giải thích được RSS, page cache, overcommit, và vì sao container bị OOMKilled.",d:[
+["OSTEP ch.21 (Swapping: Mechanisms) và ch.22 (Policies).","<code>vmstat 1</code> trong lúc một chương trình cấp phát dần; quan sát cột <code>si/so</code>, <code>free</code>, <code>cache</code>."],
+["OSTEP ch.23 (Complete VM Systems, phần Linux).","Đọc <code>/proc/meminfo</code>: giải nghĩa MemFree, MemAvailable, Cached, Dirty."],
+["CSAPP ch.9 mục 9.8 (Memory Mapping). TLPI ch.49 (mmap).","Viết chương trình đếm từ trong tệp 1 GB theo hai cách: <code>read</code> và <code>mmap</code>. Đo, so sánh số page fault."],
+["CSAPP ch.9 mục 9.9 (Dynamic Memory Allocation). TLPI ch.7.","Viết bộ cấp phát đơn giản kiểu free-list trên một vùng <code>mmap</code>. Hoặc làm Malloc Lab nếu dư sức."],
+["Tài liệu nhân về overcommit và OOM killer.","Đặt <code>memory.max</code> = 100 MB cho một cgroup, chạy chương trình ăn bộ nhớ, đọc <code>dmesg</code> và <code>memory.events</code>."],
+["CSAPP ch.6 mục 6.2–6.6 (tính cục bộ, cache). Mô-đun 3.","Nhân hai ma trận 1000×1000 theo ba thứ tự vòng lặp; đo. Dùng <code>perf stat -e cache-misses</code>."]],
+r:[["a","Linux ate my RAM","https://www.linuxatemyram.com"],["a","Tài liệu nhân: overcommit accounting","https://docs.kernel.org/mm/overcommit-accounting.html"],["a","Kubernetes: quản lý tài nguyên cho container","https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"]],
+c:"<code>free</code> báo còn 200 MB trống trên máy 16 GB. Máy có sắp hết bộ nhớ không? Bạn nhìn con số nào để trả lời?"},
+{n:7,p:1,t:"Vào/ra tệp và hệ thống tệp",g:"Biết ba tầng đệm giữa <code>write()</code> và đĩa, và inode là gì. Mô-đun 7.",d:[
+["CSAPP ch.10 (System-Level I/O).","Viết <code>cp</code> của riêng bạn bằng <code>read/write</code>; thử kích thước bộ đệm 1 byte, 4 KB, 1 MB; đo thời gian và đếm system call bằng <code>strace -c</code>."],
+["TLPI ch.4 và ch.5 (File I/O).","Thí nghiệm: hai tiến trình cùng ghi một tệp có và không có <code>O_APPEND</code>. Giải thích kết quả bằng bảng file mô tả mở."],
+["TLPI ch.13 (File I/O Buffering).","Đo chi phí <code>fsync</code> mỗi lần ghi so với ghi gộp. Xem <code>Dirty</code> trong <code>/proc/meminfo</code> thay đổi."],
+["OSTEP ch.36 (I/O Devices) và ch.37 (Hard Disk Drives).","<code>iostat -x 1</code> khi chạy <code>dd</code>. Giải nghĩa <code>await</code>, <code>%util</code>, <code>aqu-sz</code>."],
+["OSTEP ch.39 (Files and Directories).","<code>stat</code>, <code>ls -i</code>, tạo hard link và symlink; xoá tệp đang được mở rồi tìm nó trong <code>/proc/PID/fd</code>."],
+["OSTEP ch.40 (File System Implementation).","Tạo một ảnh ext4 bằng <code>dd</code> + <code>mkfs</code> + mount loop; làm hết inode (không hết dung lượng) và đọc lỗi nhận được."]],
+r:[["a","Tài liệu fio","https://fio.readthedocs.io/en/latest/fio_doc.html"],["a","Brendan Gregg — Linux Performance (bản đồ công cụ)","https://www.brendangregg.com/linuxperf.html"]],
+c:"Đĩa báo đầy nhưng <code>du</code> không tìm ra tệp lớn nào. Nêu hai nguyên nhân và cách kiểm từng cái."},
+{n:8,p:1,t:"Nhất quán khi sập và thiết bị lưu trữ",g:"Hiểu vì sao “đã ghi” chưa chắc là “đã bền”. Nền của WAL trong mọi cơ sở dữ liệu.",d:[
+["OSTEP ch.42 (Crash Consistency: FSCK and Journaling).","Vẽ lại chuỗi ghi của journaling chế độ ordered. Xem tuỳ chọn mount ext4 trên máy bạn."],
+["OSTEP ch.43 (Log-structured File Systems).","Homework mô phỏng LFS. Ghi lại ý tưởng “chỉ ghi nối tiếp” — sẽ gặp lại ở LSM tuần 28."],
+["OSTEP ch.44 (Flash-based SSDs).","<code>fio</code>: đo ghi tuần tự và ngẫu nhiên, có và không <code>fsync</code>, trên đĩa của bạn."],
+["OSTEP ch.45 (Data Integrity and Protection) và ch.38 (RAID), đọc lướt.","Tính bằng tay dung lượng và khả năng chịu lỗi của RAID 0, 1, 5, 10 với 4 đĩa."],
+["Bài “Files are hard” của Dan Luu.","Viết hàm thay tệp an toàn: ghi tệp tạm, <code>fsync</code>, <code>rename</code>, <code>fsync</code> thư mục. Giải thích từng bước bảo vệ khỏi điều gì."],
+["Trang wiki PostgreSQL về lỗi fsync (“fsyncgate”).","Viết ghi chú một trang: một cơ sở dữ liệu cần gì từ hệ điều hành để không mất dữ liệu đã xác nhận."]],
+r:[["a","Dan Luu — Files are hard","https://danluu.com/file-consistency/"],["s","PostgreSQL và lỗi fsync","https://wiki.postgresql.org/wiki/Fsync_Errors"]],
+c:"Ứng dụng gọi <code>write()</code> thành công rồi máy mất điện. Dữ liệu có thể ở những đâu, và trường hợp nào thì mất?"},
+{n:9,p:1,t:"Đồng thời và phương pháp phân tích hiệu năng",g:"Viết và gỡ lỗi được chương trình đa luồng; có phương pháp khi hệ thống chậm. Mô-đun 9. Kết thúc giai đoạn 1.",d:[
+["OSTEP ch.26 (Concurrency: Introduction) và ch.27 (Thread API).","Hai luồng cùng tăng một biến đếm 1 triệu lần. Chạy 10 lần, ghi kết quả. Dịch với <code>-fsanitize=thread</code>."],
+["OSTEP ch.28 (Locks) và ch.29 (Lock-based Data Structures).","Sửa bằng mutex; đo chậm đi bao nhiêu. Viết bộ đếm chia theo luồng để giảm tranh chấp."],
+["OSTEP ch.30 (Condition Variables) và ch.31 (Semaphores).","Viết hàng đợi có giới hạn kiểu producer–consumer bằng mutex và biến điều kiện."],
+["OSTEP ch.32 (Common Concurrency Problems).","Tạo một deadlock hai khoá; dùng <code>gdb</code> gắn vào tiến trình treo, xem ngăn xếp từng luồng. Sửa bằng thứ tự khoá."],
+["CSAPP ch.12 mục 12.1–12.5 (ba mô hình máy chủ đồng thời).","Viết echo server C theo mô hình mỗi kết nối một luồng. Sẽ viết lại bằng epoll ở tuần 18."],
+["Brendan Gregg: phương pháp USE và flame graph.","<code>perf record -g</code> rồi dựng flame graph cho chương trình nhân ma trận tuần 6. SadServers: một bài mức Medium."]],
+r:[["a","Phương pháp USE","https://www.brendangregg.com/usemethod.html"],["a","Flame Graphs","https://www.brendangregg.com/flamegraphs.html"],["v","Brendan Gregg — Linux Performance Tools","https://www.youtube.com/watch?v=FJW8nGV4jxY"],["r","FlameGraph","https://github.com/brendangregg/FlameGraph"]],
+c:"Tự kiểm cả giai đoạn: vẽ trên một tờ giấy đường đi của một lệnh <code>cat tệp</code> qua tiến trình, system call, page cache, hệ thống tệp, đĩa. Chỗ nào bạn vẽ không được thì đọc lại chỗ đó."},
+{n:10,p:2,t:"Go: ngôn ngữ lõi",g:"Viết được công cụ dòng lệnh bằng Go có kiểm thử.",d:[
+["LearnGo ch.1–3 (thiết lập, kiểu cơ bản, kiểu ghép: slice, map, struct).","A Tour of Go phần Basics. Viết lại <code>wc</code> bằng Go."],
+["LearnGo ch.4–5 (khối lệnh, hàm, closure, defer).","Viết lại <code>grep</code> đơn giản, có cờ <code>-i</code> và <code>-n</code>."],
+["LearnGo ch.6 (con trỏ) — đối chiếu với con trỏ C đã học.","Thí nghiệm: slice truyền vào hàm rồi <code>append</code> — khi nào bên ngoài thấy thay đổi? Giải thích bằng cấu trúc slice header."],
+["LearnGo ch.7 (kiểu, phương thức, interface).","Learn Go with Tests: các chương từ Hello World tới Structs, methods &amp; interfaces."],
+["LearnGo ch.8 (lỗi) và ch.9 (module, package).","Viết <code>tail -f</code> bằng Go, xử lý lỗi đầy đủ, tách package."],
+["LearnGo ch.13 (viết test), phần benchmark.","Thêm test dạng bảng và benchmark cho ba công cụ trên. Đẩy lên GitHub."]],
+r:[["l","A Tour of Go","https://go.dev/tour/"],["l","Learn Go with Tests","https://quii.gitbook.io/learn-go-with-tests"],["a","Effective Go","https://go.dev/doc/effective_go"]],
+c:"Interface trong Go khác gì lớp trừu tượng trong Java? Khi một hàm nhận <code>io.Reader</code>, bạn truyền được những gì vào?"},
+{n:11,p:2,t:"Go: đồng thời, context, công cụ",g:"Dùng goroutine và channel đúng cách; biết tìm race và điểm nghẽn.",d:[
+["LearnGo ch.10 (Concurrency), nửa đầu: goroutine, channel, select.","Tour of Go phần Concurrency. Viết worker pool tải 50 URL với tối đa 5 kết nối cùng lúc."],
+["LearnGo ch.10 nửa sau: mẫu hình, <code>sync</code>, khi nào dùng mutex.","Viết lại bài bộ đếm tuần 9 bằng Go theo ba cách: mutex, atomic, channel. Chạy với <code>-race</code>."],
+["LearnGo ch.12 (Context).","Thêm timeout và huỷ bằng <code>context</code> cho worker pool. Bấm Ctrl-C phải dừng sạch."],
+["Loạt bài “Scheduling in Go” của Ardan Labs (3 phần).","Chạy chương trình với <code>GOMAXPROCS=1</code> và 8; dùng <code>go tool trace</code> nhìn goroutine được xếp lên luồng."],
+["LearnGo ch.11 (thư viện chuẩn: io, time, json, net/http).","Viết HTTP server nhỏ có endpoint <code>/healthz</code>, tắt mềm khi nhận SIGTERM."],
+["Tài liệu Go về pprof. Xem bài nói của Rob Pike.","Gắn <code>net/http/pprof</code>, tạo tải, lấy hồ sơ CPU và heap, tìm hàm tốn nhất."]],
+r:[["v","Rob Pike — Concurrency is not Parallelism","https://www.youtube.com/watch?v=oV9rvDllKEg"],["a","Scheduling in Go, phần 1","https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part1.html"],["a","Go blog — Profiling Go Programs","https://go.dev/blog/pprof"]],
+c:"Goroutine khác luồng hệ điều hành ở đâu? Điều gì xảy ra với bộ lập lịch Go khi một goroutine gọi system call chặn?"},
+{n:12,p:2,t:"Dự án 1: máy chủ key-value qua TCP",g:"Một dịch vụ mạng tự viết, có giao thức, kiểm thử, đo tải. Cột mốc hồ sơ đầu tiên.",d:[
+["NetGo ch.3 (Reliable TCP Data Streams).","Máy chủ TCP nhận kết nối, mỗi kết nối một goroutine, lệnh <code>PING</code>."],
+["NetGo ch.4 (Sending TCP Data). Đọc đặc tả giao thức RESP của Redis.","Bộ phân tích RESP; lệnh <code>GET</code>, <code>SET</code>, <code>DEL</code>. Thử bằng <code>redis-cli</code> thật."],
+["Sách “Build Your Own Redis” ch. về vòng lặp sự kiện (đọc ý, không cần chép C).","Thêm hạn sống cho khoá (<code>EXPIRE</code>) và khoá đồng thời đúng."],
+["Ôn TLPI ch.13 và tuần 8 (fsync).","Thêm bền vững: ghi nối tiếp mọi lệnh ghi vào tệp, phát lại khi khởi động. Ba chế độ fsync."],
+["Go blog về kiểm thử; tài liệu <code>redis-benchmark</code>.","Kiểm thử tích hợp; đo bằng <code>redis-benchmark</code>; lấy pprof; sửa một điểm nghẽn và ghi con số trước/sau."],
+["—","Viết README: kiến trúc, quyết định thiết kế, số đo, hạn chế. Bản Việt trước, rồi tự dịch sang Anh."]],
+r:[["a","Build Your Own Redis","https://build-your-own.org/redis/"],["r","build-your-own-x","https://github.com/codecrafters-io/build-your-own-x"],["a","Đặc tả giao thức Redis (RESP)","https://redis.io/docs/latest/develop/reference/protocol-spec/"]],
+c:"Máy chủ của bạn sập giữa lúc ghi lệnh vào tệp. Khi khởi động lại nó xử lý dòng ghi dở thế nào? Dữ liệu nào có thể mất ở mỗi chế độ fsync?"},
+{n:13,p:3,t:"Tầng liên kết và IP",g:"Nhìn được gói tin thật trên dây. Mô-đun 8 của ke-hoach-he-thong.",d:[
+["Stevens ch.1 (Introduction). MMT chương mô hình phân tầng, đọc trước bằng tiếng Việt.","Cài Wireshark và <code>tcpdump</code>. Bắt một lần <code>curl</code> tới trang HTTP, chỉ ra từng tầng đóng gói."],
+["Stevens ch.2 (Link Layer).","Kurose Wireshark lab: Ethernet và ARP. <code>ip link</code>, <code>ip -s link</code>; MTU là gì, thử <code>ping -M do -s 1472</code> và 1473."],
+["Stevens ch.3 (IP: Internet Protocol).","Kurose Wireshark lab: IP. Tự tính checksum một header IP bắt được."],
+["Stevens ch.3 phần subnet; MMT phần chia mạng con.","20 bài chia subnet bằng tay (CIDR /20, /27…). <code>ip addr</code>, <code>ip route</code> trên máy bạn: giải nghĩa từng dòng."],
+["Stevens ch.4 (ARP).","<code>ip neigh</code>; xoá mục ARP rồi bắt gói ARP request/reply khi ping."],
+["Xem loạt video của Ben Eater về mạng (từ tín hiệu tới TCP).","Viết ghi chú tuần bằng tiếng Anh đầu tiên: 5–10 câu mô tả đường đi của một gói ping trong mạng LAN."]],
+r:[["v","Ben Eater — Networking tutorial","https://www.youtube.com/playlist?list=PLowKtXNTBypH19whXTVoG3oKSuOcw_XeW"],["l","Kurose &amp; Ross Wireshark labs","https://gaia.cs.umass.edu/kurose_ross/wireshark.php"],["a","Cloudflare Learning Center","https://www.cloudflare.com/learning/"]],
+c:"Máy A ping máy B cùng mạng LAN lần đầu tiên. Kể tên từng khung được gửi, theo thứ tự, với địa chỉ MAC và IP nguồn/đích."},
+{n:14,p:3,t:"Định tuyến, ICMP, NAT và mạng ảo trên Linux",g:"Tự dựng một mạng nhiều máy bằng network namespace. Đây chính là mạng của container.",d:[
+["Stevens ch.6 (ICMP) và ch.7 (Ping).","Bắt gói của <code>ping</code>; làm hỏng đường về để thấy request đi mà reply không về."],
+["Stevens ch.8 (Traceroute) và ch.9 (IP Routing).","<code>traceroute</code> và <code>mtr</code> tới ba đích. Giải thích traceroute dùng TTL thế nào."],
+["Bài “Container Networking Is Simple” của iximiuz, nửa đầu.","Tạo hai network namespace nối nhau bằng cặp veth; ping qua lại."],
+["Bài trên, nửa sau: bridge và định tuyến.","Ba namespace nối vào một bridge; thêm một namespace làm router giữa hai mạng con. Bật <code>ip_forward</code>."],
+["Tài liệu về netfilter/iptables: bảng, chuỗi, đường đi của gói.","Cho namespace ra Internet bằng <code>MASQUERADE</code>; mở cổng vào bằng DNAT. Xem <code>conntrack -L</code>."],
+["Bài của Cloudflare và của Meta về sự cố Facebook 10/2021 (BGP và DNS).","Viết ghi chú tiếng Anh: sự cố lan từ BGP sang DNS thế nào, và vì sao kỹ sư không vào sửa từ xa được."]],
+r:[["a","Container Networking Is Simple","https://iximiuz.com/en/posts/container-networking-is-simple/"],["s","Cloudflare — Understanding how Facebook disappeared from the Internet","https://blog.cloudflare.com/october-2021-facebook-outage/"],["s","Meta — More details about the October 4 outage","https://engineering.fb.com/2021/10/05/networking-traffic/outage-details/"]],
+c:"Gói tin từ một container ra Internet đi qua những thiết bị ảo và quy tắc nào trên máy chủ? Địa chỉ nguồn bị đổi ở đâu?"},
+{n:15,p:3,t:"UDP và DNS",g:"Tự viết một trình phân giải DNS; biết gỡ lỗi DNS.",d:[
+["Stevens ch.11 (UDP).","Viết client/server UDP bằng Go. Gửi gói lớn hơn MTU, bắt các mảnh phân mảnh."],
+["Stevens ch.14 (DNS).","<code>dig +trace</code> một tên miền; ghi từng bước từ root tới máy chủ có thẩm quyền."],
+["“Implement DNS in a weekend” phần 1–2.","Tự dựng gói truy vấn DNS bằng byte trong Go, gửi tới 8.8.8.8, in câu trả lời thô."],
+["“Implement DNS in a weekend” phần 3.","Phân tích bản ghi trả về (kể cả nén tên). Hoàn thiện trình phân giải đệ quy từ root."],
+["Tài liệu về <code>/etc/resolv.conf</code>, <code>ndots</code>, search domain; DNS trong Kubernetes.","Bắt gói khi phân giải tên ngắn với <code>ndots:5</code>: đếm số truy vấn thừa. Thêm bộ đệm có TTL cho trình phân giải."],
+["Truyện tranh “How DNS works”. Bài của Slack về sự cố DNSSEC.","Ghi chú tiếng Anh: năm kiểu hỏng DNS và lệnh để phát hiện từng kiểu."]],
+r:[["l","Implement DNS in a weekend","https://implement-dns.wizardzines.com/"],["a","How DNS works","https://howdns.works"],["a","Kubernetes: DNS cho Service và Pod","https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/"],["s","Slack — What happened during Slack's DNSSEC rollout","https://slack.engineering/what-happened-during-slacks-dnssec-rollout/"]],
+c:"Người dùng báo “trang web lúc vào được lúc không”. Bạn nghi DNS. Kiểm bằng những lệnh nào, và kết quả nào xác nhận hay loại trừ?"},
+{n:16,p:3,t:"TCP (1): kết nối và luồng dữ liệu",g:"Đọc được trạng thái TCP từ <code>ss</code> và <code>tcpdump</code>.",d:[
+["Stevens ch.17 (TCP: Transmission Control Protocol).","Bắt gói một kết nối tới máy chủ tuần 12; chỉ ra số thứ tự, ACK, cửa sổ."],
+["Stevens ch.18 (Connection Establishment and Termination).","Vẽ máy trạng thái TCP. Tạo kết nối nửa đóng; tìm socket ở <code>TIME_WAIT</code> và <code>CLOSE_WAIT</code> bằng <code>ss -tan</code>."],
+["Stevens ch.18 phần hàng đợi kết nối. Bài Cloudflare “SYN packet handling in the wild”.","Máy chủ đặt backlog = 1 và không <code>accept</code>; mở 10 kết nối; xem <code>nstat</code> đếm SYN bị rơi."],
+["Stevens ch.19 (Interactive Data Flow: Nagle, delayed ACK).","Viết client gửi nhiều gói nhỏ; đo độ trễ có và không <code>TCP_NODELAY</code>."],
+["Stevens ch.20 (Bulk Data Flow: cửa sổ trượt).","Bên nhận đọc chậm; bắt gói thấy cửa sổ về 0 và gói thăm dò. <code>ss -ti</code> xem <code>rcv_space</code>."],
+["HPBN chương “Building Blocks of TCP”.","Kurose Wireshark lab: TCP. Ghi chú tiếng Anh về bắt tay ba bước và vì sao cần đúng ba."]],
+r:[["a","High Performance Browser Networking","https://hpbn.co/"],["a","Cloudflare — SYN packet handling in the wild","https://blog.cloudflare.com/syn-packet-handling-in-the-wild/"]],
+c:"Máy chủ có hàng nghìn socket ở <code>CLOSE_WAIT</code>. Lỗi nằm ở phía nào, trong code hay trong mạng, và vì sao?"},
+{n:17,p:3,t:"TCP (2): truyền lại và điều khiển tắc nghẽn",g:"Hiểu vì sao mất 1% gói làm thông lượng sụp, và timeout phải đặt thế nào.",d:[
+["Stevens ch.21 (Timeout and Retransmission), nửa đầu.","<code>tc qdisc add … netem loss 5%</code> trên veth tuần 14; bắt gói thấy truyền lại; <code>nstat</code> đếm."],
+["Stevens ch.21 nửa sau: slow start, tránh tắc nghẽn, truyền lại nhanh.","<code>iperf3</code> với độ trễ 50 ms và mất gói 0%, 0.1%, 1%, 5%. Vẽ đồ thị thông lượng."],
+["Bài giới thiệu BBR của Google (ACM Queue) — đọc phần ý tưởng.","Lặp lại thí nghiệm với <code>cubic</code> và <code>bbr</code>. So sánh."],
+["Stevens ch.22–23 (persist timer, keepalive), đọc lướt.","Rút dây (xoá veth) giữa một kết nối đang rảnh; bên kia mất bao lâu mới biết? Bật keepalive và thử lại."],
+["Bài Cloudflare “When TCP sockets refuse to die”.","Trong Go: đặt deadline đọc/ghi, <code>TCP_USER_TIMEOUT</code>, keepalive cho client và server tuần 12."],
+["Bài AWS Builders’ Library về timeout, retry, backoff.","Ghi chú tiếng Anh: một lời gọi mạng cần những timeout nào, mỗi cái bảo vệ khỏi điều gì."]],
+r:[["a","Cloudflare — When TCP sockets refuse to die","https://blog.cloudflare.com/when-tcp-sockets-refuse-to-die/"],["p","BBR: Congestion-Based Congestion Control","https://queue.acm.org/detail.cfm?id=3022184"],["a","AWS — Timeouts, retries, and backoff with jitter","https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/"]],
+c:"Một dịch vụ gọi dịch vụ khác qua TCP, bên kia mất điện đột ngột. Không có timeout nào được đặt. Bên gọi treo bao lâu, và vì sao?"},
+{n:18,p:3,t:"Socket API và các mô hình vào/ra",g:"Hiểu vì sao một luồng phục vụ được hàng vạn kết nối, và Go giấu epoll ở đâu.",d:[
+["TLPI ch.56 (Sockets: Introduction) và ch.59 (Internet Domains). Hoặc Beej’s Guide.","Viết lại echo server tuần 9 cho gọn; xem từng system call bằng <code>strace</code>."],
+["TLPI ch.61 mục về <code>shutdown</code>, <code>sendfile</code>, tuỳ chọn socket.","Thử <code>SO_REUSEADDR</code> và <code>SO_REUSEPORT</code>: khởi động lại máy chủ ngay sau khi tắt; chạy hai tiến trình cùng một cổng."],
+["TLPI ch.63 mục 63.1–63.2 (<code>select</code>, <code>poll</code>). UNP ch.6.","Viết echo server một luồng bằng <code>poll</code>."],
+["TLPI ch.63 mục 63.4 (epoll). Bài “The C10K problem”.","Viết lại bằng <code>epoll</code>, kiểu kích hoạt theo mức rồi theo cạnh."],
+["Mã nguồn và bài viết về netpoller của Go.","<code>strace</code> máy chủ Go tuần 12: tìm <code>epoll_wait</code>. Mỗi goroutine chặn ở <code>Read</code> thực ra đang ở đâu?"],
+["NetGo ch.5 (UDP) hoặc ch.7 (Unix domain socket), tuỳ chọn.","Đo ba máy chủ (luồng, epoll, Go) với 10 000 kết nối rảnh và 100 kết nối bận; so bộ nhớ và thông lượng."]],
+r:[["a","Beej's Guide to Network Programming","https://beej.us/guide/bgnet/"],["a","The C10K problem","http://www.kegel.com/c10k.html"],["a","Go netpoller (mã nguồn)","https://github.com/golang/go/blob/master/src/runtime/netpoll.go"]],
+c:"Vì sao mô hình mỗi kết nối một luồng không lên được 100 000 kết nối? epoll giải quyết phần nào, và Go làm gì thêm trên epoll?"},
+{n:19,p:3,t:"HTTP, TLS, proxy và cân bằng tải",g:"Tự viết reverse proxy có kiểm tra sức khoẻ; tự cấp chứng chỉ. Kết thúc giai đoạn 3.",d:[
+["HPBN chương “Brief History of HTTP” và “HTTP/1.X”.","Nói chuyện HTTP/1.1 bằng tay qua <code>nc</code>: keep-alive, chunked. <code>curl -v</code> đọc từng dòng."],
+["HPBN chương “HTTP/2”.","<code>curl --http2 -v</code>; bắt gói thấy nhiều luồng trên một kết nối. Head-of-line blocking còn lại ở tầng nào?"],
+["HPBN chương “Transport Layer Security”. Trang Illustrated TLS 1.3.","<code>openssl s_client</code> tới ba trang; đọc chuỗi chứng chỉ, bộ mã, phiên bản."],
+["Tài liệu OpenSSL về tạo CA và ký chứng chỉ.","Tạo CA riêng, cấp chứng chỉ máy chủ và máy khách, bật mTLS cho máy chủ HTTP Go tuần 11."],
+["Bài của Matt Klein về cân bằng tải và proxy hiện đại.","Viết reverse proxy L7 bằng Go: round-robin tới 3 backend, kiểm tra sức khoẻ, loại backend chết."],
+["Tài liệu HAProxy hoặc Envoy phần khái niệm (listener, cluster, health check).","Thêm thuật toán ít kết nối nhất và timeout. So proxy của bạn với nginx bằng <code>wrk</code> hoặc <code>hey</code>."]],
+r:[["a","The Illustrated TLS 1.3 Connection","https://tls13.xargs.org"],["a","Matt Klein — Modern network load balancing and proxying","https://blog.envoyproxy.io/introduction-to-modern-network-load-balancing-and-proxying-a57f6ff80236"],["s","Cloudflare — sự cố 2/7/2019 (một regex làm cháy CPU toàn cầu)","https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/"]],
+c:"Tự kiểm cả giai đoạn: gõ <code>https://example.com</code> rồi Enter. Kể mọi thứ xảy ra tới khi có byte đầu tiên — DNS, ARP, định tuyến, TCP, TLS, HTTP — với những gì bạn đã tận mắt bắt được."},
+{n:20,p:4,t:"Container là gì: namespace, cgroup, rootfs",g:"Tự dựng một container bằng lệnh Linux thuần và bằng Go, không dùng Docker.",d:[
+["ConSec chương “Linux System Calls, Permissions, and Capabilities”.","<code>capsh --print</code>; bỏ từng capability rồi thử <code>ping</code>, <code>chown</code>. Bit setuid hoạt động thế nào?"],
+["ConSec chương “Control Groups”.","Ôn lab cgroup tuần 4 và 6; thêm <code>pids.max</code> chống fork bomb. Tìm cgroup của một container Docker đang chạy."],
+["ConSec chương “Container Isolation” nửa đầu: namespace UTS, PID, mount.","<code>unshare --pid --fork --mount-proc bash</code>; <code>lsns</code>; <code>nsenter</code> vào namespace của một container."],
+["ConSec chương “Container Isolation” nửa sau: chroot, pivot_root, user namespace.","Tải rootfs Alpine, <code>chroot</code> vào. Ghép với <code>unshare</code> thành container bằng tay."],
+["Xem bài nói “Containers From Scratch” của Liz Rice.","Gõ lại theo video bằng Go: <code>clone</code> với cờ namespace, đặt hostname, chroot, mount proc."],
+["Đọc mã bocker (Docker trong ~100 dòng bash).","Thêm giới hạn cgroup và network namespace (dùng lại veth tuần 14) cho container của bạn."]],
+r:[["v","Liz Rice — Containers From Scratch","https://www.youtube.com/watch?v=8fi7uSYlOdc"],["r","lizrice/containers-from-scratch","https://github.com/lizrice/containers-from-scratch"],["r","p8952/bocker","https://github.com/p8952/bocker"]],
+c:"“Container là máy ảo nhẹ” — câu này sai ở đâu? Tiến trình trong container khác gì tiến trình thường khi nhìn từ nhân?"},
+{n:21,p:4,t:"Image, runtime và bảo mật container",g:"Biết Docker gọi những gì bên dưới: containerd, runc, overlayfs.",d:[
+["ConSec chương “Container Images”.","Giải nén một image bằng <code>docker save</code> + <code>tar</code>; đọc manifest, config, từng layer."],
+["Tài liệu nhân về overlayfs.","Tự mount overlay với lower/upper/work; ghi, xoá tệp; xem whiteout. Đây là cách layer hoạt động."],
+["Đặc tả OCI runtime (đọc lướt config.json). Bài của iximiuz về runc và containerd.","<code>runc spec</code>, sửa <code>config.json</code>, chạy container bằng <code>runc run</code> không qua Docker."],
+["ConSec chương “Virtual Machines” và “Strengthening Container Isolation” (seccomp, AppArmor, gVisor, Firecracker).","Chạy container với hồ sơ seccomp cấm <code>mkdir</code>; thử <code>--cap-drop ALL</code>; chạy không phải root."],
+["ConSec chương “Breaking Container Isolation”.","Chạy container <code>--privileged</code> và mount socket Docker; từ bên trong chiếm quyền máy chủ. Ghi lại vì sao không bao giờ làm thế trên production."],
+["Tài liệu Docker về multi-stage build và bộ đệm layer.","Đóng gói máy chủ KV tuần 12: image cuối dưới 20 MB, không root, có healthcheck."]],
+r:[["a","Tài liệu nhân: overlayfs","https://docs.kernel.org/filesystems/overlayfs.html"],["a","iximiuz — Journey from containerization to orchestration","https://iximiuz.com/en/posts/journey-from-containerization-to-orchestration-and-beyond/"],["r","opencontainers/runc","https://github.com/opencontainers/runc"]],
+c:"Gõ <code>docker run nginx</code>. Kể chuỗi thành phần từ CLI tới tiến trình nginx (dockerd, containerd, shim, runc) và việc của từng cái."},
+{n:22,p:4,t:"Kiến trúc Kubernetes và dựng cụm bằng tay (1)",g:"Hiểu Kubernetes là một cơ sở dữ liệu trạng thái mong muốn cộng các vòng lặp điều hoà.",d:[
+["KUAR chương Introduction và Creating and Running Containers (đọc nhanh), chương Deploying a Kubernetes Cluster.","Cài <code>kind</code>, tạo cụm 3 node. <code>docker exec</code> vào node, tìm các tiến trình control plane."],
+["Tài liệu Kubernetes: Components, và trang Controllers.","Xem bài nói “Kubernetes Deconstructed”. Vẽ sơ đồ: ai nói chuyện với ai, ai ghi vào etcd."],
+["KUAR chương Common kubectl Commands và Pods.","Tạo Pod; dùng <code>kubectl get --watch -v=8</code> xem lời gọi API. Đọc khoá của Pod trực tiếp trong etcd bằng <code>etcdctl</code>."],
+["Kubernetes the Hard Way: bài 1–4 (chuẩn bị máy, chứng chỉ CA và TLS).","Làm trên 3–4 máy ảo cục bộ (Multipass hoặc Vagrant). Bạn đã có repo ở <code>D:\\kubernetes-the-hard-way</code>."],
+["Kubernetes the Hard Way: kubeconfig, mã hoá dữ liệu, dựng etcd.","Tiếp tục. Với mỗi chứng chỉ, ghi lại ai dùng nó để xác thực với ai — nối với mTLS tuần 19."],
+["Kubernetes the Hard Way: dựng control plane.","Tiếp tục. Khi <code>kubectl get componentstatuses</code> chạy được là xong ngày."]],
+r:[["r","kubernetes-the-hard-way","https://github.com/kelseyhightower/kubernetes-the-hard-way"],["v","Kubernetes Deconstructed","https://www.youtube.com/watch?v=90kZRyPcRZw"],["r","what-happens-when-k8s","https://github.com/jamiehannaford/what-happens-when-k8s"],["l","kind","https://kind.sigs.k8s.io/"]],
+c:"Gõ <code>kubectl apply</code> một Deployment 3 bản sao. Những thành phần nào lần lượt phản ứng, mỗi cái quan sát gì và ghi gì?"},
+{n:23,p:4,t:"Dựng cụm bằng tay (2) và các loại workload",g:"Cụm tự dựng chạy được; rồi cố ý làm hỏng nó.",d:[
+["Kubernetes the Hard Way: dựng worker (kubelet, kube-proxy, runtime).","Tiếp tục tới khi node ở trạng thái Ready."],
+["Kubernetes the Hard Way: mạng Pod, smoke test.","Hoàn tất. Chạy smoke test."],
+["KUAR chương Labels and Annotations, ReplicaSets, Deployments.","Triển khai máy chủ KV tuần 12. Rolling update; cố ý đẩy image hỏng và rollback."],
+["KUAR chương DaemonSets, Jobs, ConfigMaps and Secrets.","Chạy một DaemonSet và một CronJob. Secret trong etcd có mã hoá không? Kiểm bằng <code>etcdctl</code>."],
+["KUAR chương Health Checks (probe) và phần StatefulSet.","Cấu hình liveness/readiness sai để tự gây vòng lặp khởi động lại; đọc sự kiện để chẩn đoán."],
+["Đọc 3 câu chuyện trên k8s.af.","Phá cụm tự dựng: tắt etcd, tắt kubelet một node, làm hết hạn chứng chỉ. Ghi triệu chứng của từng kiểu."]],
+r:[["s","Kubernetes Failure Stories","https://k8s.af"],["a","Kubernetes: Liveness, Readiness, Startup Probes","https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/"]],
+c:"etcd chết hoàn toàn. Những Pod đang chạy có chết theo không? Những việc gì ngừng hoạt động và những việc gì vẫn chạy?"},
+{n:24,p:4,t:"Mạng trong Kubernetes",g:"Lần theo được một gói từ Pod này tới Pod kia qua Service.",d:[
+["Tài liệu Kubernetes: mô hình mạng của cụm. KUAR chương Service Discovery.","Xem bài nói “Life of a Packet”. Trên node kind: tìm veth của một Pod, bridge, bảng định tuyến."],
+["Đặc tả CNI (đọc lướt). Bài về viết plugin CNI bằng bash.","Đọc cấu hình CNI trong <code>/etc/cni/net.d</code>. Đối chiếu với mạng namespace bạn tự dựng tuần 14."],
+["Tài liệu Kubernetes: Service, và Virtual IPs and Service Proxies.","<code>iptables-save | grep</code> tên Service: lần theo chuỗi KUBE-SERVICES tới DNAT vào Pod. ClusterIP có tồn tại trên card mạng nào không?"],
+["Tài liệu DNS của Kubernetes (ôn tuần 15).","<code>tcpdump</code> cổng 53 trong Pod khi gọi tên Service và tên miền ngoài. Đếm truy vấn."],
+["KUAR chương HTTP Load Balancing with Ingress.","Cài ingress-nginx; định tuyến theo host và path; gắn chứng chỉ từ CA tuần 19."],
+["Tài liệu NetworkPolicy. Bài của XING về lỗi conntrack gây timeout.","Viết NetworkPolicy mặc định cấm, mở từng luồng cần thiết. Ghi chú tiếng Anh về đường đi của gói Pod → Service."]],
+r:[["v","Life of a Packet (KubeCon)","https://www.youtube.com/watch?v=0Omvgd7Hg1I"],["a","Kubernetes: Virtual IPs and Service Proxies","https://kubernetes.io/docs/reference/networking/virtual-ips/"],["s","XING — A reason for unexplained connection timeouts on Kubernetes","https://tech.xing.com/a-reason-for-unexplained-connection-timeouts-on-kubernetes-docker-abd041cf7e02"]],
+c:"Pod A gọi <code>http://svc-b</code> và thỉnh thoảng bị timeout 5 giây. Liệt kê các tầng cần kiểm, theo thứ tự, và công cụ cho từng tầng."},
+{n:25,p:4,t:"Lập lịch, tài nguyên, lưu trữ, tự co giãn",g:"Nối requests/limits với cgroup đã học; hiểu vì sao Pod bị đuổi, bị bóp, bị giết.",d:[
+["Tài liệu Kubernetes: Scheduler, và Assigning Pods to Nodes (affinity, taint, toleration).","Dùng taint và affinity ép Pod về node nhất định; tạo Pod Pending và đọc lý do từ scheduler."],
+["Tài liệu: Resource Management, QoS classes.","Đặt limit CPU, tìm cgroup của Pod trên node, đọc <code>cpu.max</code> và <code>cpu.stat</code>. Tạo tải, xem số lần bị bóp."],
+["Tài liệu: Node-pressure Eviction.","Tạo Pod vượt limit bộ nhớ (OOMKilled) và Pod làm node thiếu bộ nhớ (Evicted). Phân biệt hai trường hợp."],
+["Tài liệu: Persistent Volumes, StorageClass, CSI. KUAR phần lưu trữ.","StatefulSet 3 bản sao có PVC; xoá Pod, kiểm dữ liệu còn. Xoá PVC thì sao?"],
+["Tài liệu: HorizontalPodAutoscaler, PodDisruptionBudget.","HPA theo CPU cho máy chủ HTTP; tạo tải, xem co giãn. <code>kubectl drain</code> với PDB."],
+["Tài liệu: Priority and Preemption.","Hai lớp ưu tiên; lấp đầy cụm bằng Pod ưu tiên thấp, nộp Pod ưu tiên cao, xem chiếm chỗ. Cần cho lập lịch GPU ở tuần 48."]],
+r:[["a","Kubernetes: Scheduling, Preemption and Eviction","https://kubernetes.io/docs/concepts/scheduling-eviction/"],["a","Kubernetes: Pod Quality of Service Classes","https://kubernetes.io/docs/concepts/workloads/pods/pod-qos/"],["s","OpenAI — Scaling Kubernetes to 7,500 nodes","https://openai.com/index/scaling-kubernetes-to-7500-nodes/"]],
+c:"Ứng dụng có p99 tăng vọt dù CPU trung bình chỉ 30% so với limit. Giải thích cơ chế có thể gây ra điều này và cách xác nhận."},
+{n:26,p:4,t:"Mở rộng Kubernetes: tự viết controller",g:"Viết một operator bằng Go. Cột mốc giữa năm: CV bản 1, nộp thực tập.",d:[
+["Bài “Level Triggering and Reconciliation in Kubernetes”. Tài liệu: Custom Resources.","Đọc mã sample-controller: informer, workqueue, vòng reconcile."],
+["Kubebuilder Book: Quick Start và phần kiến trúc.","Khởi tạo dự án kubebuilder. Định nghĩa CRD <code>KVCluster</code> (số bản sao, image)."],
+["Kubebuilder Book: Implementing a controller.","Reconcile tạo StatefulSet và Service cho máy chủ KV tuần 12 từ một <code>KVCluster</code>."],
+["Kubebuilder Book: status, finalizer, owner reference.","Thêm status (số bản sao sẵn sàng), dọn dẹp khi xoá. Sửa tay StatefulSet và xem controller kéo về."],
+["Kubebuilder Book: kiểm thử với envtest.","Viết kiểm thử; chạy controller trong cụm với RBAC tối thiểu."],
+["—","README tiếng Anh cho operator. Viết CV bản 1 (một trang): ba repo, mỗi repo một dòng nói rõ cái bạn tự xây. Bắt đầu nộp thực tập."]],
+r:[["a","Kubebuilder Book","https://book.kubebuilder.io/"],["r","kubernetes/sample-controller","https://github.com/kubernetes/sample-controller"],["a","Level Triggering and Reconciliation in Kubernetes","https://hackernoon.com/level-triggering-and-reconciliation-in-kubernetes-1f17fe30333d"]],
+c:"Tự kiểm cả giai đoạn: vì sao controller của Kubernetes viết theo kiểu “so trạng thái rồi sửa” chứ không theo kiểu “nhận sự kiện rồi làm”? Kiểu thứ hai hỏng trong tình huống nào?"},
+{n:27,p:5,t:"Máy lưu trữ (1): chỉ mục băm và B-tree",g:"Tự viết một kho key-value kiểu Bitcask. Mô-đun 10 của ke-hoach-he-thong.",d:[
+["DDIA ch.3 nửa đầu (hash index, SSTable, LSM, B-tree). Đọc DDIA-VI trước.","Bắt đầu kho KV bằng Go: tệp chỉ ghi nối, chỉ mục băm trong bộ nhớ trỏ tới vị trí trong tệp."],
+["Bài báo Bitcask (6 trang).","Thêm: phát lại tệp khi khởi động, bản ghi có checksum, xoá bằng tombstone."],
+["DBI ch.1 (Introduction and Overview) và ch.2 (B-Tree Basics).","Thêm gộp tệp (compaction) và hint file. Đo thời gian khởi động trước và sau."],
+["DBI ch.3 (File Formats): trang có khe, mã hoá bản ghi.","Dùng <code>pageinspect</code> của PostgreSQL xem một trang heap và một trang B-tree thật."],
+["DBI ch.4 (Implementing B-Trees).","Vẽ bằng tay chèn 20 khoá vào B-tree bậc 4: tách nút, cân bằng lại."],
+["Xem bài giảng CMU 15-445 về lưu trữ (Storage 1–2) hoặc B+Tree.","Benchmark kho KV của bạn: đọc/ghi mỗi giây, với và không fsync. Ghi chú tiếng Anh."]],
+r:[["p","Bitcask: A Log-Structured Hash Table","https://riak.com/assets/bitcask-intro.pdf"],["v","CMU 15-445 Database Systems","https://15445.courses.cs.cmu.edu/"],["a","PostgreSQL pageinspect","https://www.postgresql.org/docs/current/pageinspect.html"]],
+c:"B-tree và LSM-tree đánh đổi gì với nhau về ghi, đọc và dung lượng? Khi nào bạn chọn cái nào?"},
+{n:28,p:5,t:"Máy lưu trữ (2): WAL, phục hồi, LSM",g:"Hiểu cơ chế khiến dữ liệu sống sót qua sập máy.",d:[
+["DBI ch.5 (Transaction Processing and Recovery) nửa đầu: buffer pool, WAL.","Thêm WAL và memtable (skip list hoặc cây có thứ tự) cho kho KV."],
+["DBI ch.5 nửa sau: checkpoint, ARIES ở mức ý tưởng.","Kiểm thử sập: <code>kill -9</code> ngẫu nhiên trong lúc ghi 100 000 khoá; khởi động lại; kiểm không mất khoá đã xác nhận."],
+["DBI ch.7 (Log-Structured Storage) nửa đầu.","Xả memtable thành SSTable có chỉ mục thưa; đọc qua nhiều SSTable."],
+["DBI ch.7 nửa sau: compaction, Bloom filter.","Thêm Bloom filter và gộp SSTable. Đo khuếch đại ghi."],
+["Bài của Discord về lưu hàng nghìn tỉ tin nhắn.","Đọc PG14 phần WAL (chương Write-Ahead Log). Dùng <code>pg_waldump</code> xem bản ghi WAL thật."],
+["Tài liệu mini-LSM (đọc phần tổng quan để đối chiếu thiết kế).","Viết design doc tiếng Anh một trang cho kho KV: định dạng tệp, đảm bảo bền vững, giới hạn."]],
+r:[["a","Discord — How Discord Stores Trillions of Messages","https://discord.com/blog/how-discord-stores-trillions-of-messages"],["a","LSM in a Week","https://skyzh.github.io/mini-lsm/"],["a","RocksDB Wiki","https://github.com/facebook/rocksdb/wiki"]],
+c:"Vì sao ghi WAL trước rồi mới sửa trang dữ liệu? Sau khi sập, cơ sở dữ liệu biết phải làm lại và huỷ những gì bằng cách nào?"},
+{n:29,p:5,t:"Giao dịch và mức cô lập",g:"Tái hiện được từng dị thường đồng thời trên PostgreSQL thật.",d:[
+["DDIA ch.7 mục ACID và Weak Isolation Levels (read committed, snapshot isolation).","Hai phiên <code>psql</code>: tái hiện non-repeatable read ở read committed."],
+["DDIA ch.7: lost update, write skew, phantom.","Tái hiện lost update và write skew (ví dụ bác sĩ trực trong sách). Sửa bằng <code>SELECT … FOR UPDATE</code>."],
+["DDIA ch.7 mục Serializability (2PL, SSI).","Chạy lại ở <code>SERIALIZABLE</code>; đọc lỗi serialization; viết vòng thử lại trong Go."],
+["PG14 phần I: chương Isolation, Pages and Tuples.","Xem <code>xmin</code>, <code>xmax</code>, <code>ctid</code> của một hàng qua vài lần UPDATE."],
+["PG14 phần I: chương Snapshots, Vacuum.","Giữ một giao dịch mở lâu; UPDATE hàng loạt; xem bảng phình ra và vacuum không dọn được. Đây là sự cố rất thường gặp."],
+["Kho Hermitage; báo cáo Jepsen về PostgreSQL 12.3.","Ghi chú tiếng Anh: bảng dị thường × mức cô lập, điền bằng kết quả bạn tự chạy."]],
+r:[["r","ept/hermitage","https://github.com/ept/hermitage"],["s","Jepsen — PostgreSQL 12.3","https://jepsen.io/analyses/postgresql-12.3"]],
+c:"Hai yêu cầu đặt cùng một ghế xem phim đến cùng lúc. Ở read committed điều gì xảy ra? Nêu hai cách sửa và cái giá của mỗi cách."},
+{n:30,p:5,t:"Truy vấn, chỉ mục và nhân bản một cơ sở dữ liệu",g:"Vận hành được một cụm PostgreSQL chính–phụ và tự chuyển đổi khi hỏng.",d:[
+["PG14: chương Buffer Cache; phần về trình lập kế hoạch truy vấn (đọc chọn).","<code>EXPLAIN (ANALYZE, BUFFERS)</code> trên bảng 1 triệu hàng: quét tuần tự, quét chỉ mục, chỉ mục phủ."],
+["PG14: chương về chỉ mục B-tree.","Tạo truy vấn chậm, sửa bằng chỉ mục đúng; đo bằng <code>pgbench</code> với kịch bản riêng."],
+["DDIA ch.5 nửa đầu (Leaders and Followers, đồng bộ/không đồng bộ).","Dựng streaming replication PostgreSQL bằng Docker: một chính, hai phụ."],
+["DDIA ch.5 mục Problems with Replication Lag.","Tạo độ trễ nhân bản bằng <code>tc netem</code>; ghi rồi đọc ngay từ bản phụ để thấy dữ liệu cũ. Đo lag."],
+["Tài liệu PostgreSQL: failover, <code>pg_rewind</code>, replication slot.","Giết bản chính; thăng bản phụ bằng tay; đưa bản chính cũ quay lại làm phụ. Mất những giao dịch nào?"],
+["Postmortem GitLab 2017 và GitHub 21/10/2018.","Ghi chú tiếng Anh: mỗi sự cố, chuỗi nguyên nhân và điều bạn sẽ kiểm tra trên cụm của mình."]],
+r:[["s","GitLab — Postmortem of database outage of January 31","https://about.gitlab.com/blog/postmortem-of-database-outage-of-january-31/"],["s","GitHub — October 21 post-incident analysis","https://github.blog/news-insights/company-news/oct21-post-incident-analysis/"],["a","PostgreSQL: High Availability","https://www.postgresql.org/docs/current/high-availability.html"]],
+c:"Bản chính chết, bạn thăng bản phụ không đồng bộ. Nêu hai hậu quả có thể xảy ra với dữ liệu và với ứng dụng (gợi ý: split brain)."},
+{n:31,p:6,t:"Nhân bản và phân mảnh",g:"Ba kiểu nhân bản và cái giá của mỗi kiểu.",d:[
+["DDIA ch.5 nửa sau: multi-leader, leaderless, quorum.","Kleppmann bài giảng 1 (Introduction). Cài Maelstrom; Gossip Glomers thử thách 1 (Echo)."],
+["Bài báo Dynamo mục 1–4.","Gossip Glomers thử thách 2 (Unique ID). Cách của bạn sống sót qua phân vùng mạng không?"],
+["Bài báo Dynamo mục 4–6 (vector clock, hinted handoff, anti-entropy).","Viết băm nhất quán có nút ảo bằng Go; đo số khoá phải chuyển khi thêm một nút."],
+["DDIA ch.6 (Partitioning) nửa đầu.","Kleppmann bài giảng 2 (Models of distributed systems)."],
+["DDIA ch.6 nửa sau: chỉ mục phụ, tái cân bằng, định tuyến yêu cầu.","Gossip Glomers thử thách 3a–3b (Broadcast một nút, nhiều nút)."],
+["DBI ch.8 (Distributed Systems: Introduction and Overview).","Ghi chú tiếng Anh: với N=3, W=2, R=2, trường hợp nào vẫn đọc ra dữ liệu cũ?"]],
+r:[["v","Martin Kleppmann — Distributed Systems lecture series","https://www.youtube.com/playlist?list=PLeKd45zvjcDFUEv_ohr_HdUFe97RItdiB"],["l","Gossip Glomers (Fly.io)","https://fly.io/dist-sys/"],["r","jepsen-io/maelstrom","https://github.com/jepsen-io/maelstrom"],["p","Dynamo: Amazon's Highly Available Key-value Store","https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf"]],
+c:"Quorum W+R&gt;N có đảm bảo luôn đọc được giá trị mới nhất không? Nêu một tình huống nó thất bại."},
+{n:32,p:6,t:"Những thứ hỏng trong hệ phân tán: mạng, đồng hồ, tiến trình",g:"Bỏ thói quen tin rằng mạng tin cậy và đồng hồ đúng.",d:[
+["DDIA ch.8 mục Faults and Partial Failures, Unreliable Networks.","Gossip Glomers 3c (Broadcast chịu lỗi phân vùng)."],
+["DDIA ch.8 mục Unreliable Clocks.","Kleppmann bài giảng 3 (Time and clocks). Xem <code>chronyc tracking</code>; đồng hồ máy bạn lệch bao nhiêu?"],
+["Bài báo “Time, Clocks, and the Ordering of Events” (Lamport) mục đầu tới hết đồng hồ logic.","Cài đồng hồ Lamport và vector clock bằng Go; phát hiện hai sự kiện đồng thời."],
+["DDIA ch.8 mục Knowledge, Truth, and Lies (fencing token, lỗi Byzantine).","Gossip Glomers 3d–3e (Broadcast hiệu quả: tối ưu số thông điệp và độ trễ)."],
+["DBI ch.9 (Failure Detection) và ch.12 mục gossip.","Kleppmann bài giảng 4 (Broadcast protocols). Viết bộ phát hiện lỗi bằng heartbeat có ngưỡng thích nghi."],
+["Bài Cloudflare về giây nhuận 2017. “Notes on Distributed Systems for Young Bloods”.","Ghi chú tiếng Anh: vì sao không thể phân biệt nút chết với nút chậm, và hệ quả cho thiết kế."]],
+r:[["p","Lamport — Time, Clocks, and the Ordering of Events","https://lamport.azurewebsites.net/pubs/time-clocks.pdf"],["s","Cloudflare — How and why the leap second affected Cloudflare DNS","https://blog.cloudflare.com/how-and-why-the-leap-second-affected-cloudflare-dns/"],["a","Notes on Distributed Systems for Young Bloods","https://www.somethingsimilar.com/2013/01/14/notes-on-distributed-systems-for-young-bloods/"]],
+c:"Một nút giữ khoá phân tán bị dừng 30 giây vì GC rồi chạy tiếp, tưởng mình vẫn giữ khoá. Hỏng gì, và fencing token sửa thế nào?"},
+{n:33,p:6,t:"Mô hình nhất quán và đồng thuận",g:"Nói chính xác được linearizable, serializable, eventual nghĩa là gì.",d:[
+["DDIA ch.9 mục Consistency Guarantees và Linearizability.","Kleppmann bài giảng 5 (Replication). Gossip Glomers 4 (Grow-Only Counter)."],
+["DDIA ch.9 mục Ordering Guarantees (thứ tự nhân quả, total order broadcast).","Gossip Glomers 5a (Kafka-style log một nút)."],
+["DDIA ch.9 mục Distributed Transactions and Consensus (2PC, FLP ở mức phát biểu).","Kleppmann bài giảng 6 (Consensus). Gossip Glomers 5b–5c."],
+["DBI ch.11 (Replication and Consistency).","Bản đồ mô hình nhất quán của Jepsen: tự vẽ lại, đặt PostgreSQL, etcd, Dynamo, Redis vào đúng ô."],
+["Bài của Kleppmann “Please stop calling databases CP or AP”.","Kleppmann bài giảng 7 (Replica consistency). Gossip Glomers 6a (giao dịch một nút)."],
+["Đọc phần giới thiệu CRDT (DDIA ch.5 mục xử lý xung đột ghi, hoặc bài giảng 8).","Ghi chú tiếng Anh: giải thích linearizability bằng một ví dụ có mốc thời gian."]],
+r:[["a","Jepsen — Consistency Models","https://jepsen.io/consistency"],["a","Kleppmann — Please stop calling databases CP or AP","https://martin.kleppmann.com/2015/05/11/please-stop-calling-databases-cp-or-ap.html"]],
+c:"Linearizability và serializability khác nhau thế nào? Cho một ví dụ hệ thống thoả cái này mà không thoả cái kia."},
+{n:34,p:6,t:"Raft (1): bầu leader",g:"Bắt đầu tự cài Raft bằng Go theo lab MIT 6.5840.",d:[
+["Bài báo Raft (bản mở rộng) mục 1–5.2.","Chạy hình động Secret Lives of Data và trình mô phỏng trên raft.github.io."],
+["Xem bài nói của Diego Ongaro về Raft.","Đọc hướng dẫn lab Raft của MIT và “Students’ Guide to Raft”. Dựng khung mã lab."],
+["Đọc lại Hình 2 của bài báo — từng dòng là một yêu cầu.","Lab 3A: trạng thái follower/candidate/leader, bộ hẹn giờ bầu cử ngẫu nhiên."],
+["Bài giảng MIT 6.824 về Raft (phần 1).","Lab 3A: RPC RequestVote, heartbeat."],
+["Ôn tuần 11 về khoá và goroutine; đọc lời khuyên về khoá của lab.","Lab 3A: chạy bộ kiểm thử 100 lần liên tiếp không lỗi, có <code>-race</code>."],
+["—","Viết ghi chú tiếng Anh: vì sao thời gian chờ bầu cử phải ngẫu nhiên; điều gì ngăn hai leader cùng một nhiệm kỳ."]],
+r:[["p","In Search of an Understandable Consensus Algorithm","https://raft.github.io/raft.pdf"],["a","The Secret Lives of Data — Raft","https://thesecretlivesofdata.com/raft/"],["v","Diego Ongaro — Raft lecture","https://www.youtube.com/watch?v=vYp4LYbnnW8"],["l","MIT 6.5840 — lịch và lab","https://pdos.csail.mit.edu/6.824/schedule.html"],["a","Students' Guide to Raft","https://thesquareplanet.com/blog/students-guide-to-raft/"]],
+c:"Cụm 5 nút bị chia thành nhóm 2 và nhóm 3. Mỗi nhóm làm được gì? Khi mạng nối lại điều gì xảy ra với leader cũ?"},
+{n:35,p:6,t:"Raft (2): nhân bản log",g:"Phần khó nhất của lộ trình. Chậm lại nếu cần.",d:[
+["Bài báo Raft mục 5.3 (Log replication).","Lab 3B: AppendEntries mang bản ghi, <code>nextIndex</code>/<code>matchIndex</code>."],
+["Bài báo Raft mục 5.4 (Safety): hạn chế bầu cử, quy tắc commit.","Lab 3B: kiểm tra log khớp, lùi <code>nextIndex</code> khi xung đột."],
+["Vẽ bằng tay Hình 7 và Hình 8 của bài báo; giải thích từng kịch bản.","Lab 3B: tiến chỉ số commit, áp dụng vào máy trạng thái."],
+["Bài giảng MIT 6.824 về Raft (phần 2).","Lab 3B: gỡ lỗi bằng log có cấu trúc; viết script chạy kiểm thử song song."],
+["Đọc mã <code>raft.go</code> của etcd-io/raft phần xử lý AppendEntries, so với mã của bạn.","Lab 3B: 100 lần liên tiếp không lỗi."],
+["Postmortem của Roblox (sự cố 73 giờ, liên quan Consul).","Ghi chú tiếng Anh: vì sao leader không được commit bản ghi của nhiệm kỳ trước chỉ bằng cách đếm bản sao."]],
+r:[["v","MIT 6.824 Distributed Systems (bài giảng 2020)","https://www.youtube.com/playlist?list=PLrw6a1wE39_tb2fErI4-WkMbsvGQk9_UB"],["r","etcd-io/raft","https://github.com/etcd-io/raft"],["s","Roblox — Return to Service 10/28–10/31 2021","https://blog.roblox.com/2022/01/roblox-return-to-service-10-28-10-31-2021/"]],
+c:"Một nút có log dài hơn nhưng nhiệm kỳ cuối thấp hơn ứng cử leader. Nó có thắng không? Quy tắc nào quyết định và quy tắc đó bảo vệ điều gì?"},
+{n:36,p:6,t:"Raft (3): bền vững, snapshot, thay đổi thành viên",g:"Hoàn tất Raft; đọc Raft ngoài đời thật.",d:[
+["Bài báo Raft mục 5.5–5.6 và phần về trạng thái bền vững.","Lab 3C: lưu <code>currentTerm</code>, <code>votedFor</code>, log; phục hồi sau khởi động lại."],
+["Bài báo Raft mục 7 (Log compaction).","Lab 3C: tối ưu lùi nhanh <code>nextIndex</code>; qua các kiểm thử mạng không tin cậy."],
+["Bài báo Raft mục 6 (Cluster membership changes).","Lab 3D (snapshot) — tuỳ chọn; nếu 3C chưa ổn định thì dành ngày này cho 3C."],
+["DBI ch.14 (Consensus): Paxos, Multi-Paxos, so với Raft.","Dựng cụm etcd 3 nút bằng Docker; giết leader; <code>etcdctl endpoint status</code>; thêm, bớt thành viên."],
+["Báo cáo Jepsen về etcd 3.4.3.","Dùng <code>tc netem</code> phân vùng cụm etcd; ghi và đọc từ hai phía; quan sát."],
+["Bài Cloudflare về lỗi Byzantine ngoài đời thật (11/2020).","Viết bài tổng kết Raft bằng tiếng Anh (khoảng 500 từ) kèm link mã. Đây là thứ đáng đưa vào CV."]],
+r:[["s","Jepsen — etcd 3.4.3","https://jepsen.io/analyses/etcd-3.4.3"],["s","Cloudflare — A Byzantine failure in the real world","https://blog.cloudflare.com/a-byzantine-failure-in-the-real-world/"],["a","etcd — tài liệu vận hành","https://etcd.io/docs/"]],
+c:"Vì sao cụm etcd nên có 3 hoặc 5 nút chứ không phải 2 hoặc 4? Cụm 3 nút mất 2 nút thì khôi phục thế nào?"},
+{n:37,p:6,t:"Dự án 2 (phần 1): commit log và gRPC",g:"Bắt đầu xây một commit log phân tán theo sách Distributed Services with Go.",d:[
+["DSGo ch.1 (Let’s Go) và ch.2 (Structure Data with Protocol Buffers).","Làm theo sách: dịch vụ log JSON qua HTTP, rồi định nghĩa protobuf."],
+["DSGo ch.3 (Write a Log Package): store, index, segment.","Viết store và index dùng <code>mmap</code> — đối chiếu với tuần 6 và 27."],
+["DSGo ch.3 phần còn lại.","Viết segment và log; kiểm thử. Tự thêm một thứ sách không có: checksum cho bản ghi."],
+["Bài “The Log” của Jay Kreps.","Ghi chú: log của bạn giống và khác WAL tuần 28 và log của Raft ở đâu."],
+["DSGo ch.4 (Serve Requests with gRPC).","Dịch vụ gRPC: Produce, Consume, và stream."],
+["DEDS chương 1–4 (đọc bản song ngữ).","Dựng Kafka một nút bằng Docker; tạo topic, ghi, đọc theo offset; xem tệp segment trên đĩa và so với của bạn."]],
+r:[["a","Jay Kreps — The Log","https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying"],["a","gRPC — Go basics","https://grpc.io/docs/languages/go/basics/"],["a","Kafka — Design","https://kafka.apache.org/documentation/#design"]],
+c:"Vì sao Kafka ghi tuần tự vào đĩa mà vẫn nhanh? Nối câu trả lời với page cache và <code>sendfile</code> bạn đã học."},
+{n:38,p:6,t:"Dự án 2 (phần 2): bảo mật, quan sát, khám phá, đồng thuận",g:"Biến dịch vụ một nút thành cụm có đồng thuận.",d:[
+["DSGo ch.5 (Secure Your Services): TLS, mTLS, ACL.","Làm theo sách; dùng lại kiến thức CA tuần 19."],
+["DSGo ch.6 (Observe Your Systems).","Thêm metric và trace. Tự thêm endpoint Prometheus."],
+["DSGo ch.7 (Server-to-Server Service Discovery) với Serf.","Làm theo sách: thành viên cụm bằng gossip. Nối với bộ phát hiện lỗi tuần 32."],
+["DSGo ch.8 (Coordinate Your Services with Consensus) nửa đầu.","Tích hợp thư viện Raft của HashiCorp: máy trạng thái hữu hạn, log store."],
+["DSGo ch.8 nửa sau.","Hoàn tất nhân bản; kiểm thử cụm 3 nút: giết leader, ghi tiếp, kiểm dữ liệu."],
+["Đọc mã hashicorp/raft phần snapshot, so với lab của bạn.","Viết phần kiến trúc của README bằng tiếng Anh, kèm sơ đồ."]],
+r:[["r","hashicorp/raft","https://github.com/hashicorp/raft"],["r","hashicorp/serf","https://github.com/hashicorp/serf"],["r","Mã nguồn sách Distributed Services with Go","https://github.com/travisjeffery/proglog"]],
+c:"Trong dự án, Serf và Raft cùng biết về thành viên cụm. Mỗi cái chịu trách nhiệm việc gì, và vì sao không dùng một cái cho cả hai việc?"},
+{n:39,p:6,t:"Dự án 2 (phần 3): triển khai, phá, đo. Giao dịch phân tán",g:"Hoàn tất dự án số 2 và kết thúc giai đoạn 6. Bắt đầu nộp hồ sơ fresher.",d:[
+["DSGo ch.9 (Discover Servers and Load Balance from the Client).","Làm theo sách: resolver và picker của gRPC — ghi về leader, đọc từ follower."],
+["DSGo ch.10 (Deploy Applications with Kubernetes Locally).","Triển khai lên kind bằng StatefulSet và Helm; probe sức khoẻ."],
+["DDIA ch.9 mục 2PC đọc lại; DBI ch.13 (Distributed Transactions).","Dùng toxiproxy chèn độ trễ và cắt mạng giữa các nút; ghi liên tục; kiểm không mất bản ghi đã xác nhận."],
+["DDIA ch.11 (Stream Processing) mục đầu; ch.12 đọc lướt.","Đo: thông lượng và p99 với 1, 3, 5 nút. Giải thích vì sao thêm nút không làm ghi nhanh hơn."],
+["Bài báo MapReduce và GFS — đọc phần mở đầu, kiến trúc, xử lý lỗi.","Viết phần “Failure modes” cho README: mỗi kiểu hỏng, hệ thống phản ứng thế nào, đã kiểm bằng gì."],
+["—","Hoàn thiện README tiếng Anh, quay video demo 3 phút. Cập nhật CV bản 2. Bắt đầu nộp các chương trình fresher."]],
+r:[["r","Shopify/toxiproxy","https://github.com/Shopify/toxiproxy"],["p","The Google File System","https://research.google/pubs/the-google-file-system/"],["p","MapReduce","https://research.google/pubs/mapreduce-simplified-data-processing-on-large-clusters/"]],
+c:"Tự kiểm cả giai đoạn: thiết kế bằng miệng một kho key-value 3 nút chịu được mất 1 nút. Ghi đi qua đâu, đọc đi qua đâu, khi leader chết thì sao, client làm gì."},
+{n:40,p:7,t:"Quan sát: metric, log, trace, SLO",g:"Biết đo cái gì và cảnh báo khi nào. Bạn đã có kinh nghiệm Prometheus/Grafana từ dự án Moodle — tuần này đào sâu phần SLO.",d:[
+["SRE Book ch.6 (Monitoring Distributed Systems): bốn tín hiệu vàng.","Gắn metric kiểu RED cho commit log: tốc độ, lỗi, histogram độ trễ. Dựng bảng Grafana."],
+["SRE Book ch.4 (Service Level Objectives).","Định nghĩa 2 SLI và SLO cho dịch vụ của bạn; tính ngân sách lỗi 30 ngày."],
+["SRE Workbook ch.2 (Implementing SLOs) và ch.5 (Alerting on SLOs).","Viết cảnh báo burn-rate nhiều cửa sổ bằng PromQL; gây lỗi để nó kêu."],
+["Bài báo “The Tail at Scale”.","Đo p50, p99, p99.9; cho một nút chậm bằng <code>tc</code>; xem đuôi phân phối. Thử hedged request."],
+["Tài liệu OpenTelemetry phần khái niệm trace.","Gắn trace qua gRPC từ client tới leader tới follower; xem trong Jaeger."],
+["Trang eBPF giới thiệu; Brendan Gregg về công cụ BCC.","Chạy <code>execsnoop</code>, <code>biolatency</code>, <code>tcplife</code>, <code>offcputime</code> trên máy chạy dịch vụ. Ghi âm 3 phút tiếng Anh giải thích SLO của bạn."]],
+r:[["a","Google SRE Book","https://sre.google/sre-book/table-of-contents/"],["a","Google SRE Workbook","https://sre.google/workbook/table-of-contents/"],["p","The Tail at Scale","https://research.google/pubs/the-tail-at-scale/"],["a","eBPF","https://ebpf.io/what-is-ebpf/"],["r","iovisor/bcc","https://github.com/iovisor/bcc"]],
+c:"Vì sao cảnh báo theo “CPU &gt; 80%” là cảnh báo tồi? Một cảnh báo tốt gắn với cái gì?"},
+{n:41,p:7,t:"Quá tải, thử lại và sự cố dây chuyền",g:"Hiểu vì sao hệ thống lớn thường chết vì chính cơ chế tự phục hồi của nó.",d:[
+["SRE Book ch.21 (Handling Overload).","Dùng <code>vegeta</code> hoặc <code>k6</code> đẩy tải vượt sức chứa; vẽ thông lượng hữu ích theo tải. Nó phẳng hay sụp?"],
+["SRE Book ch.22 (Addressing Cascading Failures).","Thêm client thử lại ngay lập tức, không giới hạn; tái hiện bão thử lại làm dịch vụ không hồi phục được."],
+["AWS Builders’ Library: timeouts, retries, backoff with jitter (ôn tuần 17).","Sửa: backoff mũ có jitter, ngân sách thử lại, deadline truyền qua context."],
+["AWS Builders’ Library: Using load shedding to avoid overload.","Thêm giới hạn đồng thời và từ chối sớm ở máy chủ; lặp lại thí nghiệm ngày 1."],
+["Bài báo “Metastable Failures in Distributed Systems” (HotOS 2021).","Thêm circuit breaker ở client. Ghi lại đồ thị trước/sau của cả tuần."],
+["Tóm tắt sự cố AWS Kinesis 11/2020 và us-east-1 12/2021.","Ghi âm 3 phút tiếng Anh: sự cố dây chuyền là gì, kể bằng thí nghiệm của bạn."]],
+r:[["a","AWS — Using load shedding to avoid overload","https://aws.amazon.com/builders-library/using-load-shedding-to-avoid-overload/"],["p","Metastable Failures in Distributed Systems","https://sigops.org/s/conferences/hotos/2021/papers/hotos21-s11-bronson.pdf"],["s","AWS — Kinesis, us-east-1, 11/2020","https://aws.amazon.com/message/11201/"],["s","AWS — us-east-1, 12/2021","https://aws.amazon.com/message/12721/"]],
+c:"Dịch vụ đã hết nguyên nhân gốc (lỗi ban đầu đã sửa) nhưng vẫn không hồi phục. Cơ chế nào giữ nó ở trạng thái hỏng, và cách thoát ra?"},
+{n:42,p:7,t:"Ứng phó sự cố, postmortem, triển khai an toàn",g:"Chạy một buổi diễn tập sự cố trên cụm của mình và viết postmortem. Kết thúc giai đoạn 7.",d:[
+["SRE Book ch.12 (Effective Troubleshooting).","SadServers: hai bài mức Hard, bấm giờ."],
+["SRE Book ch.13–14 (Emergency Response, Managing Incidents).","Cài Chaos Mesh trên kind; chạy thí nghiệm giết Pod và trễ mạng lên commit log."],
+["SRE Book ch.15 (Postmortem Culture) và phụ lục mẫu postmortem.","Diễn tập: bật ngẫu nhiên một thí nghiệm chaos, chẩn đoán chỉ bằng bảng điều khiển và log. Ghi dòng thời gian."],
+["SRE Workbook ch.16 (Canarying Releases).","Triển khai canary bằng tay: hai Deployment, chia lưu lượng qua Ingress, tiêu chí tự động rollback."],
+["Chọn 4 postmortem trong kho danluu/post-mortems thuộc 4 loại khác nhau.","Tóm tắt mỗi bài 5 câu tiếng Anh: kích hoạt, nguyên nhân sâu, phát hiện, khắc phục, bài học."],
+["Sự cố Slack 4/1/2021 và Datadog 3/2023.","Viết postmortem tiếng Anh cho buổi diễn tập của bạn theo mẫu Google. Đưa vào repo dự án."]],
+r:[["r","danluu/post-mortems","https://github.com/danluu/post-mortems"],["r","chaos-mesh","https://github.com/chaos-mesh/chaos-mesh"],["s","Slack — outage on January 4th 2021","https://slack.engineering/slacks-outage-on-january-4th-2021/"],["s","Datadog — 2023-03-08 incident","https://www.datadoghq.com/blog/2023-03-08-multiregion-infrastructure-connectivity-issue/"]],
+c:"Bạn trực ca, nhận cảnh báo tỉ lệ lỗi tăng. Mười phút đầu bạn làm gì, theo thứ tự nào, và điều gì bạn cố ý chưa làm?"},
+{n:43,p:8,t:"AWS: IAM, VPC, máy chủ, lưu trữ",g:"Dựng mạng trên cloud bằng tay để thấy nó chính là mạng bạn đã học. Theo lo-trinh-aws.html.",d:[
+["lo-trinh-aws: mục An toàn tài khoản. Tài liệu IAM: policy, role.","Tạo tài khoản, bật MFA, đặt cảnh báo ngân sách, tạo người dùng không phải root. Không làm gì khác trước khi xong bước này."],
+["Tài liệu VPC: subnet, route table, internet gateway, NAT.","Dựng VPC bằng tay: 2 subnet công khai, 2 riêng tư, ở 2 vùng sẵn sàng. Vẽ sơ đồ đối chiếu với lab namespace tuần 14."],
+["Tài liệu: security group so với network ACL; EC2.","Bastion ở subnet công khai, máy ứng dụng ở subnet riêng tư; SSH qua bastion. Xoá NAT gateway ngay sau khi xong (tính tiền theo giờ)."],
+["Tài liệu: EBS, S3 (mô hình nhất quán, lớp lưu trữ).","Đo IOPS của EBS bằng <code>fio</code> và so với đĩa máy bạn. Tải tệp lên S3 bằng URL ký sẵn."],
+["Tài liệu: Elastic Load Balancing, Auto Scaling.","Đặt ALB trước 2 máy chạy HTTP server của bạn; giết một máy, xem health check và thay thế."],
+["AWS Builders’ Library: Static stability using Availability Zones. Tóm tắt sự cố S3 2017.","Huỷ toàn bộ tài nguyên, kiểm hoá đơn về 0. Ghi âm 3 phút tiếng Anh mô tả kiến trúc đã dựng."]],
+r:[["a","AWS — Static stability using Availability Zones","https://aws.amazon.com/builders-library/static-stability-using-availability-zones/"],["s","AWS — S3 us-east-1, 2/2017","https://aws.amazon.com/message/41926/"],["a","AWS VPC — How it works","https://docs.aws.amazon.com/vpc/latest/userguide/how-it-works.html"]],
+c:"Máy ở subnet riêng tư không ra được Internet. Liệt kê các thứ cần kiểm theo thứ tự (route table, NAT, security group, NACL, DNS)."},
+{n:44,p:8,t:"Hạ tầng dạng code và đường ống triển khai",g:"Dựng lại toàn bộ tuần 43 bằng một lệnh, và huỷ bằng một lệnh.",d:[
+["Hướng dẫn Terraform cho AWS: provider, resource, state, plan/apply.","Viết Terraform cho VPC tuần 43. <code>plan</code>, <code>apply</code>, <code>destroy</code>."],
+["Tài liệu Terraform: state từ xa, khoá state, module.","Chuyển state lên S3 có khoá; tách VPC thành module."],
+["Tài liệu k3s.","Terraform dựng 3 máy EC2 nhỏ, cài k3s bằng cloud-init. Rẻ hơn dùng EKS."],
+["Tài liệu Helm phần chart cơ bản.","Đóng gói commit log thành Helm chart; triển khai lên cụm k3s."],
+["Tài liệu GitHub Actions.","Đường ống: test → build image → đẩy registry → triển khai. Thêm bước chặn nếu test hỏng."],
+["Bài “Knightmare: A DevOps Cautionary Tale”.","Huỷ toàn bộ. Kiểm hoá đơn. Ghi chú tiếng Anh: triển khai của bạn có thể hỏng ở đâu và rollback thế nào."]],
+r:[["l","Terraform — hướng dẫn AWS","https://developer.hashicorp.com/terraform/tutorials/aws-get-started"],["a","k3s","https://docs.k3s.io/"],["s","Knightmare: A DevOps Cautionary Tale","https://dougseven.com/2014/04/17/knightmare-a-devops-cautionary-tale/"]],
+c:"Hai người cùng chạy <code>terraform apply</code> một lúc. Điều gì có thể hỏng, và cơ chế nào ngăn?"},
+{n:45,p:9,t:"ML vừa đủ cho người làm hạ tầng",g:"Biết một lượt huấn luyện và một lượt suy luận tiêu thời gian và bộ nhớ ở đâu. Giai đoạn đầu của lo-trinh-ai-infrastructure.html.",d:[
+["lo-trinh-ai-infrastructure: mục “ML vừa đủ”. Xem “Intro to Large Language Models” của Karpathy.","Chạy một mô hình nhỏ bằng PyTorch trên máy bạn; in số tham số, dung lượng bộ nhớ theo kiểu số (FP32, FP16)."],
+["Xem “Let’s build GPT” của Karpathy, nửa đầu. Bạn đã học MiniMind nên đi nhanh.","Dùng lại mã MiniMind: đo thời gian một bước huấn luyện, tách ra tải dữ liệu, forward, backward."],
+["“Let’s build GPT” nửa sau. MLS1: chương về huấn luyện (lấy số trang từ lộ trình AI infra).","PyTorch profiler: tìm phép toán tốn nhất. Thay đổi batch size, vẽ thông lượng mẫu/giây."],
+["lo-trinh-ai-infrastructure: mục “Định luật sắt”.","Với một cấu hình huấn luyện, ước lượng bằng tay ba số hạng: dữ liệu, tính toán, chi phí phụ. So với số đo."],
+["Bài “Making Deep Learning Go Brrrr From First Principles”.","Đo: tỉ lệ thời gian GPU thực sự tính so với chờ dữ liệu. Tăng số worker của DataLoader và đo lại."],
+["MLS1: chương về tối ưu mô hình/lượng tử hoá (đọc chọn).","Lượng tử hoá một mô hình nhỏ xuống 8-bit; đo kích thước, tốc độ, độ sai lệch. Ghi âm 3 phút tiếng Anh."]],
+r:[["v","Karpathy — Intro to Large Language Models","https://www.youtube.com/watch?v=zjkBMFhNj_g"],["v","Karpathy — Let's build GPT","https://www.youtube.com/watch?v=kCc8FmEb1nY"],["a","Making Deep Learning Go Brrrr","https://horace.io/brrr_intro.html"],["a","Machine Learning Systems (bản web)","https://mlsysbook.ai/"]],
+c:"GPU báo 100% utilization nhưng huấn luyện vẫn chậm. Con số đó thực sự đo gì, và bạn kiểm những gì tiếp theo?"},
+{n:46,p:9,t:"GPU: kiến trúc, bộ nhớ, chia sẻ, container",g:"Hiểu GPU như một tài nguyên hạ tầng: cấp phát, cô lập, giám sát.",d:[
+["lo-trinh-ai-infrastructure: mục “GPU: kiến trúc và lập trình mức đủ dùng”.","<code>nvidia-smi</code> và <code>nvidia-smi dmon</code>: giải nghĩa từng cột. Bộ nhớ GPU của bạn bao nhiêu, đang dùng vào đâu?"],
+["Tài liệu CUDA phần mô hình lập trình (kernel, luồng, khối) — chỉ đọc khái niệm.","Viết một phép cộng vector bằng CuPy hoặc Numba CUDA; đo so với CPU ở kích thước nhỏ và lớn. Vì sao nhỏ thì GPU thua?"],
+["Tài liệu NVIDIA Container Toolkit.","Chạy container có GPU. Tìm xem thiết bị và thư viện nào được gắn vào container — nối với tuần 20–21."],
+["Tài liệu NVIDIA về chia sẻ GPU: time-slicing, MPS, MIG.","Chạy hai tiến trình suy luận trên một GPU; đo thông lượng mỗi cái khi chạy riêng và chạy chung."],
+["Tài liệu DCGM và dcgm-exporter.","Xuất metric GPU sang Prometheus; dựng bảng: utilization, bộ nhớ, nhiệt độ, công suất."],
+["Bài giảng Stanford CS149 về kiến trúc GPU (đọc slide).","Gây lỗi hết bộ nhớ GPU có chủ đích; đọc thông báo; tìm batch size lớn nhất chạy được. Ghi âm 3 phút."]],
+r:[["a","NVIDIA Container Toolkit","https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/index.html"],["r","NVIDIA/dcgm-exporter","https://github.com/NVIDIA/dcgm-exporter"],["a","Stanford CS149 — Parallel Computing","https://gfxcourses.stanford.edu/cs149/fall23"]],
+c:"Vì sao không thể chia GPU cho container bằng cgroup như chia CPU? Ba cơ chế chia sẻ GPU khác nhau thế nào về cô lập?"},
+{n:47,p:9,t:"Phục vụ mô hình ngôn ngữ",g:"Chạy và đo một máy chủ suy luận; hiểu KV cache và gộp lô liên tục.",d:[
+["lo-trinh-ai-infrastructure: mục “Phục vụ một mô hình”. MLS1: chương về triển khai/phục vụ.","Chạy một mô hình nhỏ bằng llama.cpp (hoặc vLLM nếu đủ VRAM) với API tương thích OpenAI."],
+["Bài báo vLLM (PagedAttention) mục 1–4.","Đo thời gian tới token đầu (TTFT) và token/giây với 1 yêu cầu. Vẽ bộ nhớ GPU theo độ dài ngữ cảnh."],
+["Bài của Anyscale về continuous batching. Khoá ngắn của DeepLearning.AI về vLLM.","Viết công cụ tạo tải bằng Go: N yêu cầu đồng thời, ghi TTFT, độ trễ giữa các token, tổng thời gian."],
+["Tài liệu vLLM: metric và tối ưu.","Chạy với độ đồng thời 1, 4, 16, 64; vẽ thông lượng và p99. Tìm điểm bão hoà."],
+["Đọc về lượng tử hoá cho suy luận và prefix caching.","So cùng mô hình ở hai mức lượng tử hoá; so có và không dùng chung tiền tố prompt."],
+["Áp dụng tuần 41: quá tải với dịch vụ suy luận.","Đặt cổng vào bằng Go trước máy chủ mô hình: giới hạn đồng thời, hàng đợi có hạn, từ chối sớm. Ghi âm 3 phút."]],
+r:[["p","Efficient Memory Management for LLM Serving with PagedAttention","https://arxiv.org/abs/2309.06180"],["a","vLLM docs","https://docs.vllm.ai/"],["a","Anyscale — Continuous batching for LLM inference","https://www.anyscale.com/blog/continuous-batching-llm-inference"],["l","DeepLearning.AI — Fast and Efficient LLM Inference with vLLM","https://learn.deeplearning.ai/courses/fast-and-efficient-llm-inference-with-vllm"],["r","ggml-org/llama.cpp","https://github.com/ggml-org/llama.cpp"]],
+c:"Vì sao gộp lô tĩnh không hợp với mô hình ngôn ngữ? Gộp lô liên tục khác thế nào và KV cache liên quan gì tới giới hạn số yêu cầu đồng thời?"},
+{n:48,p:9,t:"GPU trên Kubernetes: cấp phát và lập lịch",g:"Từ device plugin tới DRA và hàng đợi công việc.",d:[
+["Tài liệu Kubernetes: Device Plugins. README của NVIDIA k8s-device-plugin.","Dựng k3s có GPU (trên WSL2/Linux với NVIDIA runtime) hoặc thuê một máy GPU vài giờ. Chạy Pod xin <code>nvidia.com/gpu: 1</code>."],
+["Tài liệu NVIDIA GPU Operator.","Tìm trên node: device plugin đăng ký với kubelet qua socket nào, GPU được gắn vào container thế nào."],
+["Tài liệu Kubernetes: Dynamic Resource Allocation.","Đọc và viết thử một ResourceClaimTemplate. So với mô hình đếm số nguyên của device plugin: cái gì không biểu diễn được trước đây?"],
+["Tài liệu Kueue: khái niệm ClusterQueue, LocalQueue, cohort.","Cài Kueue; hai đội với hạn mức riêng; nộp Job vượt hạn mức; xem xếp hàng và vay hạn mức."],
+["Bài Red Hat về Kueue với DRA. Ôn tuần 25 (ưu tiên, chiếm chỗ).","Gang scheduling: Job cần 2 Pod cùng lúc khi chỉ đủ chỗ cho 1 — điều gì xảy ra với và không có Kueue?"],
+["Bài OpenAI về mở rộng Kubernetes tới 7 500 node; báo cáo sự cố OpenAI 11/12/2024.","Triển khai máy chủ suy luận tuần 47 lên cụm; tự co giãn theo độ dài hàng đợi thay vì CPU. Ghi âm 3 phút."]],
+r:[["r","NVIDIA/k8s-device-plugin","https://github.com/NVIDIA/k8s-device-plugin"],["r","NVIDIA/gpu-operator","https://github.com/NVIDIA/gpu-operator"],["a","Kubernetes — Dynamic Resource Allocation","https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/"],["a","Kueue","https://kueue.sigs.k8s.io/"],["a","Red Hat — Kueue với Dynamic Resource Allocation","https://developers.redhat.com/articles/2026/10/02/smarter-gpu-sharing-how-red-hat-build-of-kueue-works-with-dynamic-resource-allocation"],["s","OpenAI — sự cố 11/12/2024","https://status.openai.com/incidents/ctrsv3lwd797"]],
+c:"Vì sao tự co giãn theo CPU vô dụng với dịch vụ suy luận GPU? Bạn co giãn theo tín hiệu nào và vì sao khởi động lạnh là vấn đề lớn?"},
+{n:49,p:9,t:"Huấn luyện phân tán, mạng và lưu trữ cho ML",g:"Hiểu vì sao cụm huấn luyện là bài toán mạng và lưu trữ. Tuần được phép rút gọn nếu trễ lịch.",d:[
+["lo-trinh-ai-infrastructure: mục “Huấn luyện phân tán”. MLS2: chương tương ứng.","PyTorch DDP với 2 tiến trình (trên CPU nếu chỉ có 1 GPU). Đo tăng tốc so với 1 tiến trình."],
+["Đọc về song song dữ liệu, all-reduce, đồng bộ gradient.","Tính bằng tay: mô hình 1 tỉ tham số FP32, mỗi bước phải truyền bao nhiêu byte giữa các nút? Với mạng 10 Gb/s mất bao lâu?"],
+["lo-trinh-ai-infrastructure: mục “Vải mạng và lưu trữ”.","Đọc về RDMA và InfiniBand ở mức khái niệm: bỏ qua nhân nghĩa là gì — nối với đường đi của gói tin tuần 16–18."],
+["Đọc về checkpoint và chịu lỗi trong huấn luyện dài.","Thêm checkpoint định kỳ; <code>kill -9</code> giữa chừng; tiếp tục từ checkpoint. Áp dụng ghi tệp an toàn tuần 8."],
+["Đọc về đường ống dữ liệu: định dạng, bộ đệm, lưu trữ đối tượng.","Dựng MinIO; đọc dữ liệu huấn luyện từ đó; đo điểm nghẽn có chuyển sang I/O không."],
+["lo-trinh-ai-infrastructure: mục “Chịu lỗi ở quy mô lớn”.","Ước lượng: cụm 1 000 GPU, mỗi GPU hỏng trung bình 1 lần/3 năm — một công việc 2 tuần gặp bao nhiêu lần hỏng? Ghi âm 3 phút."]],
+r:[["a","PyTorch — Distributed Data Parallel","https://pytorch.org/tutorials/intermediate/ddp_tutorial.html"],["r","minio/minio","https://github.com/minio/minio"],["a","Chip Huyền — blog","https://huyenchip.com/blog/"]],
+c:"Thêm GPU thứ hai, tốc độ huấn luyện chỉ tăng 1,4 lần. Nêu ba nguyên nhân có thể và cách đo để phân biệt."},
+{n:50,p:9,t:"Dự án 3: nền tảng suy luận thu nhỏ",g:"Ghép mọi thứ: Kubernetes + máy chủ mô hình + cổng vào Go + quan sát + báo cáo đo tải + mô hình chi phí. Có thể chính là hạ tầng cho DeepTutor.",d:[
+["lo-trinh-ai-infrastructure: mục “Nền tảng và vận hành”, “Kinh tế, năng lượng, và giới hạn”.","Viết design doc tiếng Anh một trang: mục tiêu, SLO (TTFT, tỉ lệ lỗi), kiến trúc, các kiểu hỏng."],
+["Ôn tuần 19 (proxy) và 41 (quá tải).","Cổng vào: định tuyến tới nhiều bản sao, giới hạn theo người thuê (token bucket), hàng đợi có hạn."],
+["Ôn tuần 40 (SLO).","Metric từ cổng vào, máy chủ mô hình, GPU; bảng điều khiển; cảnh báo burn-rate trên TTFT."],
+["Ôn tuần 48.","Tự co giãn theo hàng đợi; đo thời gian khởi động lạnh; giảm nó (tải sẵn mô hình, image nhỏ hơn)."],
+["Ôn tuần 42.","Chaos: giết Pod mô hình giữa lúc đang sinh token; cổng vào xử lý thế nào? Ghi kết quả."],
+["—","Báo cáo đo tải: thông lượng, p50/p99, điểm bão hoà, chi phí ước tính cho một triệu token. README tiếng Anh, video demo."]],
+r:[["a","Kubernetes — HPA với metric tuỳ chỉnh","https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/"],["a","KServe","https://kserve.github.io/website/"],["a","SRE Workbook — Alerting on SLOs","https://sre.google/workbook/alerting-on-slos/"]],
+c:"Với phần cứng bạn có, phục vụ một triệu token tốn bao nhiêu? Con số đó thay đổi thế nào nếu utilization tăng từ 30% lên 70%?"},
+{n:51,p:10,t:"Hoàn thiện hồ sơ và luyện thiết kế hệ thống",g:"Ba dự án trình bày được trong 5 phút mỗi cái.",d:[
+["SDI2: chương Metrics Monitoring and Alerting System.","Rà lại README dự án 1: ai mới vào đọc 2 phút có hiểu bạn xây gì không?"],
+["SDI2: chương Distributed Message Queue.","So thiết kế trong sách với commit log của bạn. Viết ra ba điểm khác và vì sao."],
+["SDI2: chương S3-like Object Storage.","Rà README dự án 2 và 3. Thêm mục “What I would do differently”."],
+["SDI2: chương Distributed Email Service hoặc Payment System (chọn một).","Tự thiết kế bằng miệng trong 35 phút, ghi âm, nghe lại."],
+["Đọc lại ghi chú tự kiểm của tuần 9, 19, 26, 39.","Trả lời lại bốn câu tự kiểm giai đoạn đó, lần này bằng tiếng Anh, ghi âm."],
+["—","CV bản cuối, tiếng Việt và tiếng Anh. Hồ sơ GitHub: ghim 3 dự án. LinkedIn."]],
+r:[["a","ByteByteGo — System Design 101","https://github.com/ByteByteGoHq/system-design-101"],["a","Google SRE — Postmortem mẫu","https://sre.google/sre-book/example-postmortem/"]],
+c:"Kể về dự án 2 trong 3 phút bằng tiếng Anh: bài toán, thiết kế, điều khó nhất, số đo."},
+{n:52,p:10,t:"Phỏng vấn và nộp hồ sơ",g:"Luyện những câu hỏi mà người làm hạ tầng thực sự bị hỏi.",d:[
+["Ôn giai đoạn 1: mọi câu tự kiểm tuần 3–9.","SadServers: ba bài bấm giờ, nói to suy nghĩ khi làm."],
+["Ôn giai đoạn 3: mọi câu tự kiểm tuần 13–19.","Tự dựng lại lab namespace + NAT tuần 14 không nhìn ghi chú."],
+["Ôn giai đoạn 4: tuần 20–26.","Trên kind: bạn bè hoặc script phá cụm theo 5 kiểu; bạn chẩn đoán."],
+["Ôn giai đoạn 6: tuần 31–39.","Vẽ lại Raft trên giấy: bầu cử, nhân bản, an toàn. Giải thích thành lời."],
+["Ôn giai đoạn 7 và 9.","Phỏng vấn thử với một người bạn hoặc tự ghi hình: 45 phút, nửa kỹ thuật nửa dự án."],
+["—","Nộp hồ sơ theo danh sách. Lập kế hoạch 12 tuần tiếp theo dựa trên những gì phỏng vấn cho thấy còn yếu."]],
+r:[["l","SadServers","https://sadservers.com"],["r","danluu/post-mortems","https://github.com/danluu/post-mortems"]],
+c:"Sau một năm: chọn một sự cố thật trong kho postmortem mà bạn chưa đọc. Đọc phần triệu chứng, dừng lại, tự đoán nguyên nhân rồi mới đọc tiếp. Bạn đoán đúng tới đâu?"}
+];
+
+var KEY="lo-trinh-tong-52:";
+function get(k){try{return localStorage.getItem(KEY+k)==="1";}catch(e){return false;}}
+function set(k,v){try{if(v){localStorage.setItem(KEY+k,"1");}else{localStorage.removeItem(KEY+k);}}catch(e){}}
+function el(t,c,h){var e=document.createElement(t);if(c){e.className=c;}if(h!==undefined){e.innerHTML=h;}return e;}
+
+var bt=document.getElementById("books");
+bt.innerHTML="<tr><th>Viết tắt</th><th>Sách</th></tr>"+BOOKS.map(function(b){return "<tr><td><b>"+b[0]+"</b></td><td><a href=\""+encodeURI(b[2])+"\" target=\"_blank\">"+b[1]+"</a></td></tr>";}).join("");
+
+var plan=document.getElementById("plan"),nav=document.getElementById("phnav"),total=0,cur=-1;
+W.forEach(function(w){
+  if(w.p!==cur){
+    cur=w.p;
+    var h=el("div","phd");h.id="ph"+cur;
+    h.appendChild(el("h2",null,PH[cur][0]+" <span class=\"sub\">· "+PH[cur][1]+"</span>"));
+    h.appendChild(el("p","sub",PH[cur][2]));
+    plan.appendChild(h);
+    var a=el("a",null,PH[cur][0].replace("Giai đoạn ","GĐ"));a.href="#ph"+cur;nav.appendChild(a);
+  }
+  var d=el("details","wk");d.id="w"+w.n;
+  var s=el("summary",null,"<span class=\"n\">Tuần "+w.n+"</span><span>"+w.t+"</span><span class=\"pc\" id=\"pc"+w.n+"\"></span>");
+  d.appendChild(s);
+  var inn=el("div","in");
+  inn.appendChild(el("p","goal",w.g));
+  w.d.forEach(function(x,i){
+    total++;
+    var k=w.n+"-"+(i+1);
+    var row=el("label","day");
+    var cb=document.createElement("input");cb.type="checkbox";cb.checked=get(k);
+    if(cb.checked){row.classList.add("done");}
+    cb.addEventListener("change",function(){set(k,cb.checked);row.classList.toggle("done",cb.checked);upd();});
+    row.appendChild(cb);
+    row.appendChild(el("b","dn","N"+(i+1)));
+    var body=el("div");
+    body.appendChild(el("p","rd","<b>Đọc:</b> "+x[0]));
+    body.appendChild(el("p","pr","<b>Làm:</b> "+x[1]));
+    row.appendChild(body);
+    inn.appendChild(row);
+  });
+  var lk=el("div","lk","<b>Thực tế — xem hoặc đọc trong tuần, muộn nhất là ngày thứ 7</b>");
+  var ul=el("ul");
+  w.r.forEach(function(r){ul.appendChild(el("li",null,"<span class=\"tag\">"+T[r[0]]+"</span><a href=\""+r[2]+"\" target=\"_blank\" rel=\"noopener\">"+r[1]+"</a>"));});
+  lk.appendChild(ul);inn.appendChild(lk);
+  inn.appendChild(el("div","ck","<b>Tự kiểm ngày thứ 7:</b> "+w.c));
+  d.appendChild(inn);plan.appendChild(d);
+});
+
+function upd(){
+  var done=0,first=0;
+  W.forEach(function(w){
+    var c=0;
+    for(var i=1;i<=w.d.length;i++){if(get(w.n+"-"+i)){c++;}}
+    done+=c;
+    document.getElementById("pc"+w.n).textContent=c+"/"+w.d.length;
+    if(!first&&c<w.d.length){first=w.n;}
+  });
+  var p=Math.round(done*100/total);
+  document.getElementById("pct").textContent=p+"%";
+  document.getElementById("mi").style.width=p+"%";
+  document.getElementById("cnt").textContent=done+"/"+total+" ngày học";
+  return first||1;
+}
+var first=upd();
+document.getElementById("go").addEventListener("click",function(){
+  var d=document.getElementById("w"+upd());d.open=true;d.scrollIntoView({behavior:"smooth",block:"start"});
+});
+var armed=false,rs=document.getElementById("rs");
+rs.addEventListener("click",function(){
+  if(!armed){armed=true;rs.textContent="Bấm lần nữa để xoá";setTimeout(function(){armed=false;rs.textContent="Xoá tiến độ";},4000);return;}
+  try{Object.keys(localStorage).forEach(function(k){if(k.indexOf(KEY)===0){localStorage.removeItem(k);}});}catch(e){}
+  location.reload();
+});
+document.getElementById("w"+first).open=true;
+})();
+</script>
+</body>
+</html>

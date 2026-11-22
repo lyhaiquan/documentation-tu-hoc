@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Đối chiếu sách lập trình mạng</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f1f3f5; --surface:#ffffff; --ink:#161a1f; --muted:#5b6673;
+  --line:#dce0e6; --accent:#0d6b5a; --accent-soft:#e3f1ee;
+  --warn:#a8560a; --warn-soft:#fdf1e3; --code-bg:#eef1f4;
+  --java:#a8560a;  --java-soft:#fdf1e3;
+  --c:#1d4f91;     --c-soft:#e6eef8;
+  --go:#0d6b5a;    --go-soft:#e3f1ee;
+  --th:#6b3f8f;    --th-soft:#f0e9f7;
+  --hover:#e9edf1;
+  --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151a; --surface:#191e25; --ink:#e4e8ed; --muted:#8b97a5;
+    --line:#2a313b; --accent:#4bbfa5; --accent-soft:#16302b;
+    --warn:#d9963f; --warn-soft:#33260f; --code-bg:#141920;
+    --java:#e0a35c; --java-soft:#33260f;
+    --c:#7fb0e8;    --c-soft:#15263a;
+    --go:#4bbfa5;   --go-soft:#16302b;
+    --th:#c4a3e0;   --th-soft:#2a2036;
+    --hover:#222932;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151a; --surface:#191e25; --ink:#e4e8ed; --muted:#8b97a5;
+  --line:#2a313b; --accent:#4bbfa5; --accent-soft:#16302b;
+  --warn:#d9963f; --warn-soft:#33260f; --code-bg:#141920;
+  --java:#e0a35c; --java-soft:#33260f;
+  --c:#7fb0e8;    --c-soft:#15263a;
+  --go:#4bbfa5;   --go-soft:#16302b;
+  --th:#c4a3e0;   --th-soft:#2a2036;
+  --hover:#222932;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1060px;margin:0 auto;padding:30px 20px 70px;
+  display:flex;flex-direction:column;gap:24px}
+code{font-family:var(--mono);font-size:.87em;background:var(--code-bg);
+  padding:1px 5px;border-radius:3px}
+
+header{border-bottom:2px solid var(--ink);padding-bottom:15px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+h1{margin:7px 0 6px;font-size:clamp(22px,3.4vw,31px);font-weight:600;
+  letter-spacing:-.018em;text-wrap:balance}
+.sub{color:var(--muted);font-size:14px;margin:0;max-width:70ch}
+
+.legend{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  overflow:hidden}
+.legend h2{margin:0;padding:13px 18px;font-size:12px;font-family:var(--mono);
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;
+  border-bottom:1px solid var(--line)}
+.legend table{width:100%;border-collapse:collapse;font-size:13.5px}
+.legend td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.legend tr:last-child td{border-bottom:0}
+.legend td:first-child{width:76px}
+.legend td:nth-child(2){font-weight:500}
+.legend td:last-child{color:var(--muted);font-size:12.5px;text-align:right;
+  white-space:nowrap;font-family:var(--mono)}
+
+.k{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:2px 7px;border-radius:3px;white-space:nowrap;flex:none}
+.vi{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:600;
+  letter-spacing:.05em;padding:1px 6px;border-radius:3px;margin-left:8px;
+  background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+a.en{font-size:12px;margin-left:8px;color:var(--muted)!important;
+  text-decoration:none;border-bottom:1px dotted var(--muted)}
+a.en:hover{color:var(--accent)!important;border-bottom-color:var(--accent)}
+/* dau hieu ban tieng Viet ngay trong tung dong */
+li[data-b="GT"] .k::after,
+li[data-b="JNP"] .k::after,
+li[data-b="INTRO"] .k::after,
+li[data-b="DDIA"] .k::after{content:" ᵛⁱ";font-size:9px;opacity:.75}
+.k.java{background:var(--java-soft);color:var(--java)}
+.k.c{background:var(--c-soft);color:var(--c)}
+.k.go{background:var(--go-soft);color:var(--go)}
+.k.th{background:var(--th-soft);color:var(--th)}
+
+.topic{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  overflow:hidden}
+.topic-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;
+  padding:12px 18px;border-bottom:1px solid var(--line)}
+.topic-h .n{font-family:var(--mono);font-size:11.5px;font-weight:600;
+  color:var(--accent);background:var(--accent-soft);padding:2px 7px;border-radius:3px}
+.topic-h h3{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.topic-h .core{margin-left:auto;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--warn);font-weight:600}
+.refs{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr))}
+.refs>div{padding:12px 14px;border-top:1px solid var(--line)}
+.refs>div:first-child{border-top:0}
+@media(min-width:760px){
+  .refs>div{border-top:0;border-left:1px solid var(--line)}
+  .refs>div:first-child{border-left:0}
+}
+.refs h4{margin:0 0 7px;padding-left:4px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.refs ul{margin:0;padding:0;list-style:none;
+  display:flex;flex-direction:column;gap:2px}
+.refs li{font-size:13.5px}
+.refs li a{display:flex;gap:8px;align-items:baseline;text-decoration:none;
+  color:inherit;padding:4px;border-radius:4px}
+.refs li a:hover{background:var(--hover)}
+.refs li a:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.refs li a::after{content:"↗";margin-left:auto;color:var(--muted);font-size:11px;
+  opacity:0;flex:none}
+.refs li a:hover::after{opacity:1}
+.refs li .t{color:var(--muted);font-size:13px}
+.refs li.plain{padding:4px;display:flex;gap:8px;align-items:baseline}
+.none{color:var(--muted);font-size:13px;font-style:italic;padding:4px;display:block}
+
+.note{background:var(--warn-soft);border-left:3px solid var(--warn);
+  border-radius:0 5px 5px 0;padding:12px 15px;font-size:13.5px}
+.note b{font-weight:600}
+.note p{margin:0 0 8px}
+.note p:last-child{margin:0}
+
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  padding:16px 20px}
+.plan h2{margin:0 0 12px;font-size:17px;font-weight:600}
+.plan ol{margin:0;padding-left:20px}
+.plan li{margin-bottom:8px;font-size:14.5px}
+.plan li:last-child{margin-bottom:0}
+.plan b{font-weight:600}
+
+footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);
+  padding-top:15px;max-width:76ch}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Tủ sách D:\Documentation · đối chiếu chéo</div>
+  <h1>Cùng một chủ đề, chín cuốn sách</h1>
+  <p class="sub">Lấy giáo trình môn Lập trình mạng làm trục, đối chiếu sang mọi cuốn
+  khác trong tủ — Java, C, Go và lý thuyết giao thức. <b>Bấm vào bất kỳ dòng nào để
+  mở thẳng cuốn sách đó, đúng trang bắt đầu chương.</b></p>
+</header>
+
+<div class="note">
+  <p><b>Liên kết chỉ chạy khi mở file này từ ổ đĩa</b> — bấm đúp vào
+  <code>D:\Documentation\doi-chieu-lap-trinh-mang.html</code>. Nếu xem qua cửa sổ
+  xem trước trong ứng dụng thì trình duyệt chặn, không mở được file cục bộ.</p>
+  <p><b>Mỗi lần bấm là một tab mới.</b> Trang đối chiếu này không bị thay thế, nên
+  quay lại là vẫn đúng chỗ đang đọc. Đọc xong cuốn nào thì <code>Ctrl+W</code> đóng
+  tab đó. Muốn giữ nhiều chương cùng lúc thì cứ bấm tiếp, mỗi chương một tab.</p>
+  <p><b>Ưu tiên bản tiếng Việt.</b> Cuốn nào có bản dịch thì liên kết trỏ thẳng vào
+  bản đó — nhận ra bằng dấu <b>ᵛⁱ</b> nhỏ cạnh mã sách. Cụ thể là GT, JNP, INTRO và
+  DDIA. Bản song ngữ trùng số trang với bản gốc từng trang một nên số trang trong
+  bảng vẫn đúng; muốn đọc bản gốc tiếng Anh thì có liên kết riêng trong bảng ký hiệu
+  ngay dưới đây.</p>
+  <p><b>Đọc bảng này thế nào.</b> Mỗi ô là chỗ cùng một khái niệm được trình bày
+  trong cuốn đó. Socket là API của hệ điều hành có từ BSD năm 1983 — mọi ngôn ngữ
+  chỉ bọc lại nó, nên các ô trên cùng một hàng nói cùng một thứ, chỉ khác cú pháp.
+  Đừng đọc hết một hàng: chọn một cuốn theo ngôn ngữ đang dùng, phần còn lại để tra.</p>
+</div>
+
+<section class="legend">
+  <h2>Ký hiệu sách — bấm để mở</h2>
+  <table>
+    <tbody>
+      <tr><td><span class="k java">GT</span></td>
+        <td><a class="bk" data-b="GT">Giáo trình Lập trình mạng — Nguyễn Mạnh Hùng, Nguyễn Trọng Khánh</a></td>
+        <td>248 tr · 11 ch</td></tr>
+      <tr><td><span class="k java">JNP</span></td>
+        <td><a class="bk" data-b="JNP">Java Network Programming 4th — Elliotte Rusty Harold</a>
+          <span class="vi">song ngữ Việt–Anh</span>
+          <a class="bk en" data-b="JNP_EN">bản gốc EN</a></td>
+        <td>502 tr · 13 ch</td></tr>
+      <tr><td><span class="k java">INTRO</span></td>
+        <td><a class="bk" data-b="INTRO">An Introduction to Network Programming with Java</a>
+          <span class="vi">song ngữ Việt–Anh</span>
+          <a class="bk en" data-b="INTRO_EN">bản gốc EN</a></td>
+        <td>433 tr · 13 ch</td></tr>
+      <tr><td><span class="k c">UNP</span></td>
+        <td><a class="bk" data-b="UNP">UNIX Network Programming Vol 1, 3rd — Stevens</a></td>
+        <td>1094 tr · 31 ch</td></tr>
+      <tr><td><span class="k c">TLPI</span></td>
+        <td><a class="bk" data-b="TLPI">The Linux Programming Interface — Kerrisk</a></td>
+        <td>1556 tr · 64 ch</td></tr>
+      <tr><td><span class="k c">APUE</span></td>
+        <td><a class="bk" data-b="APUE">Advanced Programming in the UNIX Environment 3rd</a></td>
+        <td>1034 tr · 21 ch</td></tr>
+      <tr><td><span class="k c">CSAPP</span></td>
+        <td><a class="bk" data-b="CSAPP">Computer Systems: A Programmer's Perspective 3rd</a></td>
+        <td>1105 tr · 12 ch</td></tr>
+      <tr><td><span class="k go">GO</span></td>
+        <td><a class="bk" data-b="GO">Network Programming with Go — Adam Woodbeck</a></td>
+        <td>392 tr · 14 ch</td></tr>
+      <tr><td><span class="k th">TCPIP</span></td>
+        <td><a class="bk" data-b="TCPIP">TCP/IP Illustrated Vol 1: The Protocols — Stevens</a></td>
+        <td>841 tr · 30 ch</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 01 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">01</span>
+    <h3>Khái niệm nền: client/server, cổng, socket là gì</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="10"><span class="k java">GT</span><span class="t">Ch 1 — Giới thiệu về lập trình mạng</span></li>
+      <li data-b="JNP" data-p="25"><span class="k java">JNP</span><span class="t">Ch 1 — Basic Network Concepts</span></li>
+      <li data-b="INTRO" data-p="11"><span class="k java">INTRO</span><span class="t">Ch 1 — Basic Concepts and Terminology</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="UNP" data-p="61"><span class="k c">UNP</span><span class="t">Ch 2 — The Transport Layer: TCP, UDP, SCTP</span></li>
+      <li data-b="TLPI" data-p="1193"><span class="k c">TLPI</span><span class="t">Ch 56 — Sockets: Introduction</span></li>
+      <li data-b="TLPI" data-p="1223"><span class="k c">TLPI</span><span class="t">Ch 58 — Fundamentals of TCP/IP Networks</span></li>
+      <li data-b="CSAPP" data-p="940"><span class="k c">CSAPP</span><span class="t">Ch 11 — Network Programming, mục 11.1–11.3</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="25"><span class="k go">GO</span><span class="t">Ch 1 — An Overview of Networked Systems</span></li>
+      <li data-b="TCPIP" data-p="21"><span class="k th">TCPIP</span><span class="t">Ch 1 — Introduction</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">02</span>
+    <h3>Địa chỉ IP, tên miền, phân giải DNS</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="53"><span class="k java">GT</span><span class="t">Ch 4 — lớp <code>InetAddress</code></span></li>
+      <li data-b="JNP" data-p="117"><span class="k java">JNP</span><span class="t">Ch 4 — Internet Addresses</span></li>
+      <li data-b="INTRO" data-p="19"><span class="k java">INTRO</span><span class="t">2.1 — The InetAddress Class</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="UNP" data-p="366"><span class="k c">UNP</span><span class="t">Ch 11 — Name and Address Conversions</span></li>
+      <li data-b="TLPI" data-p="1241"><span class="k c">TLPI</span><span class="t">Ch 59 — Sockets: Internet Domains</span></li>
+      <li data-b="CSAPP" data-p="940"><span class="k c">CSAPP</span><span class="t">11.3 — <code>getaddrinfo</code></span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="39"><span class="k go">GO</span><span class="t">Ch 2 — Resource Location and Traffic Routing</span></li>
+      <li data-b="TCPIP" data-p="290"><span class="k th">TCPIP</span><span class="t">Ch 14 — DNS: The Domain Name System</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">03</span>
+    <h3>Luồng vào/ra — nền của mọi thao tác socket</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="19"><span class="k java">GT</span><span class="t">Ch 2 — ba nguồn một bộ lớp</span></li>
+      <li data-b="JNP" data-p="49"><span class="k java">JNP</span><span class="t">Ch 2 — Streams, Readers and Writers</span></li>
+      <li data-b="INTRO" data-p="101"><span class="k java">INTRO</span><span class="t">Ch 4 — File I/O, serialisation</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="TLPI" data-p="113"><span class="k c">TLPI</span><span class="t">Ch 4–5 — File I/O</span></li>
+      <li data-b="TLPI" data-p="277"><span class="k c">TLPI</span><span class="t">Ch 13 — File I/O Buffering</span></li>
+      <li data-b="APUE" data-p="95"><span class="k c">APUE</span><span class="t">Ch 3 File I/O</span></li>
+      <li data-b="APUE" data-p="177"><span class="k c">APUE</span><span class="t">Ch 5 Standard I/O Library</span></li>
+      <li data-b="CSAPP" data-p="912"><span class="k c">CSAPP</span><span class="t">Ch 10 — System-Level I/O</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="95"><span class="k go">GO</span><span class="t">Ch 4 — <code>io.Reader</code> / <code>io.Writer</code></span></li>
+      <li><span class="none">Không có phần lý thuyết tương ứng</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">04</span>
+    <h3>Đa luồng và đồng bộ hóa</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="19"><span class="k java">GT</span><span class="t">Ch 2 — ba bước Thread, <code>synchronized</code></span></li>
+      <li data-b="JNP" data-p="77"><span class="k java">JNP</span><span class="t">Ch 3 — Threads, Deadlock, Thread Pools</span></li>
+      <li data-b="INTRO" data-p="61"><span class="k java">INTRO</span><span class="t">Ch 3 — Multithreading and Multiplexing</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="UNP" data-p="775"><span class="k c">UNP</span><span class="t">Ch 26 — Threads</span></li>
+      <li data-b="TLPI" data-p="661"><span class="k c">TLPI</span><span class="t">Ch 29–33 — Threads</span></li>
+      <li data-b="APUE" data-p="417"><span class="k c">APUE</span><span class="t">Ch 11–12 — Threads, Thread Control</span></li>
+      <li data-b="CSAPP" data-p="993"><span class="k c">CSAPP</span><span class="t">Ch 12 — Concurrent Programming</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="67"><span class="k go">GO</span><span class="t">goroutine — rải trong Ch 3–4</span></li>
+      <li><span class="none">Không có phần lý thuyết tương ứng</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">05</span>
+    <h3>TCP — phía client</h3><span class="core">Trọng tâm</span></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="53"><span class="k java">GT</span><span class="t">Ch 4 — bốn bước client</span></li>
+      <li data-b="JNP" data-p="261"><span class="k java">JNP</span><span class="t">Ch 8 — Sockets for Clients</span></li>
+      <li data-b="INTRO" data-p="22"><span class="k java">INTRO</span><span class="t">2.2.1 — TCP Sockets</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="UNP" data-p="129"><span class="k c">UNP</span><span class="t">Ch 4 — Elementary TCP Sockets</span></li>
+      <li data-b="UNP" data-p="160"><span class="k c">UNP</span><span class="t">Ch 5 — TCP Client/Server Example</span></li>
+      <li data-b="TLPI" data-p="1241"><span class="k c">TLPI</span><span class="t">Ch 59 — Sockets: Internet Domains</span></li>
+      <li data-b="APUE" data-p="623"><span class="k c">APUE</span><span class="t">Ch 16 — Network IPC: Sockets</span></li>
+      <li data-b="CSAPP" data-p="940"><span class="k c">CSAPP</span><span class="t">11.4 — The Sockets Interface</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="67"><span class="k go">GO</span><span class="t">Ch 3 — Reliable TCP Data Streams</span></li>
+      <li data-b="TCPIP" data-p="343"><span class="k th">TCPIP</span><span class="t">Ch 17 — TCP</span></li>
+      <li data-b="TCPIP" data-p="352"><span class="k th">TCPIP</span><span class="t">Ch 18 — Connection Establishment and Termination</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">06</span>
+    <h3>TCP — phía server</h3><span class="core">Trọng tâm</span></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="53"><span class="k java">GT</span><span class="t">Ch 4 — năm bước server</span></li>
+      <li data-b="JNP" data-p="307"><span class="k java">JNP</span><span class="t">Ch 9 — Sockets for Servers</span></li>
+      <li data-b="INTRO" data-p="61"><span class="k java">INTRO</span><span class="t">3.3 — Multithreaded Servers</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="UNP" data-p="160"><span class="k c">UNP</span><span class="t">Ch 5 — TCP Client/Server Example</span></li>
+      <li data-b="UNP" data-p="921"><span class="k c">UNP</span><span class="t">Ch 30 — Client/Server Design Alternatives</span></li>
+      <li data-b="TLPI" data-p="1283"><span class="k c">TLPI</span><span class="t">Ch 60 — Sockets: Server Design</span></li>
+      <li data-b="CSAPP" data-p="940"><span class="k c">CSAPP</span><span class="t">11.4–11.6 — kèm web server TINY</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="95"><span class="k go">GO</span><span class="t">Ch 4 — Sending TCP Data</span></li>
+      <li data-b="TCPIP" data-p="352"><span class="k th">TCPIP</span><span class="t">Ch 18 — bắt tay ba bước, đóng bốn bước</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 07 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">07</span>
+    <h3>UDP — datagram</h3><span class="core">Trọng tâm</span></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="76"><span class="k java">GT</span><span class="t">Ch 5 — phong bì và hòm thư</span></li>
+      <li data-b="JNP" data-p="417"><span class="k java">JNP</span><span class="t">Ch 12 — UDP, DatagramPacket, DatagramSocket</span></li>
+      <li data-b="INTRO" data-p="28"><span class="k java">INTRO</span><span class="t">2.2.2 — Datagram (UDP) Sockets</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="UNP" data-p="286"><span class="k c">UNP</span><span class="t">Ch 8 — Elementary UDP Sockets</span></li>
+      <li data-b="UNP" data-p="677"><span class="k c">UNP</span><span class="t">Ch 22 — Advanced UDP Sockets</span></li>
+      <li data-b="TLPI" data-p="1241"><span class="k c">TLPI</span><span class="t">Ch 59 — ví dụ datagram</span></li>
+      <li data-b="APUE" data-p="623"><span class="k c">APUE</span><span class="t">Ch 16 — <code>sendto</code> / <code>recvfrom</code></span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="127"><span class="k go">GO</span><span class="t">Ch 5 — Unreliable UDP Communication</span></li>
+      <li data-b="GO" data-p="141"><span class="k go">GO</span><span class="t">Ch 6 — Ensuring UDP Reliability</span></li>
+      <li data-b="TCPIP" data-p="225"><span class="k th">TCPIP</span><span class="t">Ch 11 — UDP: User Datagram Protocol</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 08 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">08</span>
+    <h3>Tùy chọn socket và thời gian chờ</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="53"><span class="k java">GT</span><span class="t">Ch 4–5 — timeout</span></li>
+      <li data-b="JNP" data-p="283"><span class="k java">JNP</span><span class="t">8 — Setting Socket Options</span></li>
+      <li data-b="JNP" data-p="330"><span class="k java">JNP</span><span class="t">9 — Socket Options</span></li>
+      <li data-b="JNP" data-p="441"><span class="k java">JNP</span><span class="t">12 — Socket Options cho UDP</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="UNP" data-p="239"><span class="k c">UNP</span><span class="t">Ch 7 — Socket Options</span></li>
+      <li data-b="TLPI" data-p="1297"><span class="k c">TLPI</span><span class="t">Ch 61 — Sockets: Advanced Topics</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="67"><span class="k go">GO</span><span class="t">Ch 3 — deadline, context</span></li>
+      <li data-b="TCPIP" data-p="440"><span class="k th">TCPIP</span><span class="t">Ch 21 — Timeout and Retransmission</span></li>
+      <li data-b="TCPIP" data-p="488"><span class="k th">TCPIP</span><span class="t">Ch 23 — TCP Keepalive Timer</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 09 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">09</span>
+    <h3>Vào/ra không chặn, đa hợp (NIO, select, poll, epoll)</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="94"><span class="k java">GT</span><span class="t">Ch 6 — NIO: Buffer, Channel, Selector</span></li>
+      <li data-b="JNP" data-p="371"><span class="k java">JNP</span><span class="t">Ch 11 — Nonblocking I/O</span></li>
+      <li data-b="INTRO" data-p="61"><span class="k java">INTRO</span><span class="t">3.6 — Non-Blocking Servers</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="UNP" data-p="202"><span class="k c">UNP</span><span class="t">Ch 6 — I/O Multiplexing: select, poll</span></li>
+      <li data-b="UNP" data-p="514"><span class="k c">UNP</span><span class="t">Ch 16 — Nonblocking I/O</span></li>
+      <li data-b="TLPI" data-p="1369"><span class="k c">TLPI</span><span class="t">Ch 63 — Alternative I/O Models: epoll</span></li>
+      <li data-b="APUE" data-p="515"><span class="k c">APUE</span><span class="t">Ch 14 — Advanced I/O</span></li>
+      <li data-b="CSAPP" data-p="993"><span class="k c">CSAPP</span><span class="t">12.2 — I/O Multiplexing</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li><span class="none">Go không có chương riêng — goroutine thay thế mô hình này</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">10</span>
+    <h3>Thiết kế server đồng thời, tiến trình nền</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="53"><span class="k java">GT</span><span class="t">Ch 4 — server đa luồng</span></li>
+      <li data-b="JNP" data-p="113"><span class="k java">JNP</span><span class="t">3 — Thread Pools and Executors</span></li>
+      <li data-b="INTRO" data-p="61"><span class="k java">INTRO</span><span class="t">3.3 — Multithreaded Servers</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="UNP" data-p="921"><span class="k c">UNP</span><span class="t">Ch 30 — Client/Server Design Alternatives</span></li>
+      <li data-b="UNP" data-p="438"><span class="k c">UNP</span><span class="t">Ch 13 — Daemon Processes và inetd</span></li>
+      <li data-b="TLPI" data-p="1283"><span class="k c">TLPI</span><span class="t">Ch 60 — Sockets: Server Design</span></li>
+      <li data-b="TLPI" data-p="811"><span class="k c">TLPI</span><span class="t">Ch 37 — Daemons</span></li>
+      <li data-b="APUE" data-p="497"><span class="k c">APUE</span><span class="t">Ch 13 — Daemon Processes</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="209"><span class="k go">GO</span><span class="t">Ch 9 — Building HTTP Services</span></li>
+      <li data-b="GO" data-p="317"><span class="k go">GO</span><span class="t">Ch 13 — Logging and Metrics</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">11</span>
+    <h3>Quảng bá và multicast</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="94"><span class="k java">GT</span><span class="t">Ch 6 — multicast</span></li>
+      <li data-b="JNP" data-p="467"><span class="k java">JNP</span><span class="t">Ch 13 — IP Multicast</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="UNP" data-p="617"><span class="k c">UNP</span><span class="t">Ch 20 — Broadcasting</span></li>
+      <li data-b="UNP" data-p="638"><span class="k c">UNP</span><span class="t">Ch 21 — Multicasting</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="TCPIP" data-p="262"><span class="k th">TCPIP</span><span class="t">Ch 12 — Broadcasting and Multicasting</span></li>
+      <li data-b="TCPIP" data-p="278"><span class="k th">TCPIP</span><span class="t">Ch 13 — IGMP</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">12</span>
+    <h3>Bảo mật kênh truyền: SSL/TLS</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="94"><span class="k java">GT</span><span class="t">Ch 6 — mục 6.5</span></li>
+      <li data-b="JNP" data-p="349"><span class="k java">JNP</span><span class="t">Ch 10 — Secure Sockets</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li><span class="none">Không cuốn nào trong tủ dạy TLS bằng C</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="263"><span class="k go">GO</span><span class="t">Ch 11 — Securing Communications with TLS</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">13</span>
+    <h3>Giao thức tầng ứng dụng: HTTP, FTP, SMTP</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="147"><span class="k java">GT</span><span class="t">Ch 7 — Telnet, FTP, SMTP, POP3</span></li>
+      <li data-b="JNP" data-p="141"><span class="k java">JNP</span><span class="t">Ch 5 — URLs and URIs</span></li>
+      <li data-b="JNP" data-p="193"><span class="k java">JNP</span><span class="t">Ch 6 — HTTP</span></li>
+      <li data-b="JNP" data-p="211"><span class="k java">JNP</span><span class="t">Ch 7 — URLConnections</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="CSAPP" data-p="940"><span class="k c">CSAPP</span><span class="t">11.5–11.6 — HTTP và web server TINY</span></li>
+      <li data-b="APUE" data-p="823"><span class="k c">APUE</span><span class="t">Ch 21 — Communicating with a Network Printer</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="187"><span class="k go">GO</span><span class="t">Ch 8 — Writing HTTP Clients</span></li>
+      <li data-b="GO" data-p="209"><span class="k go">GO</span><span class="t">Ch 9 — Building HTTP Services</span></li>
+      <li data-b="TCPIP" data-p="602"><span class="k th">TCPIP</span><span class="t">Ch 27 — FTP</span></li>
+      <li data-b="TCPIP" data-p="629"><span class="k th">TCPIP</span><span class="t">Ch 28 — SMTP</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">14</span>
+    <h3>Socket miền Unix — giao tiếp trong cùng một máy</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li><span class="none">Giáo trình và JNP 4th không có — Java chỉ hỗ trợ từ phiên bản 16</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="UNP" data-p="489"><span class="k c">UNP</span><span class="t">Ch 15 — Unix Domain Protocols</span></li>
+      <li data-b="TLPI" data-p="1209"><span class="k c">TLPI</span><span class="t">Ch 57 — Sockets: UNIX Domain</span></li>
+      <li data-b="APUE" data-p="663"><span class="k c">APUE</span><span class="t">Ch 17 — Advanced IPC</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="163"><span class="k go">GO</span><span class="t">Ch 7 — Unix Domain Sockets</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">15</span>
+    <h3>Gọi thủ tục từ xa: RMI, CORBA</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="166"><span class="k java">GT</span><span class="t">Ch 8 — RMI: Stub, Skeleton, bảy bước</span></li>
+      <li data-b="INTRO" data-p="146"><span class="k java">INTRO</span><span class="t">Ch 5 — Remote Method Invocation</span></li>
+      <li data-b="INTRO" data-p="168"><span class="k java">INTRO</span><span class="t">Ch 6 — CORBA</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li><span class="none">Không có. Khái niệm gần nhất là RPC, không cuốn nào trong tủ dạy</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="291"><span class="k go">GO</span><span class="t">Ch 12 — Data Serialization: gRPC, protobuf</span></li>
+      <li data-b="TCPIP" data-p="654"><span class="k th">TCPIP</span><span class="t">Ch 29 — NFS, một ứng dụng của RPC</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 16 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">16</span>
+    <h3>Web: WebSocket, Servlet, JSP, Spring</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li data-b="GT" data-p="186"><span class="k java">GT</span><span class="t">Ch 9 — WebSocket</span></li>
+      <li data-b="GT" data-p="204"><span class="k java">GT</span><span class="t">Ch 10 — JSP và Tomcat</span></li>
+      <li data-b="GT" data-p="219"><span class="k java">GT</span><span class="t">Ch 11 — Spring Framework</span></li>
+      <li data-b="INTRO" data-p="244"><span class="k java">INTRO</span><span class="t">Ch 8 — Servlets</span></li>
+      <li data-b="INTRO" data-p="288"><span class="k java">INTRO</span><span class="t">Ch 9 — JavaServer Pages</span></li>
+      <li data-b="SPRING"><span class="k java">—</span><span class="t">Spring in Action 5th — cuốn riêng</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li><span class="none">Không liên quan</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="GO" data-p="209"><span class="k go">GO</span><span class="t">Ch 9 — Building HTTP Services</span></li>
+      <li data-b="GO" data-p="351"><span class="k go">GO</span><span class="t">Ch 14 — Moving to the Cloud</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- 17 -->
+<section class="topic">
+  <div class="topic-h"><span class="n">17</span>
+    <h3>Công cụ chẩn đoán — bắt gói, xem kết nối</h3></div>
+  <div class="refs">
+    <div><h4>Java</h4><ul>
+      <li><span class="none">Không sách nào trong nhóm Java bàn tới</span></li>
+    </ul></div>
+    <div><h4>C</h4><ul>
+      <li data-b="UNP"><span class="k c">UNP</span><span class="t">Phụ lục C — tcpdump, netstat, lsof, sock</span></li>
+    </ul></div>
+    <div><h4>Go &amp; lý thuyết</h4><ul>
+      <li data-b="TCPIP" data-p="142"><span class="k th">TCPIP</span><span class="t">Ch 7 — Ping Program</span></li>
+      <li data-b="TCPIP" data-p="160"><span class="k th">TCPIP</span><span class="t">Ch 8 — Traceroute Program</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- MO RONG -->
+<section class="topic">
+  <div class="topic-h"><span class="n">+</span>
+    <h3>Sách liên quan gián tiếp và bản gốc giáo trình</h3></div>
+  <div class="refs">
+    <div><h4>Hệ phân tán</h4><ul>
+      <li data-b="DDIA"><span class="k th">DDIA</span><span class="t">Designing Data-Intensive Applications, <b>bản tiếng Việt</b> — Ch 8: mạng không tin cậy, vì sao timeout là bài toán khó</span></li>
+      <li data-b="DDIA_EN"><span class="k th">DDIA</span><span class="t">— bản gốc tiếng Anh</span></li>
+      <li data-b="EDS"><span class="k th">EDS</span><span class="t">Designing Event-Driven Systems, song ngữ — Kafka, luồng sự kiện</span></li>
+      <li data-b="SDI2"><span class="k th">SDI2</span><span class="t">System Design Interview Vol 2</span></li>
+      <li data-b="DBINT"><span class="k th">DBINT</span><span class="t">Database Internals — phần II, đồng thuận và sao chép</span></li>
+    </ul></div>
+    <div><h4>Hạ tầng</h4><ul>
+      <li data-b="K8S"><span class="k go">K8S</span><span class="t">Kubernetes Up and Running 3rd — Service, Ingress, mạng trong cụm</span></li>
+    </ul></div>
+    <div><h4>Bản gốc giáo trình</h4><ul>
+      <li data-b="GT"><span class="k java">GT</span><span class="t">Lập trình mạng.pdf — 248 trang, bản gốc của cột GT</span></li>
+      <li class="plain"><span class="k th">✕</span><span class="t">Mạng máy tính.pdf — chỉ 9 trang ảnh quét, bản tải thiếu, không dùng được</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- HOC GO TRUOC -->
+<section class="topic">
+  <div class="topic-h"><span class="n">Go</span>
+    <h3>Học ngôn ngữ Go trước khi vào cột Go</h3>
+    <span class="core">Điều kiện tiên quyết</span></div>
+  <div class="refs">
+    <div><h4>Dạy từ số 0</h4><ul>
+      <li data-b="LITTLEGO"><span class="k go">LITTLE</span><span class="t">The Little Go Book — miễn phí, ~80 trang. Một buổi tối là xong cú pháp</span></li>
+      <li data-b="LEARNGO"><span class="k go">LEARN</span><span class="t">Learning Go (Jon Bodner) — cuốn chính, kỹ và chậm rãi</span></li>
+      <li data-b="ESSGO"><span class="k go">ESS</span><span class="t">Essentials of Go Programming — miễn phí, mỏng</span></li>
+      <li data-b="PROGO"><span class="k go">PRO</span><span class="t">Pro Go (Freeman) — dày, hợp tra cứu hơn học</span></li>
+    </ul></div>
+    <div><h4>Đã biết Go rồi mới đọc</h4><ul>
+      <li data-b="MASTERGO"><span class="k go">MASTER</span><span class="t">Mastering Go 3rd — nâng cao, mức 5 lên 7</span></li>
+      <li data-b="GO" data-p="20"><span class="k go">GO</span><span class="t">Network Programming with Go — sách tự ghi ở trang 20: cần “kiến thức làm việc về Go và hệ thống module”</span></li>
+    </ul></div>
+    <div><h4>Ba chỗ Go khác Java</h4><ul>
+      <li class="plain"><span class="t">Lỗi trả về như <b>giá trị</b> <code>error</code>, không có <code>try/catch</code></span></li>
+      <li class="plain"><span class="t">Interface <b>ngầm định</b> — không khai <code>implements</code>, đủ phương thức là thỏa</span></li>
+      <li class="plain"><span class="t"><b>goroutine và channel</b> thay cho <code>Thread</code> và <code>synchronized</code></span></li>
+    </ul></div>
+  </div>
+</section>
+
+<section class="plan">
+  <h2>Dùng bảng này thế nào cho khỏi loạn</h2>
+  <ol>
+    <li><b>Tuần này</b> — chỉ chủ đề <b>05, 06, 07</b>, và chỉ cột Java:
+    giáo trình Ch 4 và Ch 5. Bốn file <code>.java</code> trong
+    <code>LapTrinhMang-TCP-UDP\</code> bám đúng ba chủ đề đó.</li>
+    <li><b>Vướng chỗ nào</b> thì mở cùng hàng, cột Java, sang JNP hoặc INTRO —
+    hai cuốn đó giải thích kỹ hơn giáo trình.</li>
+    <li><b>Muốn hiểu tại sao</b> thay vì làm thế nào: cột lý thuyết,
+    TCP/IP Illustrated Ch 11, 17, 18.</li>
+    <li><b>Khi C lên mức 6</b> — quay lại đúng ba chủ đề đó ở cột C.
+    Cùng khái niệm, đọc lại rất nhanh, và lúc đó mới thấy Java đã giấu những gì.</li>
+    <li><b>Khi làm DevOps</b> — cột Go, chủ đề 05 đến 07 rồi 13.</li>
+  </ol>
+</section>
+
+<footer>
+  Số trang là số trang <b>của file PDF</b>, lấy từ mục lục nhúng trong chính các file
+  ở <code>D:\Documentation</code>, nên bấm vào là nhảy đúng chỗ. Hai ngoại lệ:
+  giáo trình và cuốn INTRO không có mục lục nhúng nên trang được dò bằng cách quét
+  tiêu đề chương; CS:APP không đánh số chương trong mục lục nên số mục theo bản in
+  thứ ba. Nhóm sách mở rộng chỉ mở tới trang đầu, chưa dò theo chương.
+</footer>
+</div>
+
+<script>
+(function(){
+  var ROOT = "file:///D:/Documentation/";
+  var BOOKS = {
+    GT:      "Giao-trinh-Tieng-Viet/Lập trình mạng.pdf",
+    // Hai cuốn dưới đây trỏ tới BẢN SONG NGỮ VIỆT–ANH.
+    // Bản song ngữ trùng số trang với bản gốc từng trang một,
+    // nên mọi số trang trong bảng vẫn đúng.
+    JNP:     "Java/Java Network Programming 4th Ed - song ngu VI-EN.pdf",
+    JNP_EN:  "Java/Java Network Programming 4th Ed (Elliotte Rusty Harold).pdf",
+    INTRO:   "OS-Linux-Networking/An Introduction to Network Programming - song ngu VI-EN.pdf",
+    INTRO_EN:"OS-Linux-Networking/An Introduction to Network Programming with Java.pdf",
+    UNP:     "_repo-technical-books/UNIX Network Programming(Volume1,3rd).pdf",
+    TLPI:    "OS-Linux-Networking/The Linux Programming Interface (Kerrisk).pdf",
+    APUE:    "_repo-technical-books/Advanced.Programming.in.the.UNIX.Environment.3rd.Edition.0321637739.pdf",
+    CSAPP:   "OS-Linux-Networking/CSAPP_2016.pdf",
+    GO:      "Go/Network Programming with Go (Adam Woodbeck).pdf",
+    TCPIP:   "OS-Linux-Networking/Stevens W.R. - TCP IP Illustrated, Vol.1, The Protocols.pdf",
+    SPRING:  "Java/Spring in Action 5th Ed (Craig Walls).pdf",
+    DDIA:    "System-Design-Architecture/Designing Data-Intensive Applications - ban tieng Viet.pdf",
+    DDIA_EN: "System-Design-Architecture/Designing Data-Intensive Applications (Kleppmann).pdf",
+    EDS:     "System-Design-Architecture/Designing Event-Driven Systems - song ngu VI-EN.pdf",
+    SDI2:    "System-Design-Architecture/System Design Interview Vol 2 (Alex Xu).pdf",
+    DBINT:   "Database/Database Internals - A Deep Dive (Alex Petrov).pdf",
+    K8S:     "Kubernetes/Kubernetes Up and Running - 3rd Ed 2022 (Early Release).pdf",
+    // --- hoc ngon ngu Go TRUOC khi vao cot Go ---
+    LITTLEGO:"Go/The Little Go Book (Karl Seguin) - free.pdf",
+    LEARNGO: "Go/Learning Go 1st Ed 2021 (Jon Bodner).pdf",
+    ESSGO:   "Go/Essentials of Go Programming (Baiju Muthukadan) - free.pdf",
+    PROGO:   "Go/Pro Go (Adam Freeman).pdf",
+    MASTERGO:"Go/Mastering Go 3rd Ed (Mihalis Tsoukalos).pdf"
+  };
+
+  function url(code, page){
+    var f = BOOKS[code];
+    if(!f) return null;
+    var enc = f.split("/").map(encodeURIComponent).join("/");
+    return ROOT + enc + (page ? "#page=" + page : "");
+  }
+
+  // Bọc nội dung mỗi <li data-b> vào một thẻ liên kết
+  document.querySelectorAll("li[data-b]").forEach(function(li){
+    var href = url(li.dataset.b, li.dataset.p);
+    if(!href){ li.classList.add("plain"); return; }
+    var a = document.createElement("a");
+    a.href = href;
+    // Mở tab mới: trang đối chiếu này không bao giờ bị thay thế,
+    // nên quay lại là vẫn nguyên chỗ đang đọc.
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.title = BOOKS[li.dataset.b]
+            + (li.dataset.p ? "  ·  trang " + li.dataset.p : "")
+            + "  —  mở ở tab mới";
+    while(li.firstChild) a.appendChild(li.firstChild);
+    li.appendChild(a);
+  });
+
+  // Bảng ký hiệu: mở trang đầu cuốn sách
+  document.querySelectorAll("a.bk").forEach(function(a){
+    var href = url(a.dataset.b, null);
+    if(href){ a.href = href; a.target = "_blank"; a.rel = "noopener";
+              a.style.color = "var(--accent)";
+              a.style.textDecoration = "none";
+              a.title = BOOKS[a.dataset.b] + "  —  mở ở tab mới"; }
+  });
+
+  // Nhớ chỗ đang cuộn, phòng khi lỡ tải lại trang
+  try{
+    var y = sessionStorage.getItem("doichieu-scroll");
+    if(y) window.scrollTo(0, parseInt(y, 10));
+    window.addEventListener("beforeunload", function(){
+      try{ sessionStorage.setItem("doichieu-scroll", String(window.scrollY)); }catch(e){}
+    });
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

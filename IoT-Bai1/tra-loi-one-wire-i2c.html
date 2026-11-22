@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trả lời One-Wire và I2C</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f1f3f5; --surface:#ffffff; --ink:#161a1f; --muted:#5b6673;
+  --line:#dce0e6; --accent:#0d6b5a; --accent-soft:#e3f1ee;
+  --warn:#a8560a; --warn-soft:#fdf1e3; --code-bg:#eef1f4;
+  --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151a; --surface:#191e25; --ink:#e4e8ed; --muted:#8b97a5;
+    --line:#2a313b; --accent:#4bbfa5; --accent-soft:#16302b;
+    --warn:#d9963f; --warn-soft:#33260f; --code-bg:#141920;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151a; --surface:#191e25; --ink:#e4e8ed; --muted:#8b97a5;
+  --line:#2a313b; --accent:#4bbfa5; --accent-soft:#16302b;
+  --warn:#d9963f; --warn-soft:#33260f; --code-bg:#141920;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.68;-webkit-font-smoothing:antialiased}
+.wrap{max-width:840px;margin:0 auto;padding:30px 20px 70px;
+  display:flex;flex-direction:column;gap:26px}
+code{font-family:var(--mono);font-size:.87em;background:var(--code-bg);
+  padding:1px 5px;border-radius:3px}
+
+header{border-bottom:2px solid var(--ink);padding-bottom:15px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+h1{margin:7px 0 6px;font-size:clamp(22px,3.4vw,31px);font-weight:600;
+  letter-spacing:-.018em;text-wrap:balance}
+.sub{color:var(--muted);font-size:14px;margin:0;max-width:64ch}
+
+.qa{background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  overflow:hidden}
+.qa-h{padding:14px 20px;border-bottom:1px solid var(--line);
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.qa-h .n{font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--accent);
+  background:var(--accent-soft);padding:2px 8px;border-radius:3px}
+.qa-h h2{margin:0;font-size:17.5px;font-weight:600;letter-spacing:-.012em}
+.qa-body{padding:6px 20px 20px}
+
+.lvl{margin-top:16px}
+.lvl-t{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);font-weight:600;
+  padding-bottom:5px;border-bottom:1px solid var(--line);margin-bottom:11px;
+  display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.lvl-t span{text-transform:none;letter-spacing:0;font-family:var(--sans);
+  font-size:11.5px;font-weight:400}
+
+.ans{font-size:14.5px}
+.ans p{margin:0 0 11px}
+.ans p:last-child{margin-bottom:0}
+.ans ol,.ans ul{margin:0 0 11px;padding-left:22px}
+.ans li{margin-bottom:5px}
+.ans b{font-weight:600}
+
+.short{background:var(--accent-soft);border-radius:5px;padding:14px 16px;
+  font-size:14.5px;line-height:1.75}
+.short p{margin:0 0 10px}
+.short p:last-child{margin-bottom:0}
+
+.timing{width:100%;border-collapse:collapse;font-size:13.5px;margin:2px 0 12px}
+.timing th{text-align:left;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;
+  padding:6px 10px;border-bottom:1px solid var(--line)}
+.timing td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.timing tr:last-child td{border-bottom:0}
+.timing td:first-child{font-family:var(--mono);white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+
+.tip{background:var(--warn-soft);border-left:3px solid var(--warn);
+  border-radius:0 5px 5px 0;padding:11px 14px;font-size:13.5px;margin-top:16px}
+.tip b{font-weight:600}
+
+footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);
+  padding-top:15px;max-width:72ch}
+
+@media print{
+  body{background:#fff;color:#000;font-size:11.5pt}
+  .wrap{max-width:none;padding:0;gap:16px}
+  .qa,.short{border:1px solid #bbb;background:#fff}
+  .qa-h .n{background:#eee;color:#000}
+  .tip{background:#fff;border-left:3px solid #888}
+  footer{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Bài thí nghiệm số 1 · phần tự luận</div>
+  <h1>Trả lời: nguyên lý One-Wire và I2C</h1>
+  <p class="sub">Mỗi câu có hai bản: <b>bản ngắn</b> vừa số dòng kẻ trong tài liệu để
+  chép tay, và <b>bản đầy đủ</b> nếu thầy hỏi thêm hoặc bạn muốn nộp bản đánh máy.</p>
+</header>
+
+<!-- ============ ONE-WIRE ============ -->
+<section class="qa">
+  <div class="qa-h"><span class="n">CÂU 1</span>
+    <h2>Trình bày nguyên lý cơ bản của giao thức truyền tin One-Wire</h2></div>
+  <div class="qa-body">
+
+    <div class="lvl">
+      <div class="lvl-t">Bản ngắn <span>~12 dòng viết tay</span></div>
+      <div class="short">
+        <p>One-Wire là chuẩn truyền tin nối tiếp bán song công chỉ dùng <b>một dây dữ
+        liệu</b> duy nhất cho cả chiều gửi và chiều nhận, ngoài dây nguồn và dây đất.
+        Đường dây được mắc kiểu cực máng hở kèm điện trở kéo lên, nên ở trạng thái rỗi
+        dây luôn ở mức cao; thiết bị nào muốn phát chỉ việc kéo dây xuống mức thấp.</p>
+        <p>Vì không có dây xung nhịp riêng nên One-Wire truyền <b>bất đồng bộ</b>, và
+        thông tin được mã hóa bằng <b>độ rộng của xung</b>: cùng là một xung mức cao,
+        ngắn thì là bit 0, dài thì là bit 1. Hai bên phải tuân thủ chặt chẽ các mốc thời
+        gian tính bằng micro giây, cho nên vi điều khiển thường phải tạm khóa ngắt trong
+        lúc đọc.</p>
+        <p>Với cảm biến DHT11 trong bài, vi điều khiển kéo dây xuống thấp ít nhất
+        18 ms để đánh thức cảm biến rồi thả ra. DHT11 đáp lại bằng 80 µs mức thấp và
+        80 µs mức cao, sau đó gửi <b>40 bit</b> dữ liệu, tức 5 byte: phần nguyên và phần
+        thập phân của độ ẩm, phần nguyên và phần thập phân của nhiệt độ, và một byte tổng
+        kiểm tra. Mỗi bit mở đầu bằng 50 µs mức thấp; tiếp theo nếu mức cao kéo dài
+        khoảng 26–28 µs thì đó là bit 0, còn khoảng 70 µs thì là bit 1. Vi điều khiển
+        cộng bốn byte đầu và so với byte thứ năm, khớp thì nhận kết quả.</p>
+        <p>Ưu điểm của One-Wire là tiết kiệm chân và dây nối, mạch đơn giản, giá rẻ.
+        Nhược điểm là tốc độ thấp và phụ thuộc rất chặt vào định thời, nên chỉ phù hợp
+        với cảm biến chậm — DHT11 chỉ lấy mẫu được tối đa 1 lần mỗi giây.</p>
+      </div>
+    </div>
+
+    <div class="lvl">
+      <div class="lvl-t">Bản đầy đủ <span>bổ sung chi tiết và bảng thời gian</span></div>
+      <div class="ans">
+        <p><b>1. Định nghĩa.</b> One-Wire (1-Wire) là chuẩn truyền tin nối tiếp do Dallas
+        Semiconductor phát triển, đặc trưng ở chỗ chỉ cần <b>một đường tín hiệu duy nhất</b>
+        làm nhiệm vụ trao đổi dữ liệu hai chiều. Trong nhiều thiết kế, đường dây này còn
+        cấp luôn nguồn nuôi cho thiết bị tớ (chế độ ký sinh, parasite power). Hệ thống theo
+        mô hình một chủ – nhiều tớ; mỗi thiết bị tớ có một mã định danh 64 bit ghi sẵn
+        trong ROM để phân biệt khi mắc chung bus.</p>
+
+        <p><b>2. Đặc điểm điện.</b> Chân dữ liệu của các thiết bị đều thuộc kiểu
+        <b>cực máng hở</b>: thiết bị chỉ có khả năng kéo dây xuống mức thấp, không thiết
+        bị nào chủ động đẩy dây lên cao. Một điện trở kéo lên (thường 4,7 kΩ) đưa dây về
+        mức cao khi không ai kéo. Nhờ vậy nhiều thiết bị dùng chung một dây mà không bao
+        giờ xảy ra xung đột làm hỏng cổng.</p>
+
+        <p><b>3. Cách mã hóa thông tin.</b> One-Wire không có dây xung nhịp, tức truyền
+        <b>bất đồng bộ</b>. Bên nhận không có mốc nhịp để lấy mẫu, nên giá trị bit được
+        mã hóa bằng <b>khoảng thời gian</b>: mỗi khe bit có độ dài cố định, thiết bị phát
+        kéo dây xuống rồi thả ra sớm hay muộn để biểu diễn 0 hoặc 1, bên nhận đo độ dài
+        mức cao để suy ra giá trị. Vì mọi thứ nằm ở thời gian, cả hai phía đều phải tuân
+        thủ chính xác tới từng micro giây; trên vi điều khiển, đoạn mã đọc One-Wire
+        thường phải tạm khóa ngắt để không bị lệch nhịp.</p>
+
+        <p><b>4. Trình tự trao đổi với cảm biến DHT11.</b></p>
+        <div class="scroll">
+        <table class="timing">
+          <thead><tr><th>Thời gian</th><th>Bên thực hiện</th><th>Diễn biến</th></tr></thead>
+          <tbody>
+            <tr><td>—</td><td>—</td><td>Trạng thái rỗi: điện trở kéo lên giữ dây ở mức cao</td></tr>
+            <tr><td>≥ 18 ms</td><td>Vi điều khiển</td><td>Kéo dây xuống mức thấp để đánh thức cảm biến</td></tr>
+            <tr><td>20–40 µs</td><td>Vi điều khiển</td><td>Thả dây, chuyển chân sang chế độ lối vào và chờ</td></tr>
+            <tr><td>80 µs thấp<br>80 µs cao</td><td>DHT11</td><td>Tín hiệu đáp lại, báo "đã sẵn sàng truyền"</td></tr>
+            <tr><td>40 khe bit</td><td>DHT11</td><td>Truyền 5 byte dữ liệu, bit có trọng số cao đi trước</td></tr>
+            <tr><td>50 µs thấp<br>+ 26–28 µs cao</td><td>DHT11</td><td>Một khe bit mang giá trị <b>0</b></td></tr>
+            <tr><td>50 µs thấp<br>+ 70 µs cao</td><td>DHT11</td><td>Một khe bit mang giá trị <b>1</b></td></tr>
+            <tr><td>—</td><td>DHT11</td><td>Thả dây, điện trở kéo lên đưa bus về mức cao</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p><b>5. Cấu trúc 5 byte của DHT11.</b> Lần lượt là: phần nguyên của độ ẩm,
+        phần thập phân của độ ẩm, phần nguyên của nhiệt độ, phần thập phân của nhiệt độ,
+        và byte <b>tổng kiểm tra</b>. Byte cuối bằng 8 bit thấp của tổng bốn byte đầu;
+        nếu không khớp thì khung dữ liệu bị coi là hỏng và phải đọc lại. Riêng DHT11 hai
+        byte phần thập phân luôn bằng 0, đó là lý do cảm biến này chỉ cho số nguyên,
+        khác với DHT22.</p>
+
+        <p><b>6. Ưu và nhược điểm.</b> Ưu điểm: tiết kiệm chân vi điều khiển, ít dây,
+        mạch đơn giản, chi phí thấp, cho phép nhiều thiết bị chung một bus nhờ mã định
+        danh 64 bit. Nhược điểm: tốc độ thấp (cỡ 16 kbit/s ở chế độ chuẩn), phụ thuộc
+        rất chặt vào định thời nên nhạy với nhiễu và với việc vi điều khiển bị ngắt chen
+        ngang, không truyền được xa. Vì thế One-Wire chỉ thích hợp với những cảm biến
+        biến thiên chậm như nhiệt độ và độ ẩm.</p>
+
+        <p><b>7. Vận dụng trong bài thí nghiệm.</b> Chân DATA của module DHT11 nối vào
+        chân IO4 của ESP32. Toàn bộ trình tự thời gian nêu trên do thư viện
+        <code>DHT.h</code> thực hiện; chương trình chỉ cần gọi
+        <code>dht.readTemperature()</code> và <code>dht.readHumidity()</code>. Do một chu
+        trình bắt tay mất vài mili giây và phần tử đo ẩm cần thời gian ổn định, tốc độ
+        lấy mẫu tối đa của DHT11 là 1 Hz, nên trong vòng lặp phải đặt trễ ít nhất 2 giây
+        giữa hai lần đọc.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ I2C ============ -->
+<section class="qa">
+  <div class="qa-h"><span class="n">CÂU 2</span>
+    <h2>Trình bày nguyên lý cơ bản của giao thức truyền tin I2C</h2></div>
+  <div class="qa-body">
+
+    <div class="lvl">
+      <div class="lvl-t">Bản ngắn <span>~13 dòng viết tay</span></div>
+      <div class="short">
+        <p>I2C (Inter-Integrated Circuit) là bus truyền tin nối tiếp <b>đồng bộ</b> do
+        hãng Philips đưa ra, dùng để nối các vi mạch với nhau trên cùng một bo mạch ở
+        khoảng cách ngắn. Bus chỉ gồm <b>hai dây</b>: <b>SDA</b> mang dữ liệu và
+        <b>SCL</b> mang xung nhịp. Cả hai đường đều thuộc kiểu cực máng hở và có điện trở
+        kéo lên, nhờ đó nhiều thiết bị mắc song song trên cùng hai dây mà không xung đột.</p>
+        <p>Hệ thống hoạt động theo mô hình <b>chủ – tớ</b>. Thiết bị chủ phát xung nhịp
+        trên SCL và khởi tạo mọi giao dịch; mỗi thiết bị tớ mang một <b>địa chỉ 7 bit</b>
+        riêng để được gọi tên. Quy tắc nền tảng là dữ liệu trên SDA chỉ được phép thay đổi
+        khi SCL ở mức thấp, còn khi SCL ở mức cao thì SDA phải giữ nguyên. Chính vì vậy,
+        hai trường hợp SDA đổi mức trong lúc SCL đang cao được dành riêng làm tín hiệu
+        điều khiển: SDA đi xuống là điều kiện <b>START</b>, SDA đi lên là điều kiện
+        <b>STOP</b>.</p>
+        <p>Một giao dịch diễn ra như sau: chủ phát START, gửi 7 bit địa chỉ kèm 1 bit
+        chỉ chiều đọc hay ghi; thiết bị tớ đúng địa chỉ kéo SDA xuống thấp ở xung nhịp thứ
+        chín để báo <b>ACK</b>. Sau đó dữ liệu được truyền từng byte một, bit trọng số cao
+        đi trước, và mỗi byte đều phải có một bit ACK hoặc NACK xác nhận. Kết thúc, chủ
+        phát STOP để nhả bus.</p>
+        <p>Tốc độ chuẩn là 100 kbit/s, chế độ nhanh 400 kbit/s. Ưu điểm của I2C là chỉ tốn
+        hai chân cho nhiều thiết bị và có cơ chế báo nhận; nhược điểm là chậm hơn SPI và
+        bị giới hạn bởi điện dung đường dây. Trên KIT thí nghiệm, I2C là đường nối tới màn
+        hình LCD 20x4, ESP32 hỗ trợ sẵn hai cổng I2C.</p>
+      </div>
+    </div>
+
+    <div class="lvl">
+      <div class="lvl-t">Bản đầy đủ <span>bổ sung điều kiện tín hiệu và các chế độ</span></div>
+      <div class="ans">
+        <p><b>1. Định nghĩa.</b> I2C là bus truyền tin nối tiếp đồng bộ, hai chiều, được
+        hãng Philips (nay là NXP) giới thiệu nhằm nối các vi mạch trên cùng một bo mạch
+        với số dây tối thiểu. Bus dùng chung cho nhiều thiết bị, khoảng cách ngắn, thường
+        vài chục centimet.</p>
+
+        <p><b>2. Hai đường tín hiệu.</b></p>
+        <ul>
+          <li><b>SDA</b> (Serial Data) — đường dữ liệu, hai chiều.</li>
+          <li><b>SCL</b> (Serial Clock) — đường xung nhịp, do thiết bị chủ phát ra.</li>
+        </ul>
+        <p>Cả hai đường đều là <b>cực máng hở</b>: thiết bị chỉ kéo được đường xuống mức
+        thấp, còn mức cao do điện trở kéo lên tạo ra. Cách mắc này tương đương phép AND
+        trên dây, cho phép nhiều thiết bị nối song song mà không hỏng cổng, đồng thời là
+        cơ sở kỹ thuật cho cơ chế báo nhận và phân xử. Giá trị điện trở kéo lên thường
+        4,7 kΩ và phải chọn theo điện dung tổng của đường dây.</p>
+
+        <p><b>3. Vai trò các thiết bị.</b> Thiết bị <b>chủ</b> (master) phát xung nhịp,
+        khởi tạo và kết thúc mọi giao dịch. Thiết bị <b>tớ</b> (slave) chỉ đáp lời khi
+        được gọi đúng địa chỉ. Địa chỉ dài <b>7 bit</b> nên về lý thuyết có 128 địa chỉ,
+        trừ các địa chỉ dành riêng thì còn 112 thiết bị trên một bus. Bus cho phép nhiều
+        chủ, khi đó có cơ chế phân xử: chủ nào phát mức cao mà đọc lại thấy mức thấp thì
+        biết mình thua và tự rút lui, giao dịch của bên thắng không bị hỏng.</p>
+
+        <p><b>4. Quy tắc nền tảng và các điều kiện đặc biệt.</b> Trong lúc truyền dữ liệu,
+        SDA chỉ được đổi mức khi SCL ở mức thấp; khi SCL lên cao thì SDA phải ổn định vì
+        đó là lúc bên nhận lấy mẫu. Nhờ quy tắc này, hai trường hợp SDA đổi mức lúc SCL
+        đang cao trở thành tín hiệu điều khiển không thể nhầm với dữ liệu:</p>
+        <ul>
+          <li><b>START</b> — SDA chuyển từ cao xuống thấp khi SCL đang cao. Bus bị chiếm.</li>
+          <li><b>STOP</b> — SDA chuyển từ thấp lên cao khi SCL đang cao. Bus được nhả.</li>
+          <li><b>START lặp lại</b> — phát START mới mà chưa STOP, dùng để đổi chiều truyền
+          giữa chừng mà không nhường bus cho thiết bị chủ khác.</li>
+        </ul>
+
+        <p><b>5. Khung một giao dịch.</b></p>
+        <ol>
+          <li>Chủ phát điều kiện START.</li>
+          <li>Chủ gửi 7 bit địa chỉ, kèm 1 bit chỉ chiều: 0 là ghi, 1 là đọc.</li>
+          <li>Thiết bị tớ trùng địa chỉ kéo SDA xuống thấp trong xung nhịp thứ chín để
+          báo <b>ACK</b>. Nếu không thiết bị nào đáp, SDA vẫn ở mức cao và chủ nhận được
+          <b>NACK</b>, hiểu là không có thiết bị ở địa chỉ đó.</li>
+          <li>Truyền dữ liệu từng byte, bit trọng số cao đi trước; sau mỗi byte lại có một
+          bit ACK hoặc NACK.</li>
+          <li>Chủ phát điều kiện STOP để kết thúc.</li>
+        </ol>
+
+        <p><b>6. Kéo dài xung nhịp.</b> Thiết bị tớ xử lý chậm có thể giữ SCL ở mức thấp
+        để buộc thiết bị chủ chờ (clock stretching). Đây là hệ quả trực tiếp của cách mắc
+        cực máng hở và là cơ chế đồng bộ tốc độ giữa hai bên.</p>
+
+        <p><b>7. Các chế độ tốc độ.</b> Chuẩn 100 kbit/s; nhanh 400 kbit/s; nhanh cải
+        tiến 1 Mbit/s; tốc độ cao 3,4 Mbit/s. Tốc độ thực tế còn bị giới hạn bởi điện dung
+        đường dây và giá trị điện trở kéo lên.</p>
+
+        <p><b>8. Ưu và nhược điểm.</b> Ưu điểm: chỉ tốn hai chân cho rất nhiều thiết bị,
+        có địa chỉ nên dễ mở rộng, có bit báo nhận nên phát hiện được thiết bị mất kết nối,
+        hỗ trợ nhiều chủ. Nhược điểm: tốc độ thấp hơn SPI, chỉ đi được khoảng cách ngắn,
+        có thể trùng địa chỉ giữa các module cùng loại, và khung truyền tốn thêm bit địa
+        chỉ cùng bit ACK nên hiệu suất thấp hơn khi gửi ít dữ liệu.</p>
+
+        <p><b>9. Vận dụng trong bài thí nghiệm.</b> Chip ESP32 có sẵn <b>hai cổng I2C</b>.
+        Trên KIT thí nghiệm IoT, I2C được dùng để nối màn hình <b>LCD 20x4</b> thông qua
+        module mở rộng chân, giúp màn hình vốn cần hàng chục dây chỉ còn dùng hai dây.
+        Trong Arduino IDE, thư viện hỗ trợ I2C là <code>Wire.h</code>.</p>
+
+        <div class="tip">
+          <b>Lưu ý khi viết câu này.</b> Đề bài đặt câu hỏi I2C ngay sau phần cảm biến
+          siêu âm, dễ khiến người viết tưởng US-015 dùng I2C. Thực tế US-015 giao tiếp
+          bằng hai chân Trigger và Echo, đúng như sơ đồ nối dây ở Bảng 1.4; I2C trên KIT
+          là đường nối tới màn hình LCD. Nếu muốn nêu, hãy viết nhã nhặn kiểu
+          <i>"theo datasheet của US-015, cảm biến giao tiếp bằng xung Trigger/Echo,
+          còn I2C trên KIT được dùng cho màn hình LCD 20x4"</i>.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  Hai câu này là phần chấm điểm nặng nhất của Bài 1. Bản ngắn đã đủ ý để lấy trọn điểm;
+  bản đầy đủ dành cho trường hợp thầy hỏi vấn đáp hoặc nộp báo cáo đánh máy.
+  Bấm Ctrl+P để in — trang đã có sẵn định dạng in.
+</footer>
+</div>
+</body>
+</html>

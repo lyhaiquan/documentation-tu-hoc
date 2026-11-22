@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Đọc chồng sách hệ thống</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap">
+<style>
+:root{
+  --bg:#EFEFF4;--surface:#FFF;--surface-2:#F6F6FA;
+  --ink:#171826;--ink-2:#3A3C52;--muted:#6A6C84;
+  --line:#D7D8E2;--line-2:#E7E8EF;
+  --accent:#464B9E;--accent-soft:#E6E7F5;
+  --warm:#9E5C1A;--warm-soft:#F7EDE1;
+  --done:#136B54;--done-soft:#DCEFE9;
+  --shadow:0 1px 2px rgba(23,24,38,.06),0 4px 14px rgba(23,24,38,.05);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E0F16;--surface:#171922;--surface-2:#1E202B;
+  --ink:#E9EAF2;--ink-2:#B9BBCC;--muted:#878AA0;
+  --line:#2A2C3B;--line-2:#222431;
+  --accent:#8D92E4;--accent-soft:#1C1F35;
+  --warm:#DBA062;--warm-soft:#2C2318;
+  --done:#3FBC96;--done-soft:#0F2A24;
+  --shadow:0 1px 2px rgba(0,0,0,.45),0 4px 16px rgba(0,0,0,.32);
+}}
+:root[data-theme="dark"]{
+  --bg:#0E0F16;--surface:#171922;--surface-2:#1E202B;
+  --ink:#E9EAF2;--ink-2:#B9BBCC;--muted:#878AA0;
+  --line:#2A2C3B;--line-2:#222431;
+  --accent:#8D92E4;--accent-soft:#1C1F35;
+  --warm:#DBA062;--warm-soft:#2C2318;
+  --done:#3FBC96;--done-soft:#0F2A24;
+  --shadow:0 1px 2px rgba(0,0,0,.45),0 4px 16px rgba(0,0,0,.32);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Serif",Georgia,serif;font-size:16px;line-height:1.6;margin:0;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3,h4,.ui{font-family:"IBM Plex Sans","Segoe UI",system-ui,sans-serif}
+code,.mono{font-family:"IBM Plex Mono",Consolas,monospace}
+a{color:var(--accent)}
+
+header{padding:40px 0 24px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:"IBM Plex Sans",sans-serif;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.12;margin:0 0 12px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+.lede{font-size:16.5px;color:var(--ink-2);margin:0;max-width:66ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chip{font-family:"IBM Plex Sans",sans-serif;font-size:12.5px;font-weight:500;padding:5px 11px;border:1px solid var(--line);border-radius:999px;color:var(--ink-2);background:var(--surface)}
+.chip b{color:var(--ink);font-weight:600}
+.overall{margin-top:24px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.overall .num{font-family:"IBM Plex Sans",sans-serif;font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;color:var(--accent)}
+.overall .lbl{font-family:"IBM Plex Sans",sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+.bar{flex:1;min-width:180px;height:8px;background:var(--line-2);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .35s}
+.btn{font-family:"IBM Plex Sans",sans-serif;font-size:13px;font-weight:500;padding:7px 13px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink-2);cursor:pointer}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.note{margin:26px 0;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:16px 18px}
+.note.warm{border-left-color:var(--warm)}
+.note h4{margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.note.warm h4{color:var(--warm)}
+.note p{margin:0 0 8px;font-size:15px;color:var(--ink-2)}
+.note p:last-child{margin-bottom:0}
+.note ul,.note ol{margin:8px 0 0;padding-left:20px;font-size:15px;color:var(--ink-2)}
+.note li{margin-bottom:6px}
+
+/* ban do sach */
+.stack{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:12px;margin:22px 0 8px}
+.bk{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:13px 15px;box-shadow:var(--shadow)}
+.bk .role{font-family:"IBM Plex Sans",sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:5px}
+.bk h4{margin:0 0 4px;font-size:14.5px;font-weight:600}
+.bk p{margin:0;font-size:13px;color:var(--muted);font-family:"IBM Plex Sans",sans-serif;line-height:1.45}
+
+.mod{margin-top:38px;scroll-margin-top:12px}
+.mhead{background:var(--surface);border:1px solid var(--line);border-radius:10px 10px 0 0;padding:18px 20px;border-bottom:none}
+.mtop{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.mnum{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;letter-spacing:.09em;color:var(--accent);background:var(--accent-soft);padding:3px 9px;border-radius:5px;white-space:nowrap}
+.mtitle{font-size:21px;font-weight:600;margin:0;letter-spacing:-.012em;flex:1;min-width:210px}
+.mpct{font-family:"IBM Plex Sans",sans-serif;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted)}
+.mbar{height:4px;background:var(--line-2);border-radius:99px;margin-top:12px;overflow:hidden}
+.mbar>i{display:block;height:100%;width:0;background:var(--done);border-radius:99px;transition:width .35s}
+.mthesis{margin-top:14px;padding-top:13px;border-top:1px solid var(--line-2);font-size:14.5px;color:var(--ink-2)}
+.mthesis b{color:var(--ink);font-weight:600}
+
+.sess{background:var(--surface);border:1px solid var(--line);border-radius:0 0 10px 10px;box-shadow:var(--shadow);overflow:hidden}
+.s{display:flex;gap:14px;padding:17px 20px;border-top:1px solid var(--line-2)}
+.s:first-child{border-top:none}
+.s:hover{background:var(--surface-2)}
+.s.is-done{background:var(--done-soft)}
+.s.is-done .stitle{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+.s input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:none;width:20px;height:20px;margin:2px 0 0;border:1.5px solid var(--line);border-radius:5px;background:var(--surface);cursor:pointer;position:relative}
+.s input[type=checkbox]:hover{border-color:var(--accent)}
+.s input[type=checkbox]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.s input[type=checkbox]:checked{background:var(--done);border-color:var(--done)}
+.s input[type=checkbox]:checked::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(43deg)}
+.sbody{flex:1;min-width:0}
+.shead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.snum{font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.stitle{font-family:"IBM Plex Sans",sans-serif;font-size:16.5px;font-weight:600;color:var(--ink);flex:1;min-width:170px;cursor:pointer;letter-spacing:-.005em}
+.rows{margin-top:11px;display:grid;gap:9px}
+.row{display:flex;gap:10px;font-size:14.5px;color:var(--ink-2);line-height:1.52}
+.rk{font-family:"IBM Plex Sans",sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);flex:none;width:76px;padding-top:3px}
+.row.goal .rk{color:var(--done)}
+.row.goal{color:var(--ink)}
+.rv code{font-size:13px;background:var(--surface-2);border:1px solid var(--line-2);padding:1px 5px;border-radius:4px;color:var(--ink)}
+
+/* vi sao ghep - o dinh cua moi buoi */
+.why{
+  margin-top:11px;background:var(--warm-soft);border:1px solid var(--line-2);
+  border-left:3px solid var(--warm);border-radius:0 7px 7px 0;padding:11px 14px
+}
+.why .wk{
+  font-family:"IBM Plex Sans",sans-serif;font-size:10.5px;font-weight:700;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--warm);display:block;margin-bottom:5px
+}
+.why p{margin:0;font-size:14.5px;color:var(--ink-2);line-height:1.55}
+
+.refs{display:flex;flex-direction:column;gap:4px}
+.ref{
+  display:flex;align-items:baseline;gap:9px;text-decoration:none;
+  font-family:"IBM Plex Sans",sans-serif;font-size:13.5px;padding:5px 10px;
+  border:1px solid var(--line-2);border-radius:6px;background:var(--surface-2);color:var(--ink)
+}
+.ref:hover{border-color:var(--accent);background:var(--accent-soft)}
+.ref:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.ref .bkn{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12px;white-space:nowrap;flex:none;color:var(--accent)}
+.ref .loc{flex:1;min-width:0;color:var(--ink-2)}
+.ref .pg{font-family:"IBM Plex Mono",monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap;flex:none}
+.ref.lab{background:var(--surface);border-style:dashed}
+.ref.lab .bkn{color:var(--done)}
+.ref.lab:hover{border-color:var(--done);background:var(--done-soft)}
+
+footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);font-family:"IBM Plex Sans",sans-serif;font-size:13px;color:var(--muted)}
+footer p{margin:0 0 8px}
+@media (max-width:660px){.rk{width:100%;padding-top:0}.row{flex-direction:column;gap:3px}.ref .pg{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Sau VDT · lộ trình dài hạn</p>
+  <h1>Đọc chồng sách hệ thống</h1>
+  <p class="lede">Không đọc lần lượt hết cuốn này rồi tới cuốn kia. Mỗi chủ đề đọc <strong>ba đến bốn cuốn cùng lúc</strong> — mỗi cuốn nhìn cùng một thứ từ một tầng khác nhau. Mỗi buổi đều nói rõ <em>vì sao chúng ghép được với nhau</em>.</p>
+  <div class="meta">
+    <span class="chip"><b>10</b> mô-đun</span>
+    <span class="chip"><b>71</b> buổi</span>
+    <span class="chip"><b>8</b> cuốn sách</span>
+    <span class="chip"><b>170</b> liên kết chương</span>
+    <span class="chip">4–6 tháng, tuỳ nhịp</span>
+  </div>
+  <div class="overall">
+    <div><div class="num"><span id="pct">0</span>%</div><div class="lbl">Hoàn thành</div></div>
+    <div class="bar"><i id="obar"></i></div>
+    <button class="btn" id="reset" type="button">Xoá tiến độ</button>
+  </div>
+</header>
+
+<div class="note">
+  <h4>Nguyên tắc chồng sách</h4>
+  <p>Mỗi chủ đề trong lộ trình này đều tồn tại trong nhiều cuốn — nhưng mỗi cuốn nhìn từ một <strong>tầng</strong> khác:</p>
+  <div class="stack" id="stack"></div>
+  <p style="margin-top:14px">Đọc một cuốn thì bạn hiểu một tầng. Đọc chồng ba cuốn về cùng một chủ đề trong cùng một tuần thì bạn thấy được <strong>cùng một cơ chế xuyên suốt từ phần cứng lên tới ứng dụng</strong> — và đó là thứ không cuốn nào tự nó dạy được.</p>
+</div>
+
+<div class="note warm">
+  <h4>Cách chạy một buổi</h4>
+  <ol>
+    <li><strong>Đọc chính trước</strong> — thường là CSAPP hoặc OSTEP, để có mô hình tư duy.</li>
+    <li><strong>Đọc kèm ngay sau</strong>, cùng ngày, không để cách hôm. Sức mạnh nằm ở chỗ hai góc nhìn còn tươi trong đầu cùng lúc.</li>
+    <li><strong>Đọc ô "Vì sao ghép"</strong> trước khi mở sách — nó cho bạn biết cần chú ý điều gì.</li>
+    <li><strong>Làm phần thực hành.</strong> Không gõ thì không tính là xong.</li>
+  </ol>
+  <p style="margin-top:10px">Lab của CSAPP tải miễn phí tại <code>csapp.cs.cmu.edu/3e/labs.html</code>. Bản sách của bạn là Global Edition nên bài tập cuối chương đánh số khác bản US — lab thì lấy từ trang CMU, không bị ảnh hưởng.</p>
+</div>
+
+<main id="mods"></main>
+
+<footer>
+  <p><strong>Số trang là trang thật trong file PDF</strong> của bạn, lấy từ mục lục nhúng — bấm là mở đúng chỗ. Mọi liên kết mở tab mới.</p>
+  <p>Tiến độ lưu bằng <code>localStorage</code> của trình duyệt này, độc lập với hai kế hoạch kia.</p>
+</footer>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+var ROOT="file:///D:/Documentation/";
+var B={
+ CSAPP:{f:"OS-Linux-Networking/CSAPP_2016.pdf",n:"CSAPP"},
+ TLPI:{f:"OS-Linux-Networking/The Linux Programming Interface (Kerrisk).pdf",n:"TLPI"},
+ OSTEP:{f:"OS-Linux-Networking/Operating Systems - Three Easy Pieces.pdf",n:"OSTEP"},
+ STEV:{f:"OS-Linux-Networking/Stevens W.R. - TCP IP Illustrated, Vol.1, The Protocols.pdf",n:"Stevens"},
+ UNP:{f:"_repo-technical-books/UNIX Network Programming(Volume1,3rd).pdf",n:"UNP"},
+ DDIA:{f:"System-Design-Architecture/Designing Data-Intensive Applications (Kleppmann).pdf",n:"DDIA"},
+ DBINT:{f:"Database/Database Internals - A Deep Dive (Alex Petrov).pdf",n:"DBInternals"},
+ PGINT:{f:"Database/PostgreSQL 14 Internals (Egor Rogov).pdf",n:"PG14"}
+};
+function r(k,p,t){return{k:k,p:p,t:t};}
+function lab(t,d){return{k:"LAB",t:t,d:d};}
+
+var STACK=[
+ ["Tầng chương trình","CSAPP","Nhìn hệ thống từ phía người viết code. Trả lời “điều này ảnh hưởng chương trình tôi thế nào”."],
+ ["Tầng nhân","OSTEP","Nhìn từ phía hệ điều hành. Trả lời “nhân quyết định thế nào và vì sao”."],
+ ["Tầng giao diện","TLPI","Bề mặt API thật của Linux. Trả lời “gọi hàm nào, tham số gì, lỗi ra sao”."],
+ ["Tầng giao thức","Stevens · UNP","Cái thật sự chạy trên dây. Trả lời “gói tin trông như thế nào”."],
+ ["Tầng ứng dụng","DBInternals · PG14 · DDIA","Nơi mọi thứ trên được dùng thật trong một sản phẩm."]
+];
+
+var M=[
+{n:1,title:"Biểu diễn dữ liệu — nền của mọi thứ",
+ thesis:"Mô-đun duy nhất <b>không ghép sách</b>. CSAPP chương 2 không có cuốn nào trong kho song hành, và cũng không cần: đây là kiến thức nền mà ba mô-đun sau đều dựa vào.",
+ s:[
+ {t:"Bức tranh toàn cảnh",
+  main:[r("CSAPP",31,"ch.1 — A Tour of Computer Systems")],
+  side:[],
+  why:"Đọc một mình. Chương này là bản đồ của cả cuốn sách, và cũng là bản đồ của cả lộ trình 71 buổi này — mỗi phần trong đó sẽ thành một mô-đun.",
+  d:"Biên dịch <code>hello.c</code> bằng <code>gcc -v</code>, xem 4 giai đoạn. Vẽ lại sơ đồ phần cứng trong chương.",
+  g:"Kể được hành trình từ file .c tới lúc chữ hiện trên màn hình"},
+ {t:"Số nguyên và bit",
+  main:[r("CSAPP",60,"ch.2 §2.1–2.2 — Information Storage, Integer Representations")],
+  side:[],
+  why:"Nền cho tất cả. Mọi lỗi tràn số, mọi so sánh signed/unsigned sai, mọi bug bit-mask trong TLPI và trong code mạng đều bắt nguồn từ đây.",
+  d:"Data Lab phần thao tác bit. Tự viết <code>int is_negative(int)</code> chỉ dùng phép bit.",
+  g:"Giải thích được vì sao <code>-1 &gt; 0U</code> trả về true trong C"},
+ {t:"Số học nguyên và tràn số",
+  main:[r("CSAPP",60,"ch.2 §2.3 — Integer Arithmetic")],
+  side:[],
+  why:"Đọc riêng vì đây là nguồn lỗi bảo mật kinh điển. Khi sang TLPI phần kiểm tra tham số syscall, bạn sẽ hiểu vì sao kernel kiểm tra tràn số kỹ đến thế.",
+  d:"Data Lab phần số học. Thử làm tràn <code>int</code> rồi xem trình biên dịch xử lý ra sao với <code>-fwrapv</code>.",
+  g:"Nói được nhân hai số dương có thể ra số âm trong trường hợp nào"},
+ {t:"Số thực dấu phẩy động",
+  main:[r("CSAPP",60,"ch.2 §2.4 — Floating Point")],
+  side:[],
+  why:"Đọc riêng. Sẽ dùng lại ở mô-đun 3 khi đo hiệu năng, và ở mô-đun 10 khi bàn về lưu trữ kiểu dữ liệu trong cơ sở dữ liệu.",
+  d:"Data Lab phần float. In bit của <code>0.1f</code>, kiểm chứng vì sao <code>0.1 + 0.2 != 0.3</code>.",
+  g:"Giải thích được cấu trúc 1 bit dấu + 8 mũ + 23 phần định trị"}
+]},
+
+{n:2,title:"Mã máy — đọc được thứ trình biên dịch sinh ra",
+ thesis:"Vẫn chủ yếu CSAPP một mình, nhưng bắt đầu ghép <b>TLPI chương 3</b>: khi bạn hiểu lời gọi hàm ở mức assembly, cơ chế syscall trong TLPI không còn là hộp đen.",
+ s:[
+ {t:"Cơ bản assembly x86-64",
+  main:[r("CSAPP",191,"ch.3 §3.1–3.4 — Program Encodings, Data Formats, Data Movement")],
+  side:[],
+  why:"Chương dài nhất và là nơi nhiều người bỏ cuộc. Chia làm 5 buổi, đừng cố nuốt trong một lần.",
+  d:"<code>gcc -Og -S</code> vài hàm nhỏ, đọc output. Dùng <code>objdump -d</code> so sánh.",
+  g:"Đọc được một hàm assembly 20 dòng và nói nó làm gì"},
+ {t:"Điều khiển luồng ở mức máy",
+  main:[r("CSAPP",191,"ch.3 §3.5–3.6 — Arithmetic and Logical Operations, Control")],
+  side:[],
+  why:"Điều kiện, vòng lặp, switch ở mức máy. Cần cho Bomb Lab, và cần để đọc được stack trace khi debug bằng gdb ở các mô-đun sau.",
+  d:"Viết vòng lặp trong C, xem assembly. Nhận diện mẫu <code>cmp</code> + <code>jle</code>.",
+  g:"Nhận ra được vòng lặp for và switch chỉ nhìn assembly"},
+ {t:"Thủ tục và ngăn xếp",
+  main:[r("CSAPP",191,"ch.3 §3.7 — Procedures")],
+  side:[r("TLPI",87,"ch.3 §3.1 — System Calls: cơ chế chuyển vào nhân")],
+  why:"<b>Điểm ghép đầu tiên.</b> CSAPP dạy lời gọi hàm thường: đẩy tham số, lưu địa chỉ trở về, dựng khung ngăn xếp. TLPI chương 3 mô tả lời gọi <em>hệ thống</em> — bản chất cũng là chuyển điều khiển, nhưng vượt qua ranh giới user/kernel. Đọc liền nhau, bạn thấy syscall chỉ là một lời gọi hàm đặc biệt, không phải phép màu.",
+  d:"Đặt breakpoint trong gdb, dùng <code>bt</code> và <code>info frame</code>. Rồi <code>strace ./a.out</code> xem syscall thật.",
+  g:"Vẽ được khung ngăn xếp và chỉ ra địa chỉ trở về nằm ở đâu"},
+ {t:"Mảng, struct, và bố cục bộ nhớ",
+  main:[r("CSAPP",191,"ch.3 §3.8–3.9 — Array Allocation, Heterogeneous Data")],
+  side:[],
+  why:"Nền trực tiếp cho mô-đun 3: hiểu struct nằm liền nhau trong bộ nhớ ra sao là hiểu vì sao cache hoạt động tốt hay tệ.",
+  d:"Dùng <code>offsetof</code> kiểm tra padding. Đảo thứ tự trường trong struct xem <code>sizeof</code> đổi thế nào.",
+  g:"Dự đoán đúng <code>sizeof</code> của một struct trước khi chạy"},
+ {t:"Lỗi tràn bộ đệm và cách phòng",
+  main:[r("CSAPP",191,"ch.3 §3.10 — Combining Control and Data, Buffer Overflow")],
+  side:[r("TLPI",827,"ch.38 — Writing Secure Privileged Programs")],
+  why:"<b>Ghép rất chặt.</b> CSAPP cho bạn <em>tấn công</em> — Attack Lab dạy ghi đè địa chỉ trở về. TLPI chương 38 cho bạn <em>phòng thủ</em> — viết chương trình đặc quyền an toàn. Học cách phá trước rồi học cách giữ, thứ tự này khiến bài phòng thủ trở nên hiển nhiên thay vì là danh sách quy tắc thuộc lòng.",
+  d:"Attack Lab. Rồi bật/tắt <code>-fno-stack-protector</code> và ASLR xem khác gì.",
+  g:"Thực hiện được một cuộc tấn công ghi đè địa chỉ trở về, và nói được ba cơ chế phòng thủ hiện đại"}
+]},
+
+{n:3,title:"Phân cấp bộ nhớ — nơi lý thuyết bắt đầu sinh lời",
+ thesis:"Mô-đun đầu tiên ghép <b>bốn cuốn</b>. CSAPP dạy nguyên lý cache; DBInternals và PG14 cho thấy chính nguyên lý đó quyết định thiết kế của mọi cơ sở dữ liệu trên đời. Đây là mô-đun trả về giá trị thực tế nhanh nhất.",
+ s:[
+ {t:"Công nghệ lưu trữ và tính cục bộ",
+  main:[r("CSAPP",609,"ch.6 §6.1–6.2 — Storage Technologies, Locality")],
+  side:[r("OSTEP",423,"ch.37 — Hard Disk Drives")],
+  why:"CSAPP mô tả đặc tính vật lý của SRAM, DRAM, đĩa. OSTEP chương 37 đi sâu vào cơ học đĩa quay: seek, rotation, transfer. Ghép lại bạn có đủ số liệu để hiểu vì sao chênh lệch tốc độ giữa các tầng lên tới sáu bậc — con số đó là lý do tồn tại của mọi thứ trong mô-đun này.",
+  d:"Đo băng thông đọc tuần tự và ngẫu nhiên trên máy bạn. So tỉ lệ.",
+  g:"Ghi ra được bảng độ trễ từ thanh ghi tới đĩa, theo bậc độ lớn"},
+ {t:"Bộ nhớ đệm hoạt động thế nào",
+  main:[r("CSAPP",637,"ch.6 §6.3–6.4 — The Memory Hierarchy, Cache Memories")],
+  side:[],
+  why:"Đọc kỹ một mình. Ánh xạ trực tiếp, kết hợp theo tập, chính sách thay thế — đây là bộ máy khái niệm mà ba buổi sau đều dùng.",
+  d:"Cache Lab phần mô phỏng. Tự tính chỉ số tập và thẻ cho một địa chỉ.",
+  g:"Tính tay được một địa chỉ rơi vào tập nào, và đó là hit hay miss"},
+ {t:"Viết code thân thiện với cache",
+  main:[r("CSAPP",661,"ch.6 §6.5–6.6 — Writing Cache-Friendly Code, Impact of Caches")],
+  side:[r("OSTEP",496,"ch.41 — Locality and The Fast File System")],
+  why:"CSAPP tối ưu cục bộ ở mức mảng và vòng lặp. OSTEP chương 41 áp dụng <em>chính xác cùng ý tưởng cục bộ</em> nhưng ở quy mô hệ thống tệp — FFS đặt inode gần dữ liệu vì cùng một lý do bạn duyệt mảng theo hàng thay vì theo cột. Thấy một nguyên lý lặp lại ở hai quy mô cách nhau sáu bậc là lúc nó thật sự vào đầu.",
+  d:"Cache Lab phần tối ưu nhân ma trận. Đo thời gian duyệt theo hàng và theo cột.",
+  g:"Tăng tốc được một vòng lặp gấp nhiều lần chỉ bằng cách đổi thứ tự truy cập"},
+ {t:"Tối ưu chương trình",
+  main:[r("CSAPP",523,"ch.5 — Optimizing Program Performance")],
+  side:[],
+  why:"Đọc sau chương 6 chứ không trước, dù số chương nhỏ hơn. Lý do: phần lớn cơ hội tối ưu thực tế đến từ cục bộ bộ nhớ, và chương 5 sẽ dễ hiểu hơn nhiều khi bạn đã có mô hình cache trong đầu.",
+  d:"Lấy một hàm chậm, tối ưu từng bước theo sách, đo lại sau mỗi bước.",
+  g:"Phân biệt được tối ưu nào do trình biên dịch làm hộ, tối ưu nào phải tự làm"},
+ {t:"B-tree — cache dưới dạng cấu trúc dữ liệu",
+  main:[r("DBINT",46,"ch.2 — B-Tree Basics")],
+  side:[r("CSAPP",637,"ch.6 §6.3 — nhắc lại nguyên lý tầng"),r("PGINT",421,"PG14 — B-tree trong PostgreSQL thật")],
+  why:"<b>Đây là buổi chứng minh vì sao CSAPP đáng học.</b> B-tree không phải phát minh ngẫu nhiên — nó tồn tại vì đọc đĩa theo khối, và độ rộng nút được chọn khớp kích thước trang. DBInternals cho lý thuyết, PG14 cho bạn xem PostgreSQL cài đặt thật. Không có chương 6 thì B-tree chỉ là một cây có nhiều con; có chương 6 thì nó là hệ quả tất yếu của phần cứng.",
+  d:"Trong PostgreSQL, tạo bảng, tạo index, dùng <code>pageinspect</code> xem nút B-tree thật.",
+  g:"Giải thích được vì sao B-tree rộng và nông chứ không hẹp và sâu"},
+ {t:"Lưu trữ ghi thêm và LSM-tree",
+  main:[r("DBINT",150,"ch.7 — Log-Structured Storage")],
+  side:[r("OSTEP",528,"ch.43 — Log-structured File Systems"),r("DDIA",92,"ch.3 §Data Structures That Power Your Database")],
+  why:"<b>Ba cuốn, một ý tưởng.</b> OSTEP chương 43 trình bày LFS ở tầng hệ thống tệp năm 1991; DBInternals trình bày LSM-tree ở tầng cơ sở dữ liệu; DDIA so sánh hai họ B-tree và LSM ở tầng thiết kế hệ thống. Cùng một nhận xét — ghi tuần tự nhanh hơn ghi ngẫu nhiên rất nhiều — sinh ra ba thiết kế ở ba tầng. Đọc chồng ba cuốn trong một buổi là cách duy nhất thấy được điều đó.",
+  d:"Vẽ sơ đồ so sánh đường ghi và đường đọc của B-tree và LSM. Ghi rõ đánh đổi.",
+  g:"Chọn được B-tree hay LSM cho một tải công việc cụ thể và bảo vệ được lựa chọn"},
+ {t:"Bộ đệm đệm của cơ sở dữ liệu",
+  main:[r("PGINT",147,"PG14 — Buffer Cache")],
+  side:[r("CSAPP",637,"ch.6 §6.3 — tầng cache"),r("OSTEP",250,"ch.22 — Beyond Physical Memory: Policies")],
+  why:"PostgreSQL tự cài <em>lại</em> một tầng cache riêng, ngay trên tầng cache của hệ điều hành. OSTEP chương 22 dạy các chính sách thay thế trang mà nhân dùng; PG14 cho thấy vì sao cơ sở dữ liệu không tin tưởng nhân và làm lại từ đầu. Buổi này trả lời câu hỏi hay bị hỏi khi phỏng vấn: “tại sao không để hệ điều hành lo?”",
+  d:"Xem <code>pg_buffercache</code>, chỉnh <code>shared_buffers</code>, đo lại hiệu năng truy vấn.",
+  g:"Nói được lý do một cơ sở dữ liệu muốn tự quản bộ đệm thay vì dựa vào nhân"}
+]},
+
+{n:4,title:"Liên kết — vì sao chương trình của bạn tìm không thấy .so",
+ thesis:"Ghép <b>CSAPP chương 7</b> với <b>TLPI chương 41–42</b>. CSAPP giải thích cấu trúc tĩnh của file ELF; TLPI giải thích hành vi động lúc chạy. Hai nửa của cùng một câu chuyện, và không cuốn nào kể trọn.",
+ s:[
+ {t:"Từ mã nguồn tới file đối tượng",
+  main:[r("CSAPP",698,"ch.7 §7.1–7.5 — Compiler Drivers, Static Linking, Object Files, Symbols")],
+  side:[],
+  why:"Nền. Cần biết ELF gồm những section nào trước khi nói tới bất kỳ điều gì về liên kết.",
+  d:"<code>readelf -S</code> và <code>nm</code> trên một file .o. Đối chiếu với sơ đồ trong sách.",
+  g:"Liệt kê được các section chính của ELF và vai trò từng cái"},
+ {t:"Phân giải ký hiệu và tái định vị",
+  main:[r("CSAPP",706,"ch.7 §7.6–7.7 — Symbol Resolution, Relocation")],
+  side:[],
+  why:"Đây là nơi lỗi <code>undefined reference</code> và <code>multiple definition</code> sinh ra. Hiểu chương này là hết sợ lỗi liên kết.",
+  d:"Cố tình tạo lỗi trùng ký hiệu, đọc thông báo lỗi và giải thích bằng thuật ngữ trong sách.",
+  g:"Giải thích được quy tắc ký hiệu mạnh và yếu"},
+ {t:"Thư viện chia sẻ — cấu trúc tĩnh",
+  main:[r("CSAPP",725,"ch.7 §7.10–7.12 — Dynamic Linking, Loading Shared Libraries, PIC")],
+  side:[r("TLPI",877,"ch.41 — Fundamentals of Shared Libraries")],
+  why:"<b>Ghép cốt lõi của mô-đun.</b> CSAPP giải thích <em>cơ chế</em>: PIC, bảng GOT và PLT, vì sao mã dùng chung được giữa các tiến trình. TLPI chương 41 giải thích <em>vận hành</em>: soname, đánh phiên bản, <code>ldconfig</code>, đường dẫn tìm kiếm. Bạn cần cả hai mới trả lời được câu hỏi thực tế nhất: vì sao chương trình chạy trên máy này mà không chạy trên máy kia.",
+  d:"Tự dựng một .so, chạy <code>ldd</code>, <code>readelf -d</code>. Đổi <code>LD_LIBRARY_PATH</code> xem đổi gì.",
+  g:"Truy được đúng thứ tự tìm kiếm thư viện của trình liên kết động"},
+ {t:"Nạp động và chèn thư viện",
+  main:[r("CSAPP",734,"ch.7 §7.13 — Library Interpositioning")],
+  side:[r("TLPI",903,"ch.42 — Advanced Features of Shared Libraries")],
+  why:"CSAPP dạy ba cách chèn: lúc biên dịch, lúc liên kết, lúc chạy. TLPI chương 42 cho API thật là <code>dlopen</code>, <code>dlsym</code>, và cơ chế <code>LD_PRELOAD</code>. Ghép lại bạn hiểu được cách hoạt động của mọi công cụ profiling và sandbox — và đây cũng là nền để đọc mã nguồn của các công cụ hạ tầng sau này.",
+  d:"Dùng <code>LD_PRELOAD</code> thay thế <code>malloc</code> bằng bản của bạn có đếm số lần gọi.",
+  g:"Chặn và thay thế được một hàm thư viện chuẩn mà không sửa chương trình gốc"}
+]},
+
+{n:5,title:"Tiến trình và tín hiệu — mô-đun ghép chặt nhất",
+ thesis:"Ba cuốn hội tụ mạnh nhất ở đây. <b>CSAPP chương 8</b> là bản rút gọn của <b>TLPI chương 20–28</b>, còn <b>OSTEP chương 4–8</b> giải thích những gì nhân làm ở phía dưới. Học một mình cuốn nào cũng thiếu một chiều.",
+ s:[
+ {t:"Ngoại lệ — bốn loại chuyển điều khiển bất thường",
+  main:[r("CSAPP",749,"ch.8 §8.1 — Exceptions")],
+  side:[r("OSTEP",69,"ch.6 — Mechanism: Limited Direct Execution")],
+  why:"<b>Ghép hoàn hảo.</b> CSAPP phân loại bốn kiểu ngoại lệ: interrupt, trap, fault, abort. OSTEP chương 6 giải thích <em>cơ chế phần cứng</em> khiến chúng khả thi — chế độ hạn chế, bảng vector ngắt, chuyển ngữ cảnh. CSAPP nói có cái gì, OSTEP nói nó chạy bằng cách nào. Đọc CSAPP trước rồi OSTEP ngay sau trong cùng buổi.",
+  d:"Gây một fault cố ý (chia cho 0, truy cập null), xem tín hiệu nào được gửi.",
+  g:"Phân biệt được trap, fault và interrupt bằng ví dụ cụ thể"},
+ {t:"Trừu tượng tiến trình",
+  main:[r("CSAPP",758,"ch.8 §8.2 — Processes")],
+  side:[r("OSTEP",46,"ch.4 — The Abstraction: The Process"),r("TLPI",157,"ch.6 — Processes: bố cục bộ nhớ tiến trình")],
+  why:"Ba góc trong một buổi. CSAPP: tiến trình cho ảo giác độc quyền CPU và bộ nhớ. OSTEP: nhân duy trì ảo giác đó bằng cấu trúc dữ liệu và chuyển ngữ cảnh nào. TLPI chương 6: bố cục bộ nhớ thật của một tiến trình Linux — text, data, heap, stack. Ba tầng của cùng một khái niệm.",
+  d:"Đọc <code>/proc/self/maps</code>, đối chiếu với sơ đồ bố cục trong TLPI.",
+  g:"Chỉ ra được từng vùng trong <code>/proc/PID/maps</code> tương ứng phần nào của chương trình"},
+ {t:"Tạo tiến trình: fork",
+  main:[r("CSAPP",764,"ch.8 §8.4 — Process Control")],
+  side:[r("OSTEP",58,"ch.5 — Interlude: Process API"),r("TLPI",557,"ch.24 — Process Creation")],
+  why:"<code>fork</code> là hàm khó hiểu nhất với người mới vì nó trả về hai lần. OSTEP chương 5 có bài tập fork rất hay; CSAPP có đồ thị tiến trình để suy luận thứ tự; TLPI chương 24 nói chi tiết cái gì được sao chép, cái gì chia sẻ, và copy-on-write. Ba cách tiếp cận cùng một hàm.",
+  d:"OSTEP fork lab. Vẽ đồ thị tiến trình cho đoạn có ba lời gọi fork lồng nhau.",
+  g:"Đếm đúng số tiến trình sinh ra và dự đoán được các thứ tự in hợp lệ"},
+ {t:"Kết thúc và thu hoạch tiến trình con",
+  main:[r("CSAPP",764,"ch.8 §8.4 — waitpid, tiến trình zombie")],
+  side:[r("TLPI",575,"ch.25 — Process Termination"),r("TLPI",585,"ch.26 — Monitoring Child Processes")],
+  why:"CSAPP giới thiệu zombie và tiến trình mồ côi ở mức đủ để viết shell. TLPI chương 25–26 nói hết các trường hợp biên: trạng thái thoát, <code>SIGCHLD</code>, <code>waitid</code>, hàm dọn dẹp lúc thoát. Đây là kiến thức bạn cần thật khi viết daemon ở buổi sau.",
+  d:"Tạo zombie cố ý, quan sát bằng <code>ps</code>. Rồi thu hoạch đúng cách.",
+  g:"Giải thích được vì sao zombie tồn tại và ai chịu trách nhiệm dọn"},
+ {t:"Nạp chương trình mới: exec",
+  main:[r("CSAPP",764,"ch.8 §8.4 — execve")],
+  side:[r("TLPI",607,"ch.27 — Program Execution"),r("TLPI",635,"ch.28 — Process Creation and Program Execution in More Detail")],
+  why:"Cặp <code>fork</code> + <code>exec</code> là nền tảng của mọi shell và mọi container runtime. TLPI chương 28 giải thích cái gì sống sót qua exec — file descriptor, tín hiệu, biến môi trường. Chính danh sách “cái gì sống sót” đó là thứ bạn cần khi hiểu container.",
+  d:"Viết chương trình fork rồi exec <code>/bin/ls</code>. Thử giữ và không giữ file descriptor mở.",
+  g:"Nói được ba thứ được kế thừa qua exec và ba thứ bị mất"},
+ {t:"Tín hiệu — khái niệm",
+  main:[r("CSAPP",782,"ch.8 §8.5 — Signals")],
+  side:[r("TLPI",431,"ch.20 — Signals: Fundamental Concepts")],
+  why:"Tín hiệu là phần CSAPP trình bày gọn nhất nhưng cũng dễ gây ảo tưởng hiểu nhất. TLPI dành <em>ba chương</em> cho nó là có lý do. Bắt đầu bằng CSAPP để có bức tranh, rồi TLPI chương 20 để biết chính xác thuật ngữ: gửi, chờ, chặn, xử lý.",
+  d:"Gửi tín hiệu bằng <code>kill</code>, bắt bằng <code>signal()</code>. Xem tín hiệu nào không bắt được.",
+  g:"Phân biệt được tín hiệu đang chờ và tín hiệu bị chặn"},
+ {t:"Bộ xử lý tín hiệu và những cái bẫy",
+  main:[r("CSAPP",782,"ch.8 §8.5 — viết handler an toàn")],
+  side:[r("TLPI",465,"ch.21 — Signals: Signal Handlers"),r("TLPI",491,"ch.22 — Signals: Advanced Features")],
+  why:"<b>Buổi ghép có giá trị cao nhất mô-đun.</b> CSAPP cảnh báo về hàm an toàn với async-signal và biến <code>volatile sig_atomic_t</code>. TLPI chương 21–22 cho danh sách đầy đủ và giải thích vì sao. Cả hai đều nhấn mạnh cùng một điều: handler viết ẩu là nguồn bug không tái hiện được. Ở mô-đun 9 bạn sẽ gặp lại chính vấn đề này dưới tên khác là race condition.",
+  d:"Viết handler gọi <code>printf</code>, chạy vòng lặp gửi tín hiệu dồn dập, quan sát hỏng.",
+  g:"Liệt kê được vì sao <code>printf</code> không an toàn trong handler"},
+ {t:"Nhóm tiến trình, phiên, điều khiển tác vụ",
+  main:[r("CSAPP",807,"ch.8 §8.6 — Nonlocal Jumps")],
+  side:[r("TLPI",743,"ch.34 — Process Groups, Sessions, and Job Control")],
+  why:"CSAPP chạm nhẹ khi làm Shell Lab; TLPI chương 34 mới là lời giải thích đầy đủ vì sao <code>Ctrl+C</code> giết đúng nhóm tiến trình chứ không phải một tiến trình. Đây chính là kiến thức bạn dùng khi vận hành hệ thống thật.",
+  d:"Chạy pipeline, xem <code>ps -o pid,pgid,sid</code>. Thử <code>Ctrl+Z</code> rồi <code>fg</code>, <code>bg</code>.",
+  g:"Giải thích được vì sao Ctrl+C dừng cả pipeline chứ không chỉ lệnh cuối"},
+ {t:"Shell Lab — đỉnh của mô-đun",
+  main:[lab("CSAPP Shell Lab","Viết một shell có điều khiển tác vụ hoàn chỉnh")],
+  side:[r("CSAPP",747,"ch.8 — tra cứu lại khi mắc"),r("TLPI",743,"ch.34 — semantics chính xác")],
+  why:"Lab này ép bạn dùng <em>đồng thời</em> mọi thứ trong mô-đun: fork, exec, waitpid, tín hiệu, nhóm tiến trình. Không lab nào trong CSAPP dạy nhiều bằng lab này, và đây là lúc bạn hiểu vì sao TLPI cần tới chín chương cho cùng chủ đề.",
+  d:"Hoàn thành Shell Lab. Hỗ trợ <code>&amp;</code>, <code>jobs</code>, <code>fg</code>, <code>bg</code>, <code>Ctrl+C</code>, <code>Ctrl+Z</code>.",
+  g:"Shell của bạn qua hết trace test của CMU"},
+ {t:"Daemon và tiến trình chạy nền",
+  main:[r("TLPI",811,"ch.37 — Daemons")],
+  side:[r("TLPI",743,"ch.34 — vì sao daemon cần setsid")],
+  why:"Buổi này TLPI dẫn dắt, CSAPP không có nội dung tương ứng. Nó nối trực tiếp sang kiến thức vận hành: một systemd unit thực chất quản lý đúng những thứ chương này mô tả.",
+  d:"Viết một daemon đúng chuẩn: fork hai lần, setsid, đóng fd, ghi log qua syslog.",
+  g:"Daemon của bạn sống sót khi đóng terminal và ghi log đọc được bằng journalctl"}
+]},
+
+{n:6,title:"Bộ nhớ ảo — ba cuốn nhìn cùng một cơ chế",
+ thesis:"<b>CSAPP chương 9</b> nhìn từ chương trình, <b>OSTEP chương 13–22</b> nhìn từ nhân, <b>TLPI chương 7, 49, 50</b> cho API thật. Mô-đun này kết bằng việc bạn tự viết một <code>malloc</code>.",
+ s:[
+ {t:"Địa chỉ ảo và không gian địa chỉ",
+  main:[r("CSAPP",828,"ch.9 §9.1–9.4 — Physical and Virtual Addressing, Address Spaces")],
+  side:[r("OSTEP",132,"ch.13 — The Abstraction: Address Spaces")],
+  why:"Hai cuốn mở đầu gần như cùng một cách, nhưng CSAPP nghiêng về “bộ nhớ ảo là bộ đệm cho đĩa” còn OSTEP nghiêng về “bộ nhớ ảo là ảo giác do nhân dựng lên”. Hai ẩn dụ bổ sung nhau; giữ cả hai trong đầu.",
+  d:"So <code>/proc/PID/maps</code> của hai tiến trình cùng chạy một chương trình.",
+  g:"Giải thích được vì sao hai tiến trình cùng thấy địa chỉ giống nhau mà không đụng nhau"},
+ {t:"Dịch địa chỉ",
+  main:[r("CSAPP",838,"ch.9 §9.6 — Address Translation")],
+  side:[r("OSTEP",152,"ch.15 — Mechanism: Address Translation"),r("OSTEP",166,"ch.16 — Segmentation")],
+  why:"CSAPP trình bày dịch địa chỉ đã ở dạng phân trang hoàn chỉnh. OSTEP đi theo lối lịch sử: base-and-bounds, rồi phân đoạn, rồi mới phân trang — cho bạn thấy <em>vì sao</em> phân trang thắng. Biết đường tiến hoá làm thiết kế cuối cùng dễ nhớ hơn nhiều.",
+  d:"Dịch tay một địa chỉ ảo sang vật lý với bảng trang cho sẵn.",
+  g:"Tách đúng một địa chỉ thành số trang và độ lệch, rồi tra bảng"},
+ {t:"Phân trang và TLB",
+  main:[r("CSAPP",850,"ch.9 §9.7 — Case Study: Intel Core i7/Linux Memory System")],
+  side:[r("OSTEP",195,"ch.18 — Paging: Introduction"),r("OSTEP",209,"ch.19 — Paging: Faster Translations (TLBs)")],
+  why:"<b>Điểm giao đẹp nhất của mô-đun.</b> TLB thực chất là một cache — và bạn đã học cache ở mô-đun 3. OSTEP chương 19 phân tích tỉ lệ trúng TLB bằng đúng bộ công cụ mà CSAPP chương 6 đã dạy. Ba mô-đun nối lại thành một mạch: cache → TLB → hiệu năng chương trình.",
+  d:"Viết vòng lặp duyệt mảng lớn với bước nhảy tăng dần, đo lúc nào hiệu năng sụp — đó là lúc vượt TLB.",
+  g:"Đo được kích thước vùng phủ của TLB trên máy bạn"},
+ {t:"Bảng trang nhiều cấp và bộ nhớ vượt vật lý",
+  main:[r("CSAPP",838,"ch.9 §9.6 — bảng trang nhiều cấp")],
+  side:[r("OSTEP",226,"ch.20 — Paging: Smaller Tables"),r("OSTEP",241,"ch.21 — Beyond Physical Memory: Mechanisms")],
+  why:"CSAPP đưa ra bảng bốn cấp của x86-64 như một sự đã rồi. OSTEP chương 20 dẫn bạn qua bài toán: bảng trang phẳng tốn bao nhiêu bộ nhớ, và các giải pháp lần lượt ra sao. Đọc OSTEP trước sẽ khiến con số “bốn cấp” của CSAPP trở thành hiển nhiên.",
+  d:"Tính bộ nhớ cần cho bảng trang phẳng ở không gian 48 bit, rồi so với bảng bốn cấp.",
+  g:"Giải thích được vì sao phải nhiều cấp thay vì một bảng lớn"},
+ {t:"Chính sách thay thế trang",
+  main:[r("OSTEP",250,"ch.22 — Beyond Physical Memory: Policies")],
+  side:[r("PGINT",147,"PG14 — Buffer Cache: chính sách của một CSDL")],
+  why:"Buổi này OSTEP dẫn dắt vì CSAPP gần như không bàn chính sách. Ghép với PG14 để thấy cùng bài toán “giữ trang nào, bỏ trang nào” được giải hai lần ở hai tầng, với hai bộ thông tin khác nhau — nhân không biết truy vấn, cơ sở dữ liệu thì biết.",
+  d:"Mô phỏng LRU, FIFO, clock trên cùng chuỗi truy cập, so tỉ lệ miss.",
+  g:"Nói được vì sao LRU thuần khó cài đặt trong nhân thật"},
+ {t:"Ánh xạ bộ nhớ",
+  main:[r("CSAPP",858,"ch.9 §9.8 — Memory Mapping")],
+  side:[r("TLPI",1061,"ch.49 — Memory Mappings"),r("TLPI",1089,"ch.50 — Virtual Memory Operations")],
+  why:"<b>Ghép mang tính quyết định.</b> CSAPP giải thích <code>mmap</code> như cơ chế đứng sau việc nạp chương trình và fork copy-on-write. TLPI chương 49 là tài liệu tham khảo đầy đủ về <code>mmap</code> thật với mọi cờ, và chương 50 cho <code>mprotect</code>, <code>madvise</code>. Sau buổi này bạn hiểu vì sao nhiều cơ sở dữ liệu chọn mmap và vì sao một số khác kiên quyết không.",
+  d:"Dùng <code>mmap</code> đọc một file lớn, so tốc độ với <code>read</code>. Thử <code>MAP_SHARED</code> giữa hai tiến trình.",
+  g:"Cài được cơ chế chia sẻ bộ nhớ giữa hai tiến trình bằng mmap"},
+ {t:"Cấp phát bộ nhớ động — lý thuyết",
+  main:[r("CSAPP",864,"ch.9 §9.9 — Dynamic Memory Allocation")],
+  side:[r("OSTEP",178,"ch.17 — Free-Space Management"),r("TLPI",183,"ch.7 — Memory Allocation")],
+  why:"Ba cuốn, ba độ sâu. TLPI chương 7 cho API: <code>malloc</code>, <code>free</code>, <code>brk</code>, <code>sbrk</code>. OSTEP chương 17 cho thuật toán quản lý vùng trống. CSAPP đi xa nhất, dẫn tới việc bạn tự cài. Đọc theo thứ tự TLPI → OSTEP → CSAPP là đi từ dùng, tới hiểu, tới làm.",
+  d:"Vẽ sơ đồ danh sách khối tự do. So sánh first-fit, best-fit, segregated list.",
+  g:"Giải thích được phân mảnh trong và phân mảnh ngoài bằng ví dụ"},
+ {t:"Malloc Lab — tự viết bộ cấp phát",
+  main:[lab("CSAPP Malloc Lab","Cài đặt malloc, free, realloc của riêng bạn")],
+  side:[r("CSAPP",864,"ch.9 §9.9 — tra cứu khi mắc"),r("OSTEP",178,"ch.17 — chiến lược thay thế")],
+  why:"Lab khó nhất của CSAPP, và cũng đáng nhất. Nó buộc bạn cân bằng ba thứ trái nhau: tốc độ, tỉ lệ dùng bộ nhớ, và độ phức tạp. Sau lab này bạn đọc mã nguồn của bất kỳ bộ cấp phát nào cũng thấy quen.",
+  d:"Hoàn thành Malloc Lab. Mục tiêu đạt điểm hiệu năng khá, không cần tối đa.",
+  g:"malloc của bạn qua hết trace test và không rò rỉ bộ nhớ"},
+ {t:"Lỗi bộ nhớ trong C",
+  main:[r("CSAPP",895,"ch.9 §9.11 — Common Memory-Related Bugs in C Programs")],
+  side:[r("TLPI",827,"ch.38 — Writing Secure Privileged Programs")],
+  why:"Chốt lại mô-đun. CSAPP liệt kê các mẫu lỗi; TLPI đặt chúng vào bối cảnh bảo mật. Ghép với buổi tràn bộ đệm ở mô-đun 2 để có bức tranh trọn vẹn về vì sao C nguy hiểm.",
+  d:"Chạy <code>valgrind</code> và <code>-fsanitize=address</code> trên code Malloc Lab của bạn.",
+  g:"Nhận diện được sáu mẫu lỗi bộ nhớ chỉ bằng cách đọc code"}
+]},
+
+{n:7,title:"Vào/ra hệ thống — ba tầng đệm chồng lên nhau",
+ thesis:"<b>CSAPP chương 10</b> cho mô hình tối giản, <b>TLPI chương 4, 5, 13</b> cho toàn bộ chi tiết, <b>OSTEP chương 36–43</b> cho biết đĩa và hệ thống tệp làm gì phía dưới.",
+ s:[
+ {t:"Mô hình I/O của Unix",
+  main:[r("CSAPP",913,"ch.10 §10.1–10.4 — Unix I/O, Files, Opening, Reading and Writing")],
+  side:[r("TLPI",113,"ch.4 — File I/O: The Universal I/O Model"),r("TLPI",133,"ch.5 — File I/O: Further Details")],
+  why:"CSAPP nén bốn chương TLPI thành mười trang. Đọc CSAPP để nắm ý tưởng “mọi thứ là file”, rồi TLPI chương 4–5 để biết mọi cờ của <code>open</code> và mọi mã lỗi. Đây là cặp tra cứu bạn sẽ mở lại nhiều lần.",
+  d:"Viết chương trình copy file chỉ bằng <code>open read write close</code>, không dùng stdio.",
+  g:"Xử lý đúng trường hợp <code>read</code> trả về ít hơn số byte yêu cầu"},
+ {t:"Ba tầng đệm",
+  main:[r("CSAPP",920,"ch.10 §10.5 — Robust Reading and Writing (gói RIO)")],
+  side:[r("TLPI",277,"ch.13 — File I/O Buffering")],
+  why:"<b>Buổi giải thích một hiểu lầm phổ biến.</b> Có ba tầng đệm chồng lên nhau: đệm của stdio trong không gian người dùng, đệm của gói RIO, và đệm của nhân. TLPI chương 13 vẽ rõ cả ba và cho biết <code>fflush</code> khác <code>fsync</code> ra sao. Đây chính là gốc rễ của câu hỏi “dữ liệu của tôi đã thật sự nằm trên đĩa chưa” — câu hỏi mà mô-đun 10 sẽ trả lời ở tầng cơ sở dữ liệu.",
+  d:"Ghi file rồi kill -9 ngay, có và không có <code>fsync</code>. Xem dữ liệu còn không.",
+  g:"Vẽ được ba tầng đệm và nói đúng hàm nào đẩy dữ liệu qua tầng nào"},
+ {t:"Siêu dữ liệu và thư mục",
+  main:[r("CSAPP",926,"ch.10 §10.7–10.8 — Reading File Metadata, Directory Contents")],
+  side:[r("TLPI",295,"ch.14 — File Systems"),r("TLPI",383,"ch.18 — Directories and Links")],
+  why:"CSAPP chỉ đủ để viết một server tĩnh. TLPI chương 14 và 18 giải thích inode, liên kết cứng và mềm, và vì sao đổi tên file lại là thao tác nguyên tử. Tính nguyên tử của <code>rename</code> là nền cho mọi kỹ thuật ghi an toàn ở mô-đun 10.",
+  d:"Tạo hard link và symlink, so <code>stat</code> của cả hai. Xoá file gốc xem gì xảy ra.",
+  g:"Giải thích được vì sao hard link không thể trỏ qua phân vùng khác"},
+ {t:"Hệ thống tệp nhìn từ nhân",
+  main:[r("OSTEP",459,"ch.39 — Interlude: Files and Directories")],
+  side:[r("OSTEP",478,"ch.40 — File System Implementation")],
+  why:"Buổi này OSTEP một mình. Nó lấp đúng khoảng trống giữa CSAPP và TLPI: cả hai cuốn kia đều nói về <em>gọi hàm gì</em>, còn OSTEP nói về <em>dữ liệu nằm ở đâu trên đĩa</em> — inode bitmap, data bitmap, khối gián tiếp.",
+  d:"Vẽ sơ đồ một hệ thống tệp đơn giản. Truy đường từ tên file tới khối dữ liệu.",
+  g:"Đếm được cần bao nhiêu lần đọc đĩa để mở và đọc một file"},
+ {t:"Nhất quán sau sự cố",
+  main:[r("OSTEP",508,"ch.42 — Crash Consistency: FSCK and Journaling")],
+  side:[r("PGINT",164,"PG14 — Write-Ahead Log"),r("DBINT",100,"ch.5 — Transaction Processing and Recovery")],
+  why:"<b>Buổi cho thấy một ý tưởng thắng ở mọi tầng.</b> Journaling của hệ thống tệp và WAL của cơ sở dữ liệu là <em>cùng một kỹ thuật</em>: ghi ý định ra nhật ký trước, rồi mới sửa dữ liệu thật. OSTEP dạy ở tầng hệ thống tệp, PG14 và DBInternals dạy ở tầng cơ sở dữ liệu. Nhận ra chúng là một là bước nhảy về nhận thức.",
+  d:"Xem <code>pg_wal</code> của PostgreSQL. Đọc log của ext4 journal bằng <code>dumpe2fs</code>.",
+  g:"Giải thích write-ahead logging bằng lời cho người không biết gì, trong hai phút"},
+ {t:"Mô hình I/O thay thế",
+  main:[r("TLPI",1369,"ch.63 — Alternative I/O Models")],
+  side:[r("OSTEP",394,"ch.33 — Event-based Concurrency"),r("CSAPP",999,"ch.12 §12.2 — I/O Multiplexing")],
+  why:"Chuẩn bị cho mô-đun 9. TLPI chương 63 là tài liệu đầy đủ nhất về <code>select</code>, <code>poll</code>, <code>epoll</code>. CSAPP dùng chúng để viết server đồng thời; OSTEP giải thích mô hình sự kiện như một lựa chọn thay cho luồng. Ba cuốn cùng chuẩn bị cho câu hỏi lớn của mô-đun 9: luồng hay sự kiện.",
+  d:"Viết echo server bằng <code>epoll</code> phục vụ nhiều kết nối trong một luồng.",
+  g:"Nói được vì sao epoll mở rộng tốt hơn select khi có hàng nghìn kết nối"}
+]},
+
+{n:8,title:"Mạng — bốn cuốn, bốn tầng của một gói tin",
+ thesis:"Mô-đun có nhiều cuốn hội tụ nhất. <b>Stevens</b> mô tả giao thức trên dây, <b>CSAPP chương 11</b> và <b>TLPI chương 56–61</b> mô tả API, <b>UNP</b> là tài liệu tra cứu đầy đủ. Điểm mạnh: bạn có thể <code>tcpdump</code> chính server mình vừa viết và đọc lại đúng những gì Stevens mô tả.",
+ s:[
+ {t:"Mô hình phân tầng và IP",
+  main:[r("STEV",21,"ch.1 — Introduction: mô hình phân tầng")],
+  side:[r("STEV",67,"ch.3 — IP: Internet Protocol"),r("CSAPP",942,"ch.11 §11.2–11.3 — Networks, The Global IP Internet")],
+  why:"CSAPP nén toàn bộ mạng thành mười trang cho đủ dùng. Stevens dành cả cuốn. Bắt đầu bằng CSAPP để có khung, rồi Stevens chương 1 và 3 để có chi tiết thật của tiêu đề IP.",
+  d:"<code>ip addr</code>, <code>ip route</code>. Bắt gói bằng <code>tcpdump -n</code>, đọc tiêu đề IP.",
+  g:"Chỉ ra được từng trường trong tiêu đề IP của một gói bắt được"},
+ {t:"ARP và ICMP — hai giao thức phụ trợ",
+  main:[r("STEV",93,"ch.4 — ARP: Address Resolution Protocol")],
+  side:[r("STEV",121,"ch.6 — ICMP"),r("STEV",142,"ch.7 — Ping Program")],
+  why:"Stevens một mình. Hai giao thức này không có trong CSAPP hay TLPI vì chúng nằm dưới tầng socket — nhưng chúng là nguyên nhân của rất nhiều sự cố mạng thật mà bạn sẽ gặp khi vận hành hệ thống.",
+  d:"<code>arp -a</code>, xoá một mục rồi ping lại và bắt gói ARP. Chạy <code>ping</code> và đọc gói ICMP.",
+  g:"Giải thích được chuỗi sự kiện đầy đủ khi ping một máy trong cùng mạng LAN"},
+ {t:"TCP — thiết lập kết nối",
+  main:[r("STEV",343,"ch.17 — TCP: Transmission Control Protocol")],
+  side:[r("STEV",352,"ch.18 — TCP Connection Establishment and Termination")],
+  why:"Stevens dẫn dắt. Đây là kiến thức mà mọi buổi còn lại của mô-đun đều dựa vào, và cũng là câu hỏi phỏng vấn phổ biến nhất về mạng.",
+  d:"Bắt gói toàn bộ một kết nối HTTP: bắt tay ba bước, dữ liệu, đóng bốn bước.",
+  g:"Vẽ được sơ đồ trạng thái TCP và giải thích TIME_WAIT tồn tại để làm gì"},
+ {t:"Giao diện socket",
+  main:[r("CSAPP",955,"ch.11 §11.4 — The Sockets Interface")],
+  side:[r("TLPI",1193,"ch.56 — Sockets: Introduction"),r("TLPI",1241,"ch.59 — Sockets: Internet Domains")],
+  why:"<b>Ghép API với giao thức.</b> Sau hai buổi Stevens, giờ bạn biết gói tin trông thế nào — nên khi CSAPP nói <code>connect</code> gửi SYN, bạn đã <em>thấy</em> gói SYN đó rồi. Học API trước khi biết giao thức thì chỉ là học thuộc thứ tự hàm; học sau thì mỗi hàm đều có nghĩa.",
+  d:"Viết client và server TCP bằng tay. Vừa chạy vừa <code>tcpdump</code> đối chiếu.",
+  g:"Nối được mỗi lời gọi hàm với đúng gói tin xuất hiện trên dây"},
+ {t:"Địa chỉ, DNS và chuyển đổi",
+  main:[r("CSAPP",947,"ch.11 §11.3 — getaddrinfo và tên miền")],
+  side:[r("STEV",290,"ch.14 — DNS: The Domain Name System"),r("TLPI",1241,"ch.59 — địa chỉ IPv4 và IPv6")],
+  why:"CSAPP dạy <code>getaddrinfo</code> như một hàm tiện dụng. Stevens chương 14 cho biết phía sau nó là cả một giao thức với đệm, TTL và phân giải đệ quy. DNS là nguyên nhân sự cố phổ biến nhất trong vận hành — hiểu sâu ở đây trả về lợi ích rất lâu.",
+  d:"<code>dig +trace</code> một tên miền, quan sát đường phân giải đệ quy. Bắt gói DNS.",
+  g:"Truy được toàn bộ đường đi từ tên miền tới địa chỉ IP"},
+ {t:"Máy chủ web",
+  main:[r("CSAPP",971,"ch.11 §11.5–11.6 — Web Servers, Tiny Web Server")],
+  side:[r("TLPI",1283,"ch.60 — Sockets: Server Design")],
+  why:"CSAPP cho bạn một server hoàn chỉnh gần 300 dòng để đọc và sửa. TLPI chương 60 bàn về thiết kế server ở mức kiến trúc: lặp tuần tự, một tiến trình mỗi kết nối, tiền tạo tiến trình. Đọc code thật rồi đọc phân tích kiến trúc là thứ tự hiệu quả.",
+  d:"Đọc và chạy Tiny. Thêm một tính năng, ví dụ liệt kê thư mục.",
+  g:"Sửa được Tiny mà không làm hỏng phần xử lý HTTP"},
+ {t:"Truyền dữ liệu và điều khiển tắc nghẽn",
+  main:[r("STEV",440,"ch.21 — TCP Timeout and Retransmission")],
+  side:[r("STEV",412,"ch.20 — TCP Bulk Data Flow"),r("STEV",499,"ch.24 — TCP Futures and Performance")],
+  why:"Stevens dẫn dắt. Đây là phần giải thích vì sao mạng chậm chứ không đứt — cửa sổ trượt, khởi động chậm, tránh tắc nghẽn. Kiến thức trực tiếp dùng khi chẩn đoán hệ thống phân tán chậm ở mô-đun 10.",
+  d:"Dùng <code>tc</code> tạo độ trễ và mất gói giả lập, quan sát TCP phản ứng.",
+  g:"Giải thích được vì sao mất một gói làm thông lượng giảm mạnh"},
+ {t:"Chủ đề socket nâng cao",
+  main:[r("TLPI",1297,"ch.61 — Sockets: Advanced Topics")],
+  side:[r("UNP",1,"UNP Vol.1 — tra cứu đầy đủ khi cần"),r("TLPI",1209,"ch.57 — Sockets: UNIX Domain")],
+  why:"TLPI chương 61 gom các chi tiết mà CSAPP bỏ qua: <code>shutdown</code> khác <code>close</code>, tuỳ chọn socket, <code>SO_REUSEADDR</code>, thuật toán Nagle. Đây đúng là những thứ gây ra bug khó chịu trong production. UNP dùng như từ điển, không đọc tuần tự.",
+  d:"Thử <code>SO_REUSEADDR</code> có và không có, quan sát lỗi <em>address already in use</em>.",
+  g:"Giải thích được vì sao khởi động lại server ngay lập tức thường bị lỗi bind"},
+ {t:"Proxy Lab — đỉnh của mô-đun",
+  main:[lab("CSAPP Proxy Lab","Viết một web proxy có đệm và xử lý đồng thời")],
+  side:[r("CSAPP",940,"ch.11 — tra cứu"),r("CSAPP",993,"ch.12 — phần đồng thời")],
+  why:"Lab tổng hợp: cần socket từ chương 11, đồng thời từ chương 12, và cấu trúc dữ liệu có khoá. Nó cũng là cầu nối sang mô-đun 9 — bạn sẽ gặp lại chính bài toán này khi học đồng thời bài bản.",
+  d:"Hoàn thành Proxy Lab. Làm phần đệm và phần đa luồng.",
+  g:"Proxy phục vụ được nhiều client cùng lúc và đệm hoạt động đúng"}
+]},
+
+{n:9,title:"Đồng thời — cùng một bài toán ở ba độ sâu",
+ thesis:"<b>OSTEP chương 26–33</b> là cuốn dạy tốt nhất về <em>vì sao</em> đồng thời khó; <b>TLPI chương 29–33</b> cho API pthreads đầy đủ; <b>CSAPP chương 12</b> buộc bạn dựng server thật. Ghép cả ba.",
+ s:[
+ {t:"Vì sao đồng thời khó",
+  main:[r("OSTEP",284,"ch.26 — Concurrency: An Introduction")],
+  side:[r("CSAPP",1014,"ch.12 §12.4 — Shared Variables in Threaded Programs")],
+  why:"OSTEP mở đầu bằng một ví dụ đếm hỏng và chỉ ra ngay ở mức assembly vì sao nó hỏng — nối thẳng về mô-đun 2. CSAPP §12.4 hình thức hoá khái niệm biến chia sẻ. Cả hai nói cùng một điều bằng hai ngôn ngữ.",
+  d:"Chạy ví dụ đếm bằng hai luồng không khoá, xem kết quả sai. Xem assembly của phép tăng.",
+  g:"Chỉ ra được ba lệnh máy khiến <code>counter++</code> không nguyên tử"},
+ {t:"API luồng",
+  main:[r("OSTEP",299,"ch.27 — Interlude: Thread API")],
+  side:[r("TLPI",661,"ch.29 — Threads: Introduction"),r("TLPI",675,"ch.30 — Threads: Thread Synchronization")],
+  why:"OSTEP chương 27 ngắn gọn đủ dùng; TLPI chương 29–30 cho toàn bộ chi tiết pthreads gồm thuộc tính, join, detach. Dùng OSTEP để bắt đầu, TLPI để tra khi gặp tình huống thật.",
+  d:"Viết chương trình đa luồng có join đúng cách. Thử quên join xem gì xảy ra.",
+  g:"Phân biệt được luồng joinable và detached, và khi nào dùng cái nào"},
+ {t:"Khoá — cài đặt ở mức thấp",
+  main:[r("OSTEP",310,"ch.28 — Locks")],
+  side:[],
+  why:"OSTEP một mình, và đây là chương xuất sắc nhất của cuốn sách. Nó dẫn từ ý tưởng tắt ngắt, qua các phép nguyên tử phần cứng, tới spinlock, tới khoá có chờ. Sau chương này bạn không còn coi mutex là hộp đen.",
+  d:"Tự cài spinlock bằng <code>__sync_lock_test_and_set</code>. Đo chi phí khi tranh chấp cao.",
+  g:"Cài được một khoá đúng chỉ dùng phép so sánh và hoán đổi nguyên tử"},
+ {t:"Cấu trúc dữ liệu có khoá",
+  main:[r("OSTEP",333,"ch.29 — Lock-based Concurrent Data Structures")],
+  side:[r("PGINT",240,"PG14 — Locks on Memory Structures")],
+  why:"OSTEP dạy khoá thô và khoá mịn trên danh sách, hàng đợi, bảng băm. PG14 cho thấy PostgreSQL áp dụng đúng những kỹ thuật đó lên cấu trúc trong bộ nhớ chia sẻ. Lý thuyết và một cài đặt production, cạnh nhau.",
+  d:"Cài hàng đợi có khoá, rồi đổi sang khoá hai đầu, đo thông lượng.",
+  g:"Giải thích được đánh đổi giữa khoá thô và khoá mịn"},
+ {t:"Biến điều kiện và semaphore",
+  main:[r("OSTEP",346,"ch.30 — Condition Variables"),r("OSTEP",361,"ch.31 — Semaphores")],
+  side:[r("CSAPP",1017,"ch.12 §12.5 — Synchronizing Threads with Semaphores")],
+  why:"CSAPP dùng semaphore ngay để dựng bài toán sản xuất–tiêu thụ và đọc–ghi. OSTEP giải thích cẩn thận vì sao phải dùng <code>while</code> chứ không <code>if</code> khi chờ điều kiện — một chi tiết nhỏ nhưng là nguồn bug kinh điển.",
+  d:"Cài bài toán sản xuất–tiêu thụ bằng cả hai cách, có bộ đệm giới hạn.",
+  g:"Giải thích được vì sao kiểm tra điều kiện phải nằm trong vòng while"},
+ {t:"Lỗi đồng thời thường gặp",
+  main:[r("OSTEP",379,"ch.32 — Common Concurrency Problems")],
+  side:[r("TLPI",699,"ch.31 — Threads: Thread Safety and Per-Thread Storage")],
+  why:"OSTEP phân loại: lỗi vi phạm nguyên tử, lỗi thứ tự, và deadlock với bốn điều kiện của nó. TLPI chương 31 cho giải pháp thực tế trong Linux: hàm reentrant, biến cục bộ luồng. Ghép với buổi bộ xử lý tín hiệu ở mô-đun 5 — cùng một lớp vấn đề.",
+  d:"Tạo deadlock cố ý, phát hiện bằng <code>gdb</code>. Chạy <code>helgrind</code>.",
+  g:"Liệt kê bốn điều kiện deadlock và cách phá từng cái"},
+ {t:"Đồng thời hướng sự kiện",
+  main:[r("OSTEP",394,"ch.33 — Event-based Concurrency")],
+  side:[r("CSAPP",999,"ch.12 §12.2 — I/O Multiplexing"),r("TLPI",1369,"ch.63 — epoll")],
+  why:"Khép lại tranh luận luồng và sự kiện. OSTEP nêu ưu nhược điểm; CSAPP cho code thật với <code>select</code>; TLPI cho <code>epoll</code> hiện đại. Đây là nền để hiểu vì sao nginx, Redis và Node chọn mô hình sự kiện.",
+  d:"So sánh server đa luồng và server epoll dưới cùng tải, đo tài nguyên tiêu thụ.",
+  g:"Chọn được mô hình phù hợp cho một kịch bản cụ thể và bảo vệ lựa chọn"},
+ {t:"Đồng thời để chạy song song",
+  main:[r("CSAPP",1035,"ch.12 §12.6 — Using Threads for Parallelism")],
+  side:[r("OSTEP",117,"ch.10 — Multiprocessor Scheduling"),r("CSAPP",637,"ch.6 §6.3 — nhắc lại cache")],
+  why:"<b>Buổi nối ba mô-đun.</b> Song song hoá thật thường thất bại vì <em>false sharing</em> — hai luồng ghi vào hai biến khác nhau nhưng cùng một dòng cache. Không có mô-đun 3 thì hiện tượng này là phép màu; có rồi thì nó hiển nhiên. OSTEP chương 10 thêm góc lập lịch đa nhân.",
+  d:"Viết vòng lặp song song có false sharing, rồi thêm padding và đo lại.",
+  g:"Tái hiện được false sharing và sửa được nó bằng padding"},
+ {t:"Bài toán đồng thời kinh điển",
+  main:[r("TLPI",715,"ch.32 — Threads: Thread Cancellation")],
+  side:[r("CSAPP",1042,"ch.12 §12.7 — Other Concurrency Issues"),r("TLPI",725,"ch.33 — Threads: Further Details")],
+  why:"Chốt mô-đun bằng những chi tiết thực tế: huỷ luồng an toàn, tương tác giữa luồng và tín hiệu, giữa luồng và <code>fork</code>. Nối thẳng về mô-đun 5. Đây là những chỗ mà chương trình thật hay chết.",
+  d:"Viết chương trình đa luồng tắt êm khi nhận SIGTERM — đúng thứ Kubernetes gửi.",
+  g:"Tắt được chương trình đa luồng mà không mất dữ liệu đang xử lý"}
+]},
+
+{n:10,title:"Hệ thống dữ liệu — nơi mọi tầng gặp nhau",
+ thesis:"Mô-đun đỉnh. Một cơ sở dữ liệu là chương trình dùng <b>tất cả</b> những gì bạn đã học: nó tự quản bộ đệm, tự làm I/O, tự điều khiển đồng thời, tự phục hồi sau sự cố. <b>DBInternals</b> cho lý thuyết, <b>PG14</b> cho một cài đặt thật, <b>DDIA</b> cho tầng phân tán.",
+ s:[
+ {t:"Kiến trúc một cơ sở dữ liệu",
+  main:[r("DBINT",28,"ch.1 — Introduction and Overview")],
+  side:[r("PGINT",20,"PG14 — Data Organization"),r("PGINT",33,"PG14 — Processes and Memory")],
+  why:"Mở đầu bằng bản đồ. PG14 phần tiến trình và bộ nhớ cho thấy PostgreSQL dùng mô hình một tiến trình mỗi kết nối — đúng kiến trúc bạn đã học ở mô-đun 5 và 8, giờ thấy trong một sản phẩm thật.",
+  d:"Chạy PostgreSQL, xem cây tiến trình bằng <code>ps -ef --forest</code>. Nhận diện từng vai trò.",
+  g:"Chỉ ra được tiến trình nào làm gì trong một cụm PostgreSQL đang chạy"},
+ {t:"Bố cục trang và bản ghi",
+  main:[r("DBINT",66,"ch.3 — File Formats")],
+  side:[r("PGINT",62,"PG14 — Pages and Tuples"),r("CSAPP",191,"ch.3 §3.9 — bố cục struct")],
+  why:"<b>Vòng khép kín về căn chỉnh dữ liệu.</b> Ở mô-đun 2 bạn học padding trong struct C; giờ bạn thấy cơ sở dữ liệu đối mặt đúng bài toán đó khi xếp bản ghi vào trang 8 KB. Cùng một ràng buộc phần cứng, hai giải pháp ở hai tầng.",
+  d:"Dùng <code>pageinspect</code> đọc một trang thật, đối chiếu với sơ đồ trong sách.",
+  g:"Đọc được nội dung nhị phân của một trang và chỉ ra tiêu đề, con trỏ, dữ liệu"},
+ {t:"Cài đặt B-tree",
+  main:[r("DBINT",82,"ch.4 — Implementing B-Trees")],
+  side:[r("DBINT",132,"ch.6 — B-Tree Variants"),r("PGINT",421,"PG14 — B-tree")],
+  why:"Nối tiếp buổi B-tree ở mô-đun 3, giờ đi vào cài đặt: tách nút, gộp nút, khoá khi sửa đồng thời. Phần khoá dùng lại trực tiếp kiến thức mô-đun 9.",
+  d:"Cài B-tree đơn giản trong ngôn ngữ bạn quen, hỗ trợ chèn và tách nút.",
+  g:"B-tree của bạn giữ đúng bất biến sau một nghìn phép chèn ngẫu nhiên"},
+ {t:"Giao dịch và cách ly",
+  main:[r("DBINT",100,"ch.5 — Transaction Processing and Recovery")],
+  side:[r("PGINT",39,"PG14 — Isolation"),r("PGINT",80,"PG14 — Snapshots"),r("DDIA",243,"ch.7 — Transactions")],
+  why:"<b>Ba cuốn ba tầng, chủ đề khó nhất mô-đun.</b> DBInternals cho lý thuyết ACID và các mức cách ly; PG14 cho thấy MVCC thật hoạt động ra sao bằng ảnh chụp; DDIA chương 7 giải thích các dị thường bằng ví dụ đời thật. Đọc DDIA trước cho trực giác, DBInternals cho khái niệm, PG14 cho cài đặt.",
+  d:"Mở hai phiên psql, tái hiện dirty read, non-repeatable read, phantom ở từng mức cách ly.",
+  g:"Tái hiện được từng dị thường và nói đúng mức cách ly nào ngăn được nó"},
+ {t:"Khoá trong cơ sở dữ liệu",
+  main:[r("PGINT",199,"PG14 — Relation-Level Locks")],
+  side:[r("PGINT",210,"PG14 — Row-Level Locks"),r("OSTEP",379,"ch.32 — deadlock"),r("TLPI",1161,"ch.55 — File Locking")],
+  why:"Deadlock bạn học ở mô-đun 9 giờ xuất hiện ở tầng cơ sở dữ liệu với cùng bốn điều kiện và cùng cách phá. TLPI chương 55 thêm góc thứ ba là khoá ở mức file. Một khái niệm, ba tầng.",
+  d:"Tạo deadlock trong PostgreSQL bằng hai phiên, xem log phát hiện deadlock.",
+  g:"Giải thích được PostgreSQL phát hiện deadlock bằng cách nào"},
+ {t:"Thực thi truy vấn",
+  main:[r("PGINT",251,"PG14 — Query Execution Stages")],
+  side:[r("PGINT",350,"PG14 — Nested Loop"),r("PGINT",367,"PG14 — Hashing"),r("PGINT",387,"PG14 — Sorting and Merging")],
+  why:"Ba thuật toán join là ba bài toán về phân cấp bộ nhớ trá hình: hash join thắng khi bảng băm vừa bộ nhớ, merge join thắng khi dữ liệu đã sắp. Kiến thức mô-đun 3 giải thích trực tiếp vì sao bộ tối ưu chọn cái này chứ không cái kia.",
+  d:"<code>EXPLAIN ANALYZE</code> vài truy vấn, ép đổi kiểu join bằng tham số, so thời gian.",
+  g:"Đọc được kế hoạch thực thi và đoán trước bộ tối ưu sẽ chọn join nào"},
+ {t:"Nhân bản và nhất quán",
+  main:[r("DDIA",173,"ch.5 — Replication")],
+  side:[r("DBINT",236,"ch.11 — Replication and Consistency"),r("DBINT",216,"ch.9 — Failure Detection")],
+  why:"Chuyển từ một máy sang nhiều máy. DDIA cho trực giác và ví dụ thực tế; DBInternals cho nền lý thuyết chặt chẽ hơn về mô hình nhất quán. Đọc DDIA trước luôn dễ vào hơn.",
+  d:"Dựng PostgreSQL primary và replica bằng streaming replication, đo độ trễ nhân bản.",
+  g:"Giải thích được đánh đổi giữa nhân bản đồng bộ và bất đồng bộ"},
+ {t:"Đồng thuận — đỉnh của lộ trình",
+  main:[r("DBINT",300,"ch.14 — Consensus")],
+  side:[r("DDIA",343,"ch.9 — Consistency and Consensus"),r("DBINT",226,"ch.10 — Leader Election"),r("DBINT",278,"ch.13 — Distributed Transactions")],
+  why:"Buổi cuối. Raft và Paxos là câu trả lời cho câu hỏi mà toàn bộ lộ trình dẫn tới: làm sao nhiều máy thống nhất được khi mạng có thể mất gói (mô-đun 8), tiến trình có thể chết bất kỳ lúc nào (mô-đun 5), và ghi có thể chưa xuống đĩa (mô-đun 7). Mọi thứ bạn đã học đều là điều kiện tiên quyết cho chương này.",
+  d:"Đọc bài báo Raft. Chạy thử một cụm etcd ba node, tắt một node xem bầu lại lãnh đạo.",
+  g:"Giải thích được Raft bằng lời cho người biết lập trình nhưng chưa biết hệ phân tán"}
+]}
+];
+
+/* render */
+function href(k,p){return ROOT+encodeURI(B[k].f)+"#page="+p;}
+var st=document.getElementById("stack");
+STACK.forEach(function(x){
+  var d=document.createElement("div");d.className="bk";
+  d.innerHTML='<div class="role">'+x[0]+'</div><h4>'+x[1]+'</h4><p>'+x[2]+'</p>';
+  st.appendChild(d);
+});
+
+var KEY="hethong-plan";
+var done={};
+try{done=JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){done={};}
+var total=0;M.forEach(function(m){total+=m.s.length;});
+var host=document.getElementById("mods"),frag=document.createDocumentFragment(),idx=0;
+
+function refHtml(a){
+  return a.map(function(x){
+    if(x.k==="LAB"){
+      return '<span class="ref lab"><span class="bkn">LAB</span><span class="loc">'+x.t+
+             '</span><span class="pg">csapp.cs.cmu.edu</span></span>';
+    }
+    return '<a class="ref" href="'+href(x.k,x.p)+'" target="_blank" rel="noopener">'+
+           '<span class="bkn">'+B[x.k].n+'</span><span class="loc">'+x.t+
+           '</span><span class="pg">tr. '+x.p+' ↗</span></a>';
+  }).join("");
+}
+
+M.forEach(function(m){
+  var sec=document.createElement("section");sec.className="mod";sec.id="mod-"+m.n;
+  var h=document.createElement("div");h.className="mhead";
+  h.innerHTML='<div class="mtop"><span class="mnum">MÔ-ĐUN '+m.n+'</span><h2 class="mtitle">'+m.title+
+   '</h2><span class="mpct" data-mpct="'+m.n+'">0/'+m.s.length+'</span></div>'+
+   '<div class="mbar"><i data-mbar="'+m.n+'"></i></div>'+
+   '<div class="mthesis">'+m.thesis+'</div>';
+  sec.appendChild(h);
+  var list=document.createElement("div");list.className="sess";
+  m.s.forEach(function(x){
+    idx++;var id="h"+idx;
+    var sideHtml=x.side.length?'<div class="row"><span class="rk">Đọc kèm</span><span class="rv refs">'+refHtml(x.side)+'</span></div>':'';
+    var row=document.createElement("div");
+    row.className="s"+(done[id]?" is-done":"");
+    row.dataset.id=id;row.dataset.mod=m.n;
+    row.innerHTML='<input type="checkbox" id="'+id+'"'+(done[id]?" checked":"")+
+      ' aria-label="Buổi '+idx+'"><div class="sbody"><div class="shead">'+
+      '<span class="snum">BUỔI '+idx+'</span><label class="stitle" for="'+id+'">'+x.t+'</label></div>'+
+      '<div class="rows">'+
+        '<div class="row"><span class="rk">Đọc chính</span><span class="rv refs">'+refHtml(x.main)+'</span></div>'+
+        sideHtml+
+      '</div>'+
+      '<div class="why"><span class="wk">Vì sao ghép được</span><p>'+x.why+'</p></div>'+
+      '<div class="rows" style="margin-top:9px">'+
+        '<div class="row"><span class="rk">Thực hành</span><span class="rv">'+x.d+'</span></div>'+
+        '<div class="row goal"><span class="rk">Xong khi</span><span class="rv">'+x.g+'</span></div>'+
+      '</div></div>';
+    list.appendChild(row);
+  });
+  sec.appendChild(list);frag.appendChild(sec);
+});
+host.appendChild(frag);
+
+function refresh(){
+  var n=0;
+  M.forEach(function(m){
+    var c=document.querySelectorAll('.s[data-mod="'+m.n+'"].is-done').length;n+=c;
+    var a=document.querySelector('[data-mpct="'+m.n+'"]'),b=document.querySelector('[data-mbar="'+m.n+'"]');
+    if(a)a.textContent=c+"/"+m.s.length;
+    if(b)b.style.width=(c/m.s.length*100)+"%";
+  });
+  var p=Math.round(n/total*100);
+  document.getElementById("pct").textContent=p;
+  document.getElementById("obar").style.width=p+"%";
+}
+refresh();
+
+host.addEventListener("change",function(e){
+  var box=e.target;if(!box.matches('input[type=checkbox]'))return;
+  var row=box.closest(".s");
+  if(box.checked)done[row.dataset.id]=1;else delete done[row.dataset.id];
+  row.classList.toggle("is-done",box.checked);
+  refresh();
+  try{localStorage.setItem(KEY,JSON.stringify(done));}catch(e){}
+});
+document.getElementById("reset").addEventListener("click",function(){
+  if(!confirm("Xoá toàn bộ tiến độ đã tick?"))return;
+  done={};try{localStorage.removeItem(KEY);}catch(e){}
+  document.querySelectorAll('.s').forEach(function(r){
+    r.classList.remove("is-done");r.querySelector("input").checked=false;});
+  refresh();
+});
+})();
+</script>
+</body>
+</html>

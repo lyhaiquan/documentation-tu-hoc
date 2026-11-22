@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sơ đồ Ouroboros</title>
+<style>
+:root{
+  --bg:#faf9f7; --surface:#fff; --surface-2:#f2f0ec; --surface-3:#e7e2d9; --border:#e2ddd5;
+  --ink:#1c1a17; --ink-2:#4f4940; --ink-3:#8a8379;
+  --accent:#b4622a; --accent-soft:#f7e9df; --accent-line:#dfa77c;
+  --ok:#3f7a4d; --ok-soft:#e4f0e6; --warn:#9a6a1c; --warn-soft:#f7edd8;
+  --blue:#3a6b96; --blue-soft:#e2ecf4;
+  --code-bg:#2a2724; --code-ink:#e9e3da;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Cascadia Mono",monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141317; --surface:#1c1b20; --surface-2:#24232a; --surface-3:#302f39; --border:#332f3a;
+  --ink:#ecebf0; --ink-2:#b3afba; --ink-3:#7d7887;
+  --accent:#e59462; --accent-soft:#3a2a1e; --accent-line:#8a5734;
+  --ok:#6bbd80; --ok-soft:#1d3224; --warn:#d9a441; --warn-soft:#332a16;
+  --blue:#78a8cf; --blue-soft:#1d2a35;
+  --code-bg:#100f13; --code-ink:#ded8e6;
+}}
+:root[data-theme="dark"]{
+  --bg:#141317; --surface:#1c1b20; --surface-2:#24232a; --surface-3:#302f39; --border:#332f3a;
+  --ink:#ecebf0; --ink-2:#b3afba; --ink-3:#7d7887;
+  --accent:#e59462; --accent-soft:#3a2a1e; --accent-line:#8a5734;
+  --ok:#6bbd80; --ok-soft:#1d3224; --warn:#d9a441; --warn-soft:#332a16;
+  --blue:#78a8cf; --blue-soft:#1d2a35; --code-bg:#100f13; --code-ink:#ded8e6;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:16px}
+body{margin:0; background:var(--bg); color:var(--ink);
+  font:17px/1.7 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif; -webkit-font-smoothing:antialiased}
+.shell{display:grid; grid-template-columns:220px minmax(0,1fr); gap:40px; max-width:1320px; margin:0 auto; padding:0 20px}
+nav{position:sticky; top:0; align-self:start; max-height:100vh; overflow-y:auto; padding:28px 0 60px; font-size:13.5px}
+nav::-webkit-scrollbar{width:5px} nav::-webkit-scrollbar-thumb{background:var(--border); border-radius:9px}
+nav .nt{font:650 10.5px/1 var(--mono); letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3); margin:22px 0 8px}
+nav .nt:first-child{margin-top:0}
+nav a{display:block; color:var(--ink-2); text-decoration:none; padding:4px 10px; border-left:2px solid transparent; line-height:1.4; border-radius:0 5px 5px 0; font-size:13px}
+nav a:hover{color:var(--accent); background:var(--surface-2)}
+nav a.act{color:var(--accent); border-left-color:var(--accent); background:var(--accent-soft); font-weight:600}
+main{padding:28px 0 140px; min-width:0}
+h1{font-size:clamp(28px,5vw,40px); line-height:1.15; letter-spacing:-.022em; margin:0 0 12px; font-weight:650}
+h2{font-size:clamp(22px,3.4vw,28px); letter-spacing:-.016em; margin:60px 0 14px; padding-top:24px; border-top:1px solid var(--border); font-weight:650}
+h3{font-size:19.5px; margin:44px 0 10px; font-weight:640}
+h3 .tagn{font:650 11px var(--mono); color:#fff; background:var(--accent); padding:3px 8px; border-radius:6px; vertical-align:middle; margin-right:9px; letter-spacing:.05em}
+h4{font-size:16px; margin:22px 0 7px; font-weight:640; color:var(--ink-2)}
+p{margin:0 0 15px; max-width:78ch}
+ul,ol{max-width:78ch; padding-left:23px; margin:0 0 15px} li{margin:6px 0}
+.lede{font-size:18.5px; color:var(--ink-2); max-width:70ch}
+code{font:.86em var(--mono); background:var(--surface-2); padding:2px 6px; border-radius:5px; color:var(--ink)}
+pre{background:var(--code-bg); color:var(--code-ink); padding:15px 18px; border-radius:10px; overflow-x:auto; margin:18px 0; font:13px/1.6 var(--mono)}
+pre code{background:none; padding:0; color:inherit}
+pre .cm{color:#8b9a7e} pre .kw{color:#d99a6c}
+blockquote{margin:20px 0; padding:14px 19px; background:var(--accent-soft); border-left:3px solid var(--accent); border-radius:0 10px 10px 0; color:var(--ink-2); max-width:78ch}
+blockquote p:last-child{margin:0} blockquote strong{color:var(--ink)}
+.box{border-radius:11px; padding:15px 18px; margin:18px 0; font-size:15px; max-width:78ch}
+.box p:last-child{margin:0}
+.box .bh{font:650 10.5px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:8px}
+.b-key{background:var(--accent-soft); border:1px solid var(--accent-line)} .b-key .bh{color:var(--accent)}
+.b-warn{background:var(--warn-soft); border:1px solid var(--warn)} .b-warn .bh{color:var(--warn)}
+.b-ok{background:var(--ok-soft); border:1px solid var(--ok)} .b-ok .bh{color:var(--ok)}
+figure{margin:22px 0 26px; background:var(--surface); border:1px solid var(--border); border-radius:13px; padding:20px 16px; overflow-x:auto}
+figure svg{display:block; margin:0 auto; max-width:100%; height:auto; min-width:560px}
+figcaption{margin-top:13px; font-size:13px; color:var(--ink-3); text-align:center; line-height:1.55; padding:0 10px}
+svg text{font-family:ui-sans-serif,system-ui,sans-serif}
+svg .m{font-family:var(--mono)}
+.tw{overflow-x:auto; margin:18px 0}
+table{border-collapse:collapse; width:100%; font-size:14.5px; min-width:440px}
+th{text-align:left; font:650 11px/1.3 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); padding:8px 12px; border-bottom:1.5px solid var(--border)}
+td{padding:9px 12px; border-bottom:1px solid var(--border); vertical-align:top}
+tbody tr:hover{background:var(--surface-2)}
+.legend{display:flex; flex-wrap:wrap; gap:9px 18px; font-size:12.5px; color:var(--ink-3); margin:0 0 16px; padding:11px 14px; background:var(--surface-2); border-radius:9px; max-width:78ch}
+.legend i{display:inline-block; width:26px; height:0; border-top-width:2px; vertical-align:middle; margin-right:6px}
+.li-sync{border-top:2px solid var(--ink-2)}
+.li-ret{border-top:2px dashed var(--ok)}
+.li-hot{border-top:2px solid var(--accent)}
+.li-async{border-top:2px dotted var(--blue)}
+footer{margin-top:70px; padding-top:24px; border-top:1px solid var(--border); font-size:14px; color:var(--ink-3)}
+#tt{position:fixed; right:18px; bottom:18px; z-index:9; font:inherit; font-size:13px; padding:9px 14px;
+  border:1px solid var(--border); background:var(--surface); color:var(--ink-2); border-radius:9px; cursor:pointer; box-shadow:0 3px 14px rgba(0,0,0,.09)}
+#tt:hover{border-color:var(--accent); color:var(--accent)}
+@media(max-width:980px){
+  .shell{grid-template-columns:1fr; gap:0}
+  nav{position:static; max-height:none; border-bottom:1px solid var(--border); margin-bottom:8px; padding-bottom:18px}
+  nav .navwrap{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:1px}
+  body{font-size:16px}
+}
+</style>
+</head>
+<body>
+<button id="tt" onclick="tog()">Sáng / tối</button>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="var(--ink-2)"/></marker>
+  <marker id="arok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="var(--ok)"/></marker>
+  <marker id="arhot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker>
+  <marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="var(--blue)"/></marker>
+  <marker id="argr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M0 0 L10 5 L0 10 z" fill="var(--ink-3)"/></marker>
+</defs></svg>
+
+<div class="shell">
+<nav><div class="navwrap">
+  <div class="nt">Kiến trúc</div>
+  <a href="#a1">A1 · Triển khai 3 node</a>
+  <a href="#a2">A2 · Thành phần &amp; giao diện</a>
+  <a href="#a3">A3 · Bên trong store</a>
+  <a href="#a4">A4 · Bên trong net</a>
+  <a href="#a5">A5 · Bên trong dist</a>
+  <a href="#a6">A6 · Bên trong run</a>
+  <a href="#a7">A7 · Bên trong ctl</a>
+  <div class="nt">Tuần tự</div>
+  <a href="#s1">S1 · PUT một node</a>
+  <a href="#s2">S2 · GET hit / miss</a>
+  <a href="#s3">S3 · Phục hồi sau crash</a>
+  <a href="#s4">S4 · B-Tree split lan lên</a>
+  <a href="#s5">S5 · Vòng lặp epoll</a>
+  <a href="#s6">S6 · PUT qua Raft</a>
+  <a href="#s7">S7 · Bầu leader</a>
+  <a href="#s8">S8 · Khởi động container</a>
+  <a href="#s9">S9 · ouroctl apply</a>
+  <a href="#s10">S10 · Container chết</a>
+</div></nav>
+
+<main>
+<h1>Sơ đồ chi tiết</h1>
+<p class="lede">Bảy sơ đồ kiến trúc và mười sơ đồ tuần tự. Đủ chi tiết để ngồi xuống gõ code.</p>
+
+<div class="legend">
+  <span><i class="li-sync"></i> gọi đồng bộ (chờ trả lời)</span>
+  <span><i class="li-ret"></i> trả về</span>
+  <span><i class="li-hot"></i> đường tốn kém / quan trọng</span>
+  <span><i class="li-async"></i> bất đồng bộ (không chờ)</span>
+</div>
+
+<!-- ═══════════════ A. KIẾN TRÚC ═══════════════ -->
+<h2>Phần A — Sơ đồ kiến trúc</h2>
+
+<!-- A1 -->
+<h3 id="a1"><span class="tagn">A1</span>Sơ đồ triển khai — cụm 3 máy</h3>
+<p>Cái gì chạy ở đâu, trên phần cứng thật. Đây là hình bạn sẽ nhìn thấy ở tuần 75.</p>
+
+<figure>
+<svg viewBox="0 0 980 420" role="img" aria-label="Ba máy vật lý, mỗi máy chạy node agent, ouro-run và container chứa store cộng dist">
+  <rect x="8" y="8" width="964" height="46" rx="9" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text x="26" y="30" font-size="13" font-weight="700" fill="var(--ink-3)">NGƯỜI VẬN HÀNH</text>
+  <rect x="180" y="16" width="170" height="30" rx="7" fill="var(--accent-soft)" stroke="var(--accent)"/>
+  <text class="m" x="265" y="36" font-size="12" text-anchor="middle" fill="var(--ink)">ouroctl apply -f</text>
+  <text x="380" y="36" font-size="12" fill="var(--ink-3)">gRPC / TLS →  API server của node đang giữ vai leader</text>
+
+  <g stroke="var(--accent)" stroke-width="1.6" marker-end="url(#arhot)"><path d="M265 46 L265 74"/></g>
+
+  <!-- 3 nodes -->
+  <g>
+    <rect x="8" y="82" width="310" height="284" rx="12" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>
+    <rect x="336" y="82" width="310" height="284" rx="12" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+    <rect x="664" y="82" width="308" height="284" rx="12" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+  </g>
+  <text x="26" y="104" font-size="13.5" font-weight="700" fill="var(--accent)">MÁY 1 · 10.0.0.1</text>
+  <text x="354" y="104" font-size="13.5" font-weight="700" fill="var(--ink-2)">MÁY 2 · 10.0.0.2</text>
+  <text x="682" y="104" font-size="13.5" font-weight="700" fill="var(--ink-2)">MÁY 3 · 10.0.0.3</text>
+  <text x="220" y="104" font-size="11" fill="var(--accent)">← Raft LEADER</text>
+
+  <!-- per node stacks -->
+  <g font-size="11.5" text-anchor="middle">
+    <!-- máy 1 -->
+    <rect x="22" y="114" width="282" height="30" rx="6" fill="var(--accent-soft)" stroke="var(--accent-line)"/>
+    <text class="m" x="163" y="134" fill="var(--ink)">ouro-ctl  (api · scheduler · controller)</text>
+    <rect x="22" y="150" width="282" height="26" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="163" y="168" fill="var(--ink-2)">node-agent</text>
+    <rect x="22" y="182" width="282" height="26" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="163" y="200" fill="var(--ink-2)">ouro-run  (runtime)</text>
+    <rect x="22" y="216" width="282" height="86" rx="8" fill="var(--ok-soft)" stroke="var(--ok)" stroke-dasharray="5 3"/>
+    <text x="163" y="234" font-size="10.5" fill="var(--ok)">CONTAINER · ns + cgroup</text>
+    <rect x="36" y="242" width="254" height="24" rx="5" fill="var(--surface)" stroke="var(--border)"/>
+    <text class="m" x="163" y="258" fill="var(--ink)">ouro-dist (raft · gossip)</text>
+    <rect x="36" y="270" width="254" height="24" rx="5" fill="var(--surface)" stroke="var(--border)"/>
+    <text class="m" x="163" y="286" fill="var(--ink)">ouro-store (btree · wal)</text>
+    <rect x="22" y="308" width="282" height="26" rx="6" fill="var(--surface-3)" stroke="var(--border)"/>
+    <text class="m" x="163" y="326" fill="var(--ink-2)">đĩa:  data.db  ·  wal.log</text>
+    <text x="163" y="352" font-size="11" fill="var(--ink-3)">Linux kernel · veth0 ↔ br-ouro</text>
+
+    <!-- máy 2 -->
+    <rect x="350" y="114" width="282" height="30" rx="6" fill="var(--surface-2)" stroke="var(--border)" stroke-dasharray="4 3"/>
+    <text class="m" x="491" y="134" fill="var(--ink-3)">ouro-ctl  (chờ · standby)</text>
+    <rect x="350" y="150" width="282" height="26" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="491" y="168" fill="var(--ink-2)">node-agent</text>
+    <rect x="350" y="182" width="282" height="26" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="491" y="200" fill="var(--ink-2)">ouro-run</text>
+    <rect x="350" y="216" width="282" height="86" rx="8" fill="var(--ok-soft)" stroke="var(--ok)" stroke-dasharray="5 3"/>
+    <text x="491" y="234" font-size="10.5" fill="var(--ok)">CONTAINER</text>
+    <rect x="364" y="242" width="254" height="24" rx="5" fill="var(--surface)" stroke="var(--border)"/>
+    <text class="m" x="491" y="258" fill="var(--ink)">ouro-dist  · FOLLOWER</text>
+    <rect x="364" y="270" width="254" height="24" rx="5" fill="var(--surface)" stroke="var(--border)"/>
+    <text class="m" x="491" y="286" fill="var(--ink)">ouro-store</text>
+    <rect x="350" y="308" width="282" height="26" rx="6" fill="var(--surface-3)" stroke="var(--border)"/>
+    <text class="m" x="491" y="326" fill="var(--ink-2)">đĩa:  data.db  ·  wal.log</text>
+    <text x="491" y="352" font-size="11" fill="var(--ink-3)">Linux kernel · veth0 ↔ br-ouro</text>
+
+    <!-- máy 3 -->
+    <rect x="678" y="114" width="280" height="30" rx="6" fill="var(--surface-2)" stroke="var(--border)" stroke-dasharray="4 3"/>
+    <text class="m" x="818" y="134" fill="var(--ink-3)">ouro-ctl  (chờ · standby)</text>
+    <rect x="678" y="150" width="280" height="26" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="818" y="168" fill="var(--ink-2)">node-agent</text>
+    <rect x="678" y="182" width="280" height="26" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="818" y="200" fill="var(--ink-2)">ouro-run</text>
+    <rect x="678" y="216" width="280" height="86" rx="8" fill="var(--ok-soft)" stroke="var(--ok)" stroke-dasharray="5 3"/>
+    <text x="818" y="234" font-size="10.5" fill="var(--ok)">CONTAINER</text>
+    <rect x="692" y="242" width="252" height="24" rx="5" fill="var(--surface)" stroke="var(--border)"/>
+    <text class="m" x="818" y="258" fill="var(--ink)">ouro-dist  · FOLLOWER</text>
+    <rect x="692" y="270" width="252" height="24" rx="5" fill="var(--surface)" stroke="var(--border)"/>
+    <text class="m" x="818" y="286" fill="var(--ink)">ouro-store</text>
+    <rect x="678" y="308" width="280" height="26" rx="6" fill="var(--surface-3)" stroke="var(--border)"/>
+    <text class="m" x="818" y="326" fill="var(--ink-2)">đĩa:  data.db  ·  wal.log</text>
+    <text x="818" y="352" font-size="11" fill="var(--ink-3)">Linux kernel · veth0 ↔ br-ouro</text>
+  </g>
+
+  <!-- raft links -->
+  <path d="M304 254 L364 254" stroke="var(--accent)" stroke-width="2"/>
+  <path d="M618 254 L692 254" stroke="var(--ink-3)" stroke-width="1.6" stroke-dasharray="4 3"/>
+  <path d="M163 302 L163 384 L818 384 L818 302" stroke="var(--accent)" stroke-width="1.6" fill="none" stroke-dasharray="6 4"/>
+  <text x="490" y="404" font-size="12" text-anchor="middle" fill="var(--accent)">Raft AppendEntries + gossip heartbeat qua mạng nội bộ 10.0.0.0/24</text>
+</svg>
+<figcaption>Một tiến trình <code>ouro-ctl</code> giữ vai leader; hai cái kia chờ. Cả ba node đều chạy đủ tầng dưới.</figcaption>
+</figure>
+
+<div class="box b-key"><span class="bh">🐍 Đọc kỹ chỗ này</span>
+<p><code>ouro-ctl</code> ở Máy 1 lưu state của nó vào <code>ouro-store</code> — mà <code>ouro-store</code> lại nằm <strong>bên trong container</strong> do <code>ouro-run</code> ở chính Máy 1 tạo ra, theo lệnh của chính <code>ouro-ctl</code> đó. Vòng khép kín nằm gọn trong một máy, rồi nhân lên ba.</p></div>
+
+<!-- A2 -->
+<h3 id="a2"><span class="tagn">A2</span>Sơ đồ thành phần và giao diện</h3>
+<p>Ai gọi ai, bằng giao thức gì. Mũi tên chỉ <strong>chiều phụ thuộc</strong> — đuôi mũi tên phụ thuộc vào đầu mũi tên.</p>
+
+<figure>
+<svg viewBox="0 0 980 560" role="img" aria-label="Sơ đồ thành phần với giao diện và giao thức giữa các thành phần">
+  <!-- ouroctl -->
+  <rect x="380" y="10" width="220" height="44" rx="9" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text class="m" x="490" y="30" font-size="12.5" text-anchor="middle" font-weight="700" fill="var(--ink)">ouroctl</text>
+  <text x="490" y="46" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">CLI · đọc YAML · in bảng</text>
+  <path d="M490 54 L490 84" stroke="var(--ink-2)" stroke-width="1.6" marker-end="url(#ar)"/>
+  <text x="502" y="73" font-size="11" fill="var(--ink-3)">gRPC + mTLS</text>
+
+  <!-- ctl -->
+  <rect x="250" y="86" width="480" height="122" rx="11" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.8"/>
+  <text class="m" x="266" y="106" font-size="12.5" font-weight="700" fill="var(--accent)">ouro-ctl</text>
+  <text x="716" y="106" font-size="10.5" text-anchor="end" fill="var(--accent)">Phase 7 · Go</text>
+  <g font-size="11" text-anchor="middle">
+    <rect x="264" y="116" width="132" height="34" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+    <text class="m" x="330" y="137" fill="var(--ink)">API server</text>
+    <rect x="404" y="116" width="132" height="34" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+    <text class="m" x="470" y="137" fill="var(--ink)">Scheduler</text>
+    <rect x="544" y="116" width="172" height="34" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+    <text class="m" x="630" y="137" fill="var(--ink)">Controller (reconcile)</text>
+    <rect x="264" y="158" width="452" height="34" rx="6" fill="var(--surface)" stroke="var(--border)" stroke-dasharray="4 3"/>
+    <text class="m" x="490" y="179" fill="var(--ink-2)">store adapter  →  giao diện KV:  Put / Get / Watch / CAS</text>
+  </g>
+
+  <!-- arrows down from ctl -->
+  <path d="M330 208 L200 246" stroke="var(--ink-2)" stroke-width="1.6" marker-end="url(#ar)"/>
+  <text x="180" y="232" font-size="11" text-anchor="end" fill="var(--ink-3)">KV qua gRPC</text>
+  <path d="M630 208 L820 246" stroke="var(--ink-2)" stroke-width="1.6" marker-end="url(#ar)"/>
+  <text x="790" y="230" font-size="11" fill="var(--ink-3)">lệnh: chạy / dừng</text>
+
+  <!-- dist -->
+  <rect x="20" y="248" width="420" height="120" rx="11" fill="var(--surface)" stroke="var(--blue)" stroke-width="1.8"/>
+  <text class="m" x="36" y="268" font-size="12.5" font-weight="700" fill="var(--blue)">ouro-dist</text>
+  <text x="426" y="268" font-size="10.5" text-anchor="end" fill="var(--blue)">Phase 5 · Go</text>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="34" y="278" width="120" height="32" rx="6" fill="var(--blue-soft)" stroke="var(--blue)"/>
+    <text class="m" x="94" y="298" fill="var(--ink)">Raft</text>
+    <rect x="162" y="278" width="120" height="32" rx="6" fill="var(--blue-soft)" stroke="var(--blue)"/>
+    <text class="m" x="222" y="298" fill="var(--ink)">Gossip / SWIM</text>
+    <rect x="290" y="278" width="136" height="32" rx="6" fill="var(--blue-soft)" stroke="var(--blue)"/>
+    <text class="m" x="358" y="298" fill="var(--ink)">FSM apply</text>
+    <rect x="34" y="318" width="392" height="32" rx="6" fill="var(--surface-2)" stroke="var(--border)" stroke-dasharray="4 3"/>
+    <text class="m" x="230" y="338" fill="var(--ink-2)">yêu cầu:  giao diện Store (Put/Get/Scan)  ·  giao diện Transport</text>
+  </g>
+
+  <!-- run -->
+  <rect x="640" y="248" width="320" height="120" rx="11" fill="var(--surface)" stroke="var(--ok)" stroke-width="1.8"/>
+  <text class="m" x="656" y="268" font-size="12.5" font-weight="700" fill="var(--ok)">ouro-run</text>
+  <text x="946" y="268" font-size="10.5" text-anchor="end" fill="var(--ok)">Phase 6 · Go+C</text>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="654" y="278" width="92" height="32" rx="6" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <text class="m" x="700" y="298" fill="var(--ink)">ns</text>
+    <rect x="754" y="278" width="92" height="32" rx="6" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <text class="m" x="800" y="298" fill="var(--ink)">cgroup</text>
+    <rect x="854" y="278" width="92" height="32" rx="6" fill="var(--ok-soft)" stroke="var(--ok)"/>
+    <text class="m" x="900" y="298" fill="var(--ink)">image</text>
+    <rect x="654" y="318" width="292" height="32" rx="6" fill="var(--surface-2)" stroke="var(--border)" stroke-dasharray="4 3"/>
+    <text class="m" x="800" y="338" fill="var(--ink-2)">yêu cầu:  syscall Linux  ·  /sys/fs/cgroup</text>
+  </g>
+
+  <!-- net -->
+  <path d="M230 368 L230 402" stroke="var(--ink-2)" stroke-width="1.6" marker-end="url(#ar)"/>
+  <text x="242" y="390" font-size="11" fill="var(--ink-3)">wire protocol nhị phân</text>
+  <rect x="20" y="404" width="420" height="72" rx="11" fill="var(--surface)" stroke="var(--border)" stroke-width="1.6"/>
+  <text class="m" x="36" y="424" font-size="12.5" font-weight="700" fill="var(--ink)">ouro-net</text>
+  <text x="426" y="424" font-size="10.5" text-anchor="end" fill="var(--ink-3)">Phase 3 C → Phase 4 Go</text>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="34" y="432" width="126" height="32" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="97" y="452" fill="var(--ink-2)">epoll loop</text>
+    <rect x="168" y="432" width="126" height="32" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="231" y="452" fill="var(--ink-2)">codec</text>
+    <rect x="302" y="432" width="124" height="32" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="364" y="452" fill="var(--ink-2)">worker pool</text>
+  </g>
+
+  <path d="M230 476 L230 506" stroke="var(--ink-2)" stroke-width="1.6" marker-end="url(#ar)"/>
+  <text x="242" y="496" font-size="11" fill="var(--ink-3)">gọi hàm C trực tiếp (cùng tiến trình)</text>
+
+  <rect x="20" y="508" width="420" height="44" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.8"/>
+  <text class="m" x="36" y="528" font-size="12.5" font-weight="700" fill="var(--warn)">ouro-store</text>
+  <text class="m" x="230" y="545" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">cung cấp: store_open/put/get/del/scan/close</text>
+  <text x="426" y="528" font-size="10.5" text-anchor="end" fill="var(--warn)">Phase 1–2 · C</text>
+
+  <!-- scope -->
+  <rect x="460" y="404" width="180" height="148" rx="11" fill="var(--surface-2)" stroke="var(--border)" stroke-dasharray="5 4"/>
+  <text class="m" x="550" y="426" font-size="12" text-anchor="middle" font-weight="700" fill="var(--ink-3)">ouro-scope</text>
+  <g font-size="10.5" text-anchor="middle" fill="var(--ink-3)">
+    <text x="550" y="450">metrics</text><text x="550" y="470">tracing</text>
+    <text x="550" y="490">pprof / perf</text><text x="550" y="510">bench harness</text>
+    <text x="550" y="536" font-size="10">mọi thành phần đều đẩy vào</text>
+  </g>
+  <g stroke="var(--ink-3)" stroke-width="1.1" stroke-dasharray="3 3" marker-end="url(#argr)">
+    <path d="M440 440 L456 440"/><path d="M440 530 L456 528"/>
+    <path d="M660 440 L646 470"/><path d="M490 208 L540 400"/>
+  </g>
+</svg>
+<figcaption>Đường nét đứt trong mỗi hộp = giao diện nó <b>yêu cầu</b> từ bên dưới. Đó là chỗ bạn cắm mock khi test.</figcaption>
+</figure>
+
+<blockquote><p><strong>Vì sao <code>ouro-store</code> không có mũi tên nào đi ra:</strong> nó không phụ thuộc vào ai cả, ngoài hệ tệp. Đó là thứ cho phép bạn hoàn thành Phase 1 mà chưa cần viết một dòng nào của bốn thành phần kia.</p></blockquote>
+
+<!-- A3 -->
+<h3 id="a3"><span class="tagn">A3</span>Bên trong <code>ouro-store</code></h3>
+<p>Mũi tên = chiều gọi hàm. Chú ý <code>wal</code> và <code>bufpool</code> đều ghi xuống đĩa nhưng <strong>bằng hai file khác nhau, hai kiểu ghi khác nhau</strong>.</p>
+
+<figure>
+<svg viewBox="0 0 900 460" role="img" aria-label="Các mô-đun bên trong ouro-store và chiều gọi hàm giữa chúng">
+  <rect x="290" y="10" width="320" height="40" rx="9" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.8"/>
+  <text class="m" x="450" y="35" font-size="12.5" text-anchor="middle" font-weight="700" fill="var(--accent)">store.h — API 6 hàm</text>
+
+  <path d="M370 50 L230 92" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <path d="M530 50 L670 92" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <path d="M450 50 L450 92" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text x="462" y="76" font-size="11" fill="var(--accent)">mọi lần ghi đi qua đây TRƯỚC</text>
+
+  <rect x="120" y="94" width="200" height="46" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text class="m" x="220" y="114" font-size="12" text-anchor="middle" fill="var(--ink)">btree.c</text>
+  <text x="220" y="131" font-size="10" text-anchor="middle" fill="var(--ink-3)">search · insert · split · merge</text>
+
+  <rect x="360" y="94" width="180" height="46" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+  <text class="m" x="450" y="114" font-size="12" text-anchor="middle" fill="var(--ink)">wal.c</text>
+  <text x="450" y="131" font-size="10" text-anchor="middle" fill="var(--ink-3)">LSN · group commit</text>
+
+  <rect x="580" y="94" width="200" height="46" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text class="m" x="680" y="114" font-size="12" text-anchor="middle" fill="var(--ink)">lsm.c</text>
+  <text x="680" y="131" font-size="10" text-anchor="middle" fill="var(--ink-3)">memtable · SSTable · compact</text>
+
+  <path d="M220 140 L300 186" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <path d="M680 140 L600 186" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+
+  <rect x="290" y="188" width="320" height="52" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
+  <text class="m" x="450" y="209" font-size="12.5" text-anchor="middle" font-weight="700" fill="var(--ink)">bufpool.c</text>
+  <text x="450" y="228" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">fetch(page_id) · pin / unpin · mark_dirty · CLOCK evict</text>
+
+  <path d="M450 240 L450 282" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="330" y="284" width="240" height="46" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text class="m" x="450" y="304" font-size="12" text-anchor="middle" fill="var(--ink)">page.c</text>
+  <text x="450" y="321" font-size="10" text-anchor="middle" fill="var(--ink-3)">slotted layout · checksum · serialize</text>
+
+  <path d="M450 330 L450 366" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <path d="M450 140 L450 150 L810 150 L810 366" stroke="var(--accent)" stroke-width="1.6" fill="none" marker-end="url(#arhot)"/>
+
+  <rect x="290" y="368" width="240" height="44" rx="8" fill="var(--surface-3)" stroke="var(--border)"/>
+  <text class="m" x="410" y="388" font-size="12" text-anchor="middle" fill="var(--ink)">data.db</text>
+  <text x="410" y="404" font-size="10" text-anchor="middle" fill="var(--ink-3)">pwrite ngẫu nhiên · 4KB</text>
+
+  <rect x="700" y="368" width="200" height="44" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+  <text class="m" x="800" y="388" font-size="12" text-anchor="middle" fill="var(--ink)">wal.log</text>
+  <text x="800" y="404" font-size="10" text-anchor="middle" fill="var(--ink-3)">append tuần tự + fsync</text>
+
+  <!-- recovery -->
+  <rect x="20" y="284" width="200" height="46" rx="8" fill="var(--ok-soft)" stroke="var(--ok)"/>
+  <text class="m" x="120" y="304" font-size="12" text-anchor="middle" fill="var(--ink)">recovery.c</text>
+  <text x="120" y="321" font-size="10" text-anchor="middle" fill="var(--ink-3)">chỉ chạy lúc khởi động</text>
+  <path d="M220 390 L120 390 L120 332" stroke="var(--ok)" stroke-width="1.5" fill="none" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+  <path d="M700 390 L640 430 L120 430 L120 332" stroke="var(--ok)" stroke-width="1.5" fill="none" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+  <path d="M220 300 L286 300" stroke="var(--ok)" stroke-width="1.5" marker-end="url(#arok)"/>
+  <text x="70" y="255" font-size="11" fill="var(--ok)">đọc wal.log,</text>
+  <text x="70" y="270" font-size="11" fill="var(--ok)">redo vào bufpool</text>
+
+  <rect x="20" y="94" width="80" height="46" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text class="m" x="60" y="121" font-size="11.5" text-anchor="middle" fill="var(--ink-2)">util.c</text>
+  <text x="60" y="160" font-size="10" text-anchor="middle" fill="var(--ink-3)">mọi mô-đun</text>
+  <text x="60" y="173" font-size="10" text-anchor="middle" fill="var(--ink-3)">đều dùng</text>
+</svg>
+<figcaption>Hai đường xuống đĩa: <code>wal.log</code> ghi tuần tự + fsync (đắt, nhưng nhỏ); <code>data.db</code> ghi ngẫu nhiên, lười, không fsync ngay.</figcaption>
+</figure>
+
+<!-- A4 -->
+<h3 id="a4"><span class="tagn">A4</span>Bên trong <code>ouro-net</code></h3>
+<p>Kiến trúc bạn sẽ chọn sau khi đọc UNP Ch30: <strong>một luồng chạy epoll, N luồng thợ xử lý</strong>.</p>
+
+<figure>
+<svg viewBox="0 0 900 400" role="img" aria-label="Kiến trúc epoll một luồng sự kiện và nhiều luồng thợ">
+  <rect x="14" y="14" width="200" height="120" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text x="114" y="36" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--ink-3)">10.000 CLIENT</text>
+  <g fill="var(--surface)" stroke="var(--border)">
+    <rect x="28" y="46" width="172" height="18" rx="4"/><rect x="28" y="68" width="172" height="18" rx="4"/>
+    <rect x="28" y="90" width="172" height="18" rx="4"/>
+  </g>
+  <g class="m" font-size="9.5" fill="var(--ink-3)"><text x="36" y="59">fd 12 · có dữ liệu</text><text x="36" y="81">fd 13 · im lặng</text><text x="36" y="103">fd 14 · có dữ liệu</text></g>
+  <text x="114" y="126" font-size="10" text-anchor="middle" fill="var(--ink-3)">…9.997 fd nữa</text>
+
+  <path d="M214 74 L262 74" stroke="var(--ink-2)" stroke-width="1.6" marker-end="url(#ar)"/>
+
+  <rect x="264" y="14" width="200" height="120" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.8"/>
+  <text x="364" y="36" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--accent)">KERNEL · epoll</text>
+  <text class="m" x="364" y="60" font-size="11" text-anchor="middle" fill="var(--ink)">epoll_wait(epfd,…)</text>
+  <text x="364" y="80" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">ngủ cho tới khi có việc</text>
+  <text x="364" y="104" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">trả về ĐÚNG những fd</text>
+  <text x="364" y="119" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">đã sẵn sàng — O(1)</text>
+
+  <path d="M464 74 L512 74" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text x="488" y="64" font-size="10" text-anchor="middle" fill="var(--accent)">12 fd</text>
+
+  <rect x="514" y="14" width="372" height="120" rx="10" fill="var(--surface)" stroke="var(--accent-line)" stroke-width="1.6"/>
+  <text x="700" y="36" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--ink)">LUỒNG SỰ KIỆN (chỉ 1)</text>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="528" y="46" width="108" height="30" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="582" y="65" fill="var(--ink-2)">accept()</text>
+    <rect x="644" y="46" width="108" height="30" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="698" y="65" fill="var(--ink-2)">read_full()</text>
+    <rect x="760" y="46" width="112" height="30" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="816" y="65" fill="var(--ink-2)">codec decode</text>
+    <rect x="528" y="84" width="344" height="36" rx="6" fill="var(--warn-soft)" stroke="var(--warn)"/>
+    <text x="700" y="100" font-size="10.5" fill="var(--ink-2)">conn.c — máy trạng thái mỗi kết nối</text>
+    <text class="m" x="700" y="114" font-size="10" fill="var(--ink-3)">ĐỌC_HEADER → ĐỌC_BODY → XỬ_LÝ → GHI_LẠI</text>
+  </g>
+
+  <path d="M700 134 L700 172" stroke="var(--blue)" stroke-width="1.6" stroke-dasharray="3 3" marker-end="url(#arb)"/>
+  <text x="712" y="158" font-size="11" fill="var(--blue)">đẩy vào hàng đợi, KHÔNG chờ</text>
+
+  <rect x="514" y="174" width="372" height="40" rx="8" fill="var(--blue-soft)" stroke="var(--blue)"/>
+  <text class="m" x="700" y="199" font-size="11.5" text-anchor="middle" fill="var(--ink)">hàng đợi công việc (có khoá / lock-free)</text>
+
+  <g>
+    <path d="M600 214 L600 246" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+    <path d="M700 214 L700 246" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+    <path d="M800 214 L800 246" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  </g>
+  <g fill="var(--surface-2)" stroke="var(--border)">
+    <rect x="548" y="248" width="104" height="38" rx="7"/><rect x="648" y="248" width="104" height="38" rx="7"/><rect x="748" y="248" width="104" height="38" rx="7"/>
+  </g>
+  <g class="m" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">
+    <text x="600" y="272">thợ 1</text><text x="700" y="272">thợ 2</text><text x="800" y="272">thợ N</text>
+  </g>
+  <text x="700" y="304" font-size="11" text-anchor="middle" fill="var(--ink-3)">N ≈ số nhân CPU · mỗi thợ gọi store_put / store_get (chặn ở đĩa được, không sao)</text>
+
+  <path d="M700 310 L700 340" stroke="var(--ink-2)" stroke-width="1.6" marker-end="url(#ar)"/>
+  <rect x="580" y="342" width="240" height="40" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
+  <text class="m" x="700" y="367" font-size="12" text-anchor="middle" font-weight="700" fill="var(--ink)">ouro-store</text>
+
+  <path d="M548 267 L300 267 L300 220" stroke="var(--ok)" stroke-width="1.4" fill="none" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+  <text x="310" y="248" font-size="10.5" fill="var(--ok)">ghi hồi đáp trở lại fd</text>
+  <path d="M300 220 L300 140" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+</svg>
+<figcaption>Luồng sự kiện <b>không bao giờ được chặn</b>. Việc gì có thể chặn (đọc đĩa) thì đẩy sang thợ.</figcaption>
+</figure>
+
+<div class="box b-warn"><span class="bh">Sai lầm kinh điển ở đây</span>
+<p>Gọi thẳng <code>store_get()</code> ngay trong luồng sự kiện. Một lần đọc đĩa 5ms là <strong>toàn bộ 10.000 kết nối đứng hình 5ms</strong>. Đó là lý do phải có hàng đợi và thợ.</p></div>
+
+<!-- A5 -->
+<h3 id="a5"><span class="tagn">A5</span>Bên trong <code>ouro-dist</code></h3>
+<p>Chú ý <code>ouro-dist</code> <strong>bọc</strong> <code>ouro-store</code> chứ không sửa nó. Mọi lệnh ghi phải qua Raft log trước.</p>
+
+<figure>
+<svg viewBox="0 0 900 430" role="img" aria-label="Cấu trúc bên trong ouro-dist với raft, gossip, fsm và store bên dưới">
+  <rect x="300" y="10" width="300" height="38" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text class="m" x="450" y="34" font-size="12" text-anchor="middle" fill="var(--ink)">client/ — tìm leader, retry, load balance</text>
+  <path d="M450 48 L450 80" stroke="var(--ink-2)" stroke-width="1.6" marker-end="url(#ar)"/>
+
+  <rect x="20" y="82" width="860" height="216" rx="12" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="1.8"/>
+  <text class="m" x="38" y="103" font-size="12.5" font-weight="700" fill="var(--blue)">ouro-dist</text>
+
+  <!-- raft box -->
+  <rect x="36" y="114" width="500" height="166" rx="10" fill="var(--surface)" stroke="var(--blue)"/>
+  <text class="m" x="52" y="134" font-size="12" font-weight="700" fill="var(--blue)">raft/</text>
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="50" y="144" width="150" height="40" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="125" y="161" fill="var(--ink)">raft.go</text>
+    <text x="125" y="176" fill="var(--ink-3)">vòng đời 3 trạng thái</text>
+    <rect x="210" y="144" width="150" height="40" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="285" y="161" fill="var(--ink)">election.go</text>
+    <text x="285" y="176" fill="var(--ink-3)">timeout · bỏ phiếu</text>
+    <rect x="370" y="144" width="150" height="40" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="445" y="161" fill="var(--ink)">replicate.go</text>
+    <text x="445" y="176" fill="var(--ink-3)">AppendEntries</text>
+    <rect x="50" y="194" width="230" height="40" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+    <text class="m" x="165" y="211" fill="var(--ink)">log.go</text>
+    <text x="165" y="226" fill="var(--ink-3)">index · term · commitIndex</text>
+    <rect x="290" y="194" width="230" height="40" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="405" y="211" fill="var(--ink)">snapshot.go</text>
+    <text x="405" y="226" fill="var(--ink-3)">cắt log khi quá dài</text>
+  </g>
+  <text x="285" y="258" font-size="11" text-anchor="middle" fill="var(--ink-3)">trạng thái:  follower ⇄ candidate ⇄ leader</text>
+
+  <!-- gossip + fsm -->
+  <rect x="552" y="114" width="312" height="76" rx="10" fill="var(--surface)" stroke="var(--blue)"/>
+  <text class="m" x="568" y="134" font-size="12" font-weight="700" fill="var(--blue)">gossip/</text>
+  <text x="708" y="155" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">SWIM · ping / ping-req / suspect</text>
+  <text x="708" y="173" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">trả lời: "ai còn sống?" — độc lập với Raft</text>
+
+  <rect x="552" y="200" width="312" height="80" rx="10" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+  <text class="m" x="568" y="220" font-size="12" font-weight="700" fill="var(--ok)">fsm/</text>
+  <text x="708" y="241" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">Apply(entry) — biến một dòng log</text>
+  <text x="708" y="258" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">thành store_put / store_del thật</text>
+  <text x="708" y="274" font-size="10" text-anchor="middle" fill="var(--ok)">CHỈ chạy sau khi entry đã commit</text>
+
+  <path d="M520 214 L548 230" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+
+  <path d="M708 280 L708 328" stroke="var(--ok)" stroke-width="1.8" marker-end="url(#arok)"/>
+  <rect x="558" y="330" width="300" height="44" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.8"/>
+  <text class="m" x="708" y="350" font-size="12.5" text-anchor="middle" font-weight="700" fill="var(--ink)">ouro-store</text>
+  <text x="708" y="366" font-size="10" text-anchor="middle" fill="var(--ink-3)">hoàn toàn không biết mình đang được nhân bản</text>
+
+  <path d="M165 280 L165 328" stroke="var(--accent)" stroke-width="1.6" marker-end="url(#arhot)"/>
+  <rect x="40" y="330" width="250" height="44" rx="9" fill="var(--accent-soft)" stroke="var(--accent)"/>
+  <text class="m" x="165" y="350" font-size="12" text-anchor="middle" fill="var(--ink)">raft.log (trên đĩa, fsync)</text>
+  <text x="165" y="366" font-size="10" text-anchor="middle" fill="var(--ink-3)">nguồn sự thật duy nhất</text>
+
+  <path d="M290 400 L860 400" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="5 4" marker-start="url(#arb)" marker-end="url(#arb)"/>
+  <text x="575" y="392" font-size="11" text-anchor="middle" fill="var(--blue)">transport/ — gRPC tới 2 node còn lại</text>
+</svg>
+<figcaption>Hai file đĩa khác nhau: <code>raft.log</code> là sự thật; <code>data.db</code> chỉ là kết quả đã áp dụng, luôn dựng lại được.</figcaption>
+</figure>
+
+<!-- A6 -->
+<h3 id="a6"><span class="tagn">A6</span>Bên trong <code>ouro-run</code> — dây chuyền syscall</h3>
+<p>Đây không phải sơ đồ mô-đun mà là <strong>dây chuyền</strong>: thứ tự bắt buộc, sai một bước là hỏng.</p>
+
+<figure>
+<svg viewBox="0 0 900 380" role="img" aria-label="Dây chuyền các bước và syscall để dựng một container">
+  <g font-size="10.5">
+    <rect x="14" y="16" width="160" height="66" rx="9" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="94" y="38" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--ink)">1 · image/</text>
+    <text x="94" y="56" text-anchor="middle" fill="var(--ink-3)">tải layer, giải nén</text>
+    <text x="94" y="72" text-anchor="middle" fill="var(--ink-3)">dựng overlayfs</text>
+
+    <rect x="196" y="16" width="160" height="66" rx="9" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="276" y="38" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--ink)">2 · cgroup/</text>
+    <text class="m" x="276" y="56" font-size="9.5" text-anchor="middle" fill="var(--ink-3)">mkdir /sys/fs/cgroup/x</text>
+    <text class="m" x="276" y="72" font-size="9.5" text-anchor="middle" fill="var(--ink-3)">echo 256M &gt; memory.max</text>
+
+    <rect x="378" y="16" width="160" height="66" rx="9" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
+    <text class="m" x="458" y="38" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--accent)">3 · ns/</text>
+    <text class="m" x="458" y="56" font-size="9.5" text-anchor="middle" fill="var(--ink-2)">clone(CLONE_NEWPID |</text>
+    <text class="m" x="458" y="72" font-size="9.5" text-anchor="middle" fill="var(--ink-2)">NEWNS|NEWNET|NEWUTS…)</text>
+
+    <rect x="560" y="16" width="160" height="66" rx="9" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="640" y="38" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--ink)">4 · network/</text>
+    <text x="640" y="56" text-anchor="middle" fill="var(--ink-3)">tạo cặp veth</text>
+    <text x="640" y="72" text-anchor="middle" fill="var(--ink-3)">cắm vào br-ouro + NAT</text>
+
+    <rect x="742" y="16" width="146" height="66" rx="9" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="815" y="38" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--ink)">5 · mount</text>
+    <text class="m" x="815" y="56" font-size="9.5" text-anchor="middle" fill="var(--ink-3)">mount /proc, /sys</text>
+    <text x="815" y="72" text-anchor="middle" fill="var(--ink-3)">trong ns mới</text>
+  </g>
+  <g stroke="var(--ink-2)" stroke-width="1.6" marker-end="url(#ar)">
+    <path d="M174 49 L192 49"/><path d="M356 49 L374 49"/><path d="M538 49 L556 49"/><path d="M720 49 L738 49"/>
+  </g>
+  <path d="M815 82 L815 104 L94 104 L94 128" stroke="var(--ink-2)" stroke-width="1.6" fill="none" marker-end="url(#ar)"/>
+
+  <g font-size="10.5">
+    <rect x="14" y="130" width="160" height="66" rx="9" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
+    <text class="m" x="94" y="152" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--accent)">6 · pivot_root</text>
+    <text x="94" y="170" text-anchor="middle" fill="var(--ink-2)">đổi / thành rootfs mới</text>
+    <text x="94" y="186" text-anchor="middle" fill="var(--ink-2)">rồi umount / cũ</text>
+
+    <rect x="196" y="130" width="160" height="66" rx="9" fill="var(--surface-2)" stroke="var(--border)"/>
+    <text class="m" x="276" y="152" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--ink)">7 · security/</text>
+    <text x="276" y="170" text-anchor="middle" fill="var(--ink-3)">drop capabilities</text>
+    <text class="m" x="276" y="186" font-size="9.5" text-anchor="middle" fill="var(--ink-3)">no_new_privs + seccomp</text>
+
+    <rect x="378" y="130" width="160" height="66" rx="9" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+    <text class="m" x="458" y="152" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--ok)">8 · execve()</text>
+    <text x="458" y="170" text-anchor="middle" fill="var(--ink-2)">thay ảnh tiến trình</text>
+    <text x="458" y="186" text-anchor="middle" fill="var(--ink-2)">bằng ouro-store</text>
+
+    <rect x="560" y="130" width="328" height="66" rx="9" fill="var(--surface)" stroke="var(--ok)" stroke-dasharray="5 3"/>
+    <text class="m" x="724" y="152" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--ok)">CONTAINER ĐANG CHẠY</text>
+    <text x="724" y="170" text-anchor="middle" fill="var(--ink-2)">bên trong nó là PID 1 · hostname riêng · IP riêng</text>
+    <text x="724" y="186" text-anchor="middle" fill="var(--ink-3)">nhìn từ host: chỉ là một tiến trình bình thường</text>
+  </g>
+  <g stroke="var(--ink-2)" stroke-width="1.6" marker-end="url(#ar)">
+    <path d="M174 163 L192 163"/><path d="M356 163 L374 163"/><path d="M538 163 L556 163"/>
+  </g>
+
+  <rect x="14" y="224" width="874" height="66" rx="10" fill="var(--warn-soft)" stroke="var(--warn)"/>
+  <text x="34" y="246" font-size="12" font-weight="700" fill="var(--warn)">THỨ TỰ LÀ BẮT BUỘC</text>
+  <text x="34" y="266" font-size="11.5" fill="var(--ink-2)">• cgroup phải gán TRƯỚC khi tiến trình con chạy — không thì nó kịp ngốn RAM</text>
+  <text x="34" y="282" font-size="11.5" fill="var(--ink-2)">• pivot_root phải SAU mount namespace nhưng TRƯỚC execve — sai thì rò rỉ ra host hoặc container không chạy nổi</text>
+
+  <rect x="14" y="302" width="874" height="62" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text x="34" y="324" font-size="12" font-weight="700" fill="var(--ink-3)">shim/ — tiến trình cha ở lại</text>
+  <text x="34" y="344" font-size="11.5" fill="var(--ink-2)">giữ stdin/stdout, gọi <tspan class="m">waitpid()</tspan>, báo mã thoát về node-agent, dọn cgroup và veth khi container chết</text>
+  <text x="34" y="359" font-size="11" fill="var(--ink-3)">Không có shim thì container chết mà không ai biết — reconcile loop sẽ mù.</text>
+</svg>
+<figcaption>Tám bước, khoảng 12 syscall. Đó là toàn bộ "container" — không có phép màu nào khác.</figcaption>
+</figure>
+
+<!-- A7 -->
+<h3 id="a7"><span class="tagn">A7</span>Bên trong <code>ouro-ctl</code></h3>
+<p>Mấu chốt: <strong>không thành phần nào gọi thẳng thành phần nào.</strong> Tất cả đều chỉ đọc/ghi vào store, và phản ứng với thay đổi. Đây gọi là kiến trúc <em>level-triggered</em>, và nó là lý do Kubernetes tự lành được.</p>
+
+<figure>
+<svg viewBox="0 0 900 420" role="img" aria-label="Kiến trúc ouro-ctl xoay quanh một kho trạng thái trung tâm">
+  <rect x="330" y="150" width="240" height="110" rx="12" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.2"/>
+  <text class="m" x="450" y="176" font-size="13" text-anchor="middle" font-weight="700" fill="var(--accent)">KHO TRẠNG THÁI</text>
+  <text x="450" y="196" font-size="11" text-anchor="middle" fill="var(--ink-2)">= cụm ouro-store + Raft</text>
+  <text x="450" y="216" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">/services/ouro-db → {replicas:3}</text>
+  <text x="450" y="232" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">/nodes/10.0.0.2  → {cpu:4, mem:8G}</text>
+  <text x="450" y="250" font-size="10.5" text-anchor="middle" fill="var(--accent)">Put · Get · Watch · CAS</text>
+
+  <!-- api server -->
+  <rect x="40" y="20" width="200" height="70" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text class="m" x="140" y="42" font-size="12" text-anchor="middle" font-weight="700" fill="var(--ink)">api/</text>
+  <text x="140" y="60" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">nhận YAML, validate</text>
+  <text x="140" y="76" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">GHI mong muốn</text>
+  <path d="M240 60 L330 168" stroke="var(--ink-2)" stroke-width="1.6" marker-end="url(#ar)"/>
+  <text x="264" y="118" font-size="10.5" fill="var(--ink-3)">ghi</text>
+
+  <!-- scheduler -->
+  <rect x="660" y="20" width="200" height="70" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text class="m" x="760" y="42" font-size="12" text-anchor="middle" font-weight="700" fill="var(--ink)">scheduler/</text>
+  <text x="760" y="60" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">lọc node → chấm điểm</text>
+  <text x="760" y="76" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">gán node cho workload</text>
+  <path d="M660 60 L570 168" stroke="var(--blue)" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#arb)"/>
+  <path d="M582 180 L668 82" stroke="var(--ok)" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+  <text x="632" y="128" font-size="10.5" fill="var(--blue)">watch</text>
+
+  <!-- controllers -->
+  <rect x="40" y="320" width="230" height="86" rx="10" fill="var(--surface)" stroke="var(--blue)" stroke-width="1.6"/>
+  <text class="m" x="155" y="342" font-size="12" text-anchor="middle" font-weight="700" fill="var(--blue)">controller/</text>
+  <text x="155" y="360" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">service-controller</text>
+  <text x="155" y="376" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">node-controller</text>
+  <text x="155" y="392" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">rollout-controller</text>
+  <path d="M270 352 L336 250" stroke="var(--blue)" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#arb)"/>
+  <path d="M348 258 L282 336" stroke="var(--ok)" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+  <text x="256" y="300" font-size="10.5" text-anchor="end" fill="var(--blue)">watch + ghi</text>
+
+  <!-- agents -->
+  <rect x="630" y="320" width="230" height="86" rx="10" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+  <text class="m" x="745" y="342" font-size="12" text-anchor="middle" font-weight="700" fill="var(--ok)">agent/  ×3</text>
+  <text x="745" y="360" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">chạy trên MỖI node</text>
+  <text x="745" y="376" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">gọi ouro-run</text>
+  <text x="745" y="392" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">BÁO thực tế về</text>
+  <path d="M630 352 L566 250" stroke="var(--ok)" stroke-width="1.6" marker-end="url(#arok)"/>
+  <path d="M554 258 L618 336" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arb)"/>
+  <text x="648" y="300" font-size="10.5" fill="var(--ok)">báo thực tế</text>
+
+  <path d="M745 406 L745 414" stroke="var(--ink-3)"/>
+  <text x="745" y="416" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">→ ouro-run → container</text>
+</svg>
+<figcaption>Kho trạng thái ở giữa. Không ai gọi thẳng ai — tất cả đều <code>Watch</code> và phản ứng.</figcaption>
+</figure>
+
+<blockquote><p><strong>Vì sao thiết kế này tự lành:</strong> giết bất kỳ thành phần nào rồi bật lại — nó chỉ cần đọc kho trạng thái và tiếp tục. Không có "trạng thái trong bộ nhớ" nào bị mất, vì không thành phần nào giữ sự thật cả. Sự thật nằm trong kho.</p></blockquote>
+
+<!-- ═══════════════ B. SEQUENCE ═══════════════ -->
+<h2>Phần B — Sơ đồ tuần tự</h2>
+<p class="lede">Thời gian chảy từ trên xuống. Cột dọc là một thành phần. Mũi tên ngang là một lời gọi.</p>
+
+<!-- S1 -->
+<h3 id="s1"><span class="tagn">S1</span>PUT trên một node — Phase 1–2</h3>
+<p>Sơ đồ quan trọng nhất trang này. Nhìn kỹ <strong>chỗ nào báo "xong" cho client</strong> — đó là điểm quyết định độ bền.</p>
+
+<figure>
+<svg viewBox="0 0 960 620" role="img" aria-label="Trình tự một lệnh PUT đi qua net, store api, wal, buffer pool và đĩa">
+  <g font-size="11" text-anchor="middle">
+    <rect x="10" y="10" width="140" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="80" y="31" fill="var(--ink)">client</text>
+    <rect x="170" y="10" width="140" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="240" y="31" fill="var(--ink)">ouro-net</text>
+    <rect x="330" y="10" width="140" height="32" rx="7" fill="var(--accent-soft)" stroke="var(--accent)"/><text class="m" x="400" y="31" fill="var(--ink)">store API</text>
+    <rect x="490" y="10" width="140" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="560" y="31" fill="var(--ink)">wal.c</text>
+    <rect x="650" y="10" width="140" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="720" y="31" fill="var(--ink)">bufpool.c</text>
+    <rect x="810" y="10" width="140" height="32" rx="7" fill="var(--surface-3)" stroke="var(--border)"/><text class="m" x="880" y="31" fill="var(--ink)">KERNEL / ĐĨA</text>
+  </g>
+  <g stroke="var(--border)" stroke-width="1.2" stroke-dasharray="4 4">
+    <path d="M80 42 L80 588"/><path d="M240 42 L240 588"/><path d="M400 42 L400 588"/>
+    <path d="M560 42 L560 588"/><path d="M720 42 L720 588"/><path d="M880 42 L880 588"/>
+  </g>
+
+  <g font-size="11" fill="var(--ink-2)">
+    <path d="M80 72 L236 72" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text class="m" x="86" y="66" font-size="10.5">PUT user:1 = "Quan"  (18B header + payload)</text>
+
+    <path d="M240 106 L396 106" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text class="m" x="246" y="100" font-size="10.5">store_put(key, val)</text>
+
+    <path d="M400 140 L556 140" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+    <text class="m" x="406" y="134" font-size="10.5" fill="var(--accent)">append(LSN 42, PUT, key, val)</text>
+
+    <path d="M560 174 L876 174" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text class="m" x="566" y="168" font-size="10.5">write(walfd, …)</text>
+    <path d="M876 200 L564 200" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+    <text class="m" x="600" y="194" font-size="10" fill="var(--warn)">trả về ngay — dữ liệu MỚI CHỈ trong page cache RAM</text>
+
+    <path d="M560 236 L876 236" stroke="var(--accent)" stroke-width="2.2" marker-end="url(#arhot)"/>
+    <text class="m" x="566" y="230" font-size="11" font-weight="700" fill="var(--accent)">fsync(walfd)   ← 0,1–10 ms · ĐẮT NHẤT CẢ LUỒNG</text>
+    <path d="M876 266 L564 266" stroke="var(--ok)" stroke-width="1.6" marker-end="url(#arok)"/>
+    <text class="m" x="600" y="260" font-size="10.5" fill="var(--ok)">giờ mới thật sự nằm trên mặt đĩa</text>
+
+    <path d="M556 292 L404 292" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+    <text class="m" x="420" y="286" font-size="10.5" fill="var(--ok)">ok, LSN 42 bền</text>
+  </g>
+
+  <rect x="20" y="306" width="930" height="30" rx="7" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+  <text x="485" y="326" font-size="12" text-anchor="middle" font-weight="700" fill="var(--ok)">★ ĐIỂM AN TOÀN — từ đây trở đi, cúp điện cũng không mất dữ liệu</text>
+
+  <g font-size="11" fill="var(--ink-2)">
+    <path d="M400 362 L716 362" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text class="m" x="406" y="356" font-size="10.5">fetch(page_id) + pin</text>
+
+    <path d="M720 396 L876 396" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text class="m" x="726" y="390" font-size="10.5">pread() — chỉ khi page chưa có trong RAM</text>
+    <path d="M876 420 L724 420" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+
+    <path d="M716 446 L404 446" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+    <text class="m" x="420" y="440" font-size="10.5" fill="var(--ok)">con trỏ tới page trong RAM</text>
+
+    <path d="M400 478 L716 478" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text class="m" x="406" y="472" font-size="10.5">btree insert vào page · mark_dirty · unpin</text>
+
+    <path d="M396 508 L244 508" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+    <text class="m" x="260" y="502" font-size="10.5" fill="var(--ok)">return 0</text>
+    <path d="M236 534 L84 534" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+    <text class="m" x="100" y="528" font-size="10.5" fill="var(--ok)">OK (req_id khớp)</text>
+  </g>
+
+  <path d="M720 560 L876 560" stroke="var(--blue)" stroke-width="1.6" stroke-dasharray="3 3" marker-end="url(#arb)"/>
+  <text class="m" x="726" y="554" font-size="10.5" fill="var(--blue)">pwrite page bẩn — BẤT ĐỒNG BỘ, có thể 30 giây sau</text>
+  <text x="485" y="584" font-size="11" text-anchor="middle" fill="var(--blue)">client đã đi từ lâu · nếu cúp điện trước bước này, recovery sẽ redo từ wal.log</text>
+</svg>
+<figcaption>Client được báo "xong" ở dòng 508 — nhưng dữ liệu đã an toàn từ dòng 266, khi <code>fsync</code> trả về.</figcaption>
+</figure>
+
+<div class="box b-key"><span class="bh">Ba điều rút ra từ sơ đồ này</span>
+<p><b>1.</b> Chỉ có <strong>một</strong> <code>fsync</code> trên đường đi — và nó vào file WAL nhỏ, ghi tuần tự, không phải vào B-Tree.<br>
+<b>2.</b> B-Tree được sửa <strong>sau</strong> khi đã báo an toàn. Nó chỉ là bản sao tiện tra cứu.<br>
+<b>3.</b> Nếu 100 client cùng tới trong 1ms, bạn gom cả 100 vào một <code>fsync</code> duy nhất — đó là <b>group commit</b>, và nó là toàn bộ khác biệt giữa 100 và 50.000 giao dịch/giây.</p></div>
+
+<!-- S2 -->
+<h3 id="s2"><span class="tagn">S2</span>GET — trúng cache và trượt cache</h3>
+<p>Cùng một lệnh, hai kết cục khác nhau <strong>100 lần về tốc độ</strong>. Đây là lý do buffer pool tồn tại.</p>
+
+<figure>
+<svg viewBox="0 0 960 400" role="img" aria-label="Trình tự GET khi trúng cache so với khi trượt cache">
+  <g font-size="11" text-anchor="middle">
+    <rect x="10" y="10" width="150" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="85" y="31" fill="var(--ink)">store API</text>
+    <rect x="260" y="10" width="150" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="335" y="31" fill="var(--ink)">btree.c</text>
+    <rect x="510" y="10" width="150" height="32" rx="7" fill="var(--warn-soft)" stroke="var(--warn)"/><text class="m" x="585" y="31" fill="var(--ink)">bufpool.c</text>
+    <rect x="800" y="10" width="150" height="32" rx="7" fill="var(--surface-3)" stroke="var(--border)"/><text class="m" x="875" y="31" fill="var(--ink)">ĐĨA</text>
+  </g>
+  <g stroke="var(--border)" stroke-width="1.2" stroke-dasharray="4 4">
+    <path d="M85 42 L85 370"/><path d="M335 42 L335 370"/><path d="M585 42 L585 370"/><path d="M875 42 L875 370"/>
+  </g>
+
+  <path d="M85 70 L331 70" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text class="m" x="91" y="64" font-size="10.5" fill="var(--ink-2)">store_get("user:1")</text>
+  <path d="M335 100 L581 100" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text class="m" x="341" y="94" font-size="10.5" fill="var(--ink-2)">fetch(root_page)</text>
+
+  <rect x="500" y="118" width="440" height="102" rx="9" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.5"/>
+  <text class="m" x="514" y="138" font-size="11.5" font-weight="700" fill="var(--ok)">alt · TRÚNG CACHE  (~95% số lần)</text>
+  <path d="M585 164 L585 186" stroke="var(--ok)" stroke-width="1.5"/>
+  <path d="M585 186 l-4 -8 l8 0 z" fill="var(--ok)"/>
+  <text x="600" y="170" font-size="11" fill="var(--ink-2)">page đã ở trong RAM → pin rồi trả luôn</text>
+  <text class="m" x="600" y="206" font-size="11.5" font-weight="700" fill="var(--ok)">~100 nano giây</text>
+
+  <rect x="500" y="232" width="440" height="122" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+  <text class="m" x="514" y="252" font-size="11.5" font-weight="700" fill="var(--warn)">alt · TRƯỢT CACHE  (~5% số lần)</text>
+  <text x="514" y="272" font-size="10.5" fill="var(--ink-2)">① CLOCK chọn nạn nhân · nếu bẩn thì pwrite xuống trước</text>
+  <path d="M585 288 L871 288" stroke="var(--warn)" stroke-width="1.8" marker-end="url(#ar)"/>
+  <text class="m" x="600" y="282" font-size="10.5" fill="var(--ink-2)">② pread(fd, buf, 4096, offset)</text>
+  <path d="M871 314 L589 314" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+  <text class="m" x="640" y="308" font-size="10.5" fill="var(--ink-2)">③ nạp vào khung trống</text>
+  <text class="m" x="600" y="340" font-size="11.5" font-weight="700" fill="var(--warn)">~100 micro giây  —  chậm hơn 1.000 lần</text>
+
+  <path d="M581 378 L339 378" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+  <text class="m" x="360" y="372" font-size="10.5" fill="var(--ok)">con trỏ page</text>
+  <text x="120" y="378" font-size="11" fill="var(--ink-3)">→ btree đi xuống tầng tiếp theo, lặp lại 3–4 lần</text>
+</svg>
+<figcaption>Một lần tra B-Tree = 3–4 lần <code>fetch</code>. Nếu cả 4 đều trượt cache, một <code>GET</code> tốn 400µs thay vì 400ns.</figcaption>
+</figure>
+
+<!-- S3 -->
+<h3 id="s3"><span class="tagn">S3</span>Khởi động lại sau khi cúp điện</h3>
+<p>Đây là thứ mà test <code>kill -9</code> 1000 lần đang kiểm tra.</p>
+
+<figure>
+<svg viewBox="0 0 960 460" role="img" aria-label="Trình tự phục hồi khi mở lại store sau khi bị giết đột ngột">
+  <g font-size="11" text-anchor="middle">
+    <rect x="10" y="10" width="160" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="90" y="31" fill="var(--ink)">store_open()</text>
+    <rect x="270" y="10" width="160" height="32" rx="7" fill="var(--ok-soft)" stroke="var(--ok)"/><text class="m" x="350" y="31" fill="var(--ink)">recovery.c</text>
+    <rect x="530" y="10" width="160" height="32" rx="7" fill="var(--accent-soft)" stroke="var(--accent)"/><text class="m" x="610" y="31" fill="var(--ink)">wal.log</text>
+    <rect x="790" y="10" width="160" height="32" rx="7" fill="var(--surface-3)" stroke="var(--border)"/><text class="m" x="870" y="31" fill="var(--ink)">data.db</text>
+  </g>
+  <g stroke="var(--border)" stroke-width="1.2" stroke-dasharray="4 4">
+    <path d="M90 42 L90 430"/><path d="M350 42 L350 430"/><path d="M610 42 L610 430"/><path d="M870 42 L870 430"/>
+  </g>
+
+  <path d="M90 74 L346 74" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text class="m" x="96" y="68" font-size="10.5" fill="var(--ink-2)">recover()</text>
+
+  <path d="M350 108 L866 108" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text class="m" x="356" y="102" font-size="10.5" fill="var(--ink-2)">① đọc header: LSN của checkpoint gần nhất = 37</text>
+
+  <path d="M350 142 L606 142" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text class="m" x="356" y="136" font-size="10.5" fill="var(--accent)">② đọc mọi entry có LSN &gt; 37</text>
+  <path d="M606 172 L354 172" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+  <text class="m" x="380" y="166" font-size="10.5" fill="var(--ok)">LSN 38, 39, 40, 41, 42 … và một entry CỤT</text>
+
+  <rect x="240" y="188" width="700" height="56" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+  <text x="258" y="208" font-size="11.5" font-weight="700" fill="var(--warn)">③ Entry cuối bị cụt — máy chết giữa lúc ghi</text>
+  <text x="258" y="228" font-size="11" fill="var(--ink-2)">checksum không khớp → <b>vứt bỏ entry đó</b>. Nó chưa bao giờ được báo "xong" cho client, nên vứt là đúng.</text>
+
+  <path d="M350 270 L866 270" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text class="m" x="356" y="264" font-size="10.5" fill="var(--ink-2)">④ REDO: áp lại LSN 38→42 vào page (qua bufpool)</text>
+
+  <rect x="240" y="288" width="700" height="52" rx="9" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text x="258" y="308" font-size="11.5" font-weight="700" fill="var(--ink-3)">⑤ Vì sao chỉ REDO, không cần UNDO?</text>
+  <text x="258" y="326" font-size="11" fill="var(--ink-2)">Vì entry chỉ vào WAL sau khi giao dịch đã quyết định commit. Chưa commit thì chưa bao giờ nằm trong log.</text>
+
+  <path d="M350 366 L866 366" stroke="var(--ok)" stroke-width="1.6" marker-end="url(#arok)"/>
+  <text class="m" x="356" y="360" font-size="10.5" fill="var(--ok)">⑥ checkpoint mới: ghi hết page bẩn + fsync + cắt WAL</text>
+
+  <path d="M346 400 L94 400" stroke="var(--ok)" stroke-width="1.6" marker-end="url(#arok)"/>
+  <text class="m" x="110" y="394" font-size="10.5" fill="var(--ok)">store sẵn sàng — đúng trạng thái trước khi chết</text>
+  <text x="480" y="424" font-size="11" text-anchor="middle" fill="var(--ink-3)">Toàn bộ quá trình này thường mất dưới 1 giây, vì WAL từ checkpoint gần nhất luôn ngắn.</text>
+</svg>
+<figcaption>Recovery chỉ đọc phần WAL sau checkpoint. Đó là lý do phải checkpoint đều đặn — không thì khởi động lại mất hàng phút.</figcaption>
+</figure>
+
+<!-- S4 -->
+<h3 id="s4"><span class="tagn">S4</span>B-Tree insert làm node vỡ, lan lên tận gốc</h3>
+<p>Phần code khó nhất Phase 1. Sơ đồ này là thứ bạn sẽ dán lên tường.</p>
+
+<figure>
+<svg viewBox="0 0 960 470" role="img" aria-label="Trình tự chèn khoá làm lá đầy, tách ra, đẩy lên cha, cha cũng đầy, tạo gốc mới">
+  <g font-size="11" text-anchor="middle">
+    <rect x="10" y="10" width="150" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="85" y="31" fill="var(--ink)">insert()</text>
+    <rect x="250" y="10" width="150" height="32" rx="7" fill="var(--ok-soft)" stroke="var(--ok)"/><text class="m" x="325" y="31" fill="var(--ink)">LÁ (page 9)</text>
+    <rect x="490" y="10" width="150" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="565" y="31" fill="var(--ink)">CHA (page 4)</text>
+    <rect x="730" y="10" width="150" height="32" rx="7" fill="var(--accent-soft)" stroke="var(--accent)"/><text class="m" x="805" y="31" fill="var(--ink)">GỐC (page 1)</text>
+  </g>
+  <g stroke="var(--border)" stroke-width="1.2" stroke-dasharray="4 4">
+    <path d="M85 42 L85 440"/><path d="M325 42 L325 440"/><path d="M565 42 L565 440"/><path d="M805 42 L805 440"/>
+  </g>
+
+  <path d="M85 72 L801 72" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text class="m" x="91" y="66" font-size="10.5" fill="var(--ink-2)">① đi xuống từ gốc, tìm lá đúng cho key</text>
+  <path d="M805 100 L569 100" stroke="var(--ink-3)" stroke-width="1.3" marker-end="url(#argr)"/>
+  <path d="M565 124 L329 124" stroke="var(--ink-3)" stroke-width="1.3" marker-end="url(#argr)"/>
+  <text class="m" x="400" y="118" font-size="10" fill="var(--ink-3)">② tới lá</text>
+
+  <rect x="240" y="142" width="480" height="38" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+  <text x="256" y="166" font-size="11.5" font-weight="700" fill="var(--warn)">③ LÁ ĐẦY — không còn chỗ cho key mới</text>
+
+  <path d="M325 206 L325 232" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text class="m" x="338" y="200" font-size="10.5" fill="var(--accent)">④ split: cắt đôi, nửa phải sang page mới (page 12)</text>
+  <path d="M329 250 L561 250" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text class="m" x="340" y="244" font-size="10.5" fill="var(--accent)">⑤ đẩy key giữa lên cha + con trỏ tới page 12</text>
+
+  <rect x="480" y="268" width="460" height="38" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+  <text x="496" y="292" font-size="11.5" font-weight="700" fill="var(--warn)">⑥ CHA CŨNG ĐẦY — đệ quy lại bước ④</text>
+
+  <path d="M569 330 L801 330" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text class="m" x="580" y="324" font-size="10.5" fill="var(--accent)">⑦ cha split, đẩy key giữa lên gốc</text>
+
+  <rect x="720" y="348" width="230" height="38" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+  <text x="736" y="372" font-size="11.5" font-weight="700" fill="var(--warn)">⑧ GỐC CŨNG ĐẦY</text>
+
+  <rect x="20" y="398" width="920" height="54" rx="9" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.8"/>
+  <text x="40" y="420" font-size="12" font-weight="700" fill="var(--accent)">⑨ TẠO GỐC MỚI (page 13) với đúng 1 key và 2 con trỏ</text>
+  <text x="40" y="440" font-size="11.5" fill="var(--ink-2)">Cây cao thêm một tầng. <b>Đây là cách DUY NHẤT B-Tree cao lên</b> — không phải từ lá, mà từ gốc, đi ngược lên trên.</text>
+</svg>
+<figcaption>Split lan từ lá lên gốc. Mọi lá luôn ở cùng độ sâu — đó là bất biến bạn phải giữ bằng mọi giá.</figcaption>
+</figure>
+
+<div class="box b-warn"><span class="bh">Chỗ bạn sẽ viết sai (ai cũng sai)</span>
+<p>Ở bước ⑤, bạn phải <strong>pin cả lá lẫn cha</strong> trước khi split — nếu không, buffer pool có thể đá cha ra khỏi RAM ngay giữa lúc bạn đang sửa nó. Ở Phase 2 khi có đa luồng, lỗi này biến thành hỏng cây không phục hồi được.</p></div>
+
+<!-- S5 -->
+<h3 id="s5"><span class="tagn">S5</span>Một vòng của event loop — Phase 3</h3>
+<p>Chú ý cách xử lý <strong>đọc thiếu</strong>: TCP trả về 7 byte trong khi cần 18. Đây là bug số một của server tự viết.</p>
+
+<figure>
+<svg viewBox="0 0 960 500" role="img" aria-label="Một vòng lặp epoll xử lý kết nối mới và dữ liệu đến thiếu">
+  <g font-size="11" text-anchor="middle">
+    <rect x="10" y="10" width="160" height="32" rx="7" fill="var(--surface-3)" stroke="var(--border)"/><text class="m" x="90" y="31" fill="var(--ink)">KERNEL</text>
+    <rect x="260" y="10" width="180" height="32" rx="7" fill="var(--accent-soft)" stroke="var(--accent)"/><text class="m" x="350" y="31" fill="var(--ink)">luồng sự kiện</text>
+    <rect x="530" y="10" width="160" height="32" rx="7" fill="var(--warn-soft)" stroke="var(--warn)"/><text class="m" x="610" y="31" fill="var(--ink)">conn state</text>
+    <rect x="790" y="10" width="160" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="870" y="31" fill="var(--ink)">thợ</text>
+  </g>
+  <g stroke="var(--border)" stroke-width="1.2" stroke-dasharray="4 4">
+    <path d="M90 42 L90 470"/><path d="M350 42 L350 470"/><path d="M610 42 L610 470"/><path d="M870 42 L870 470"/>
+  </g>
+
+  <path d="M350 72 L94 72" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text class="m" x="110" y="66" font-size="10.5" fill="var(--ink-2)">epoll_wait(epfd, evs, 64, -1)   ← luồng NGỦ ở đây</text>
+  <path d="M90 104 L346 104" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text class="m" x="100" y="98" font-size="10.5" fill="var(--accent)">thức dậy: 2 sự kiện — listenfd và fd 14</text>
+
+  <rect x="240" y="124" width="700" height="80" rx="9" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.5"/>
+  <text class="m" x="256" y="144" font-size="11.5" font-weight="700" fill="var(--ok)">sự kiện 1 · listenfd sẵn sàng = có client mới</text>
+  <path d="M350 164 L94 164" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="110" y="158" font-size="10.5" fill="var(--ink-2)">accept4(…, SOCK_NONBLOCK) → fd 27</text>
+  <path d="M350 190 L606 190" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="360" y="184" font-size="10.5" fill="var(--ink-2)">tạo conn{fd:27, state: ĐỌC_HEADER, got:0} · epoll_ctl ADD</text>
+
+  <rect x="240" y="216" width="700" height="150" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+  <text class="m" x="256" y="236" font-size="11.5" font-weight="700" fill="var(--warn)">sự kiện 2 · fd 14 có dữ liệu — nhưng KHÔNG ĐỦ</text>
+  <path d="M350 258 L94 258" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="110" y="252" font-size="10.5" fill="var(--ink-2)">read(14, buf+got, 18-got)</text>
+  <path d="M94 282 L346 282" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="110" y="276" font-size="10.5" fill="var(--warn)">trả về 7  ← cần 18, mới có 7. KHÔNG PHẢI LỖI.</text>
+  <path d="M350 308 L606 308" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="360" y="302" font-size="10.5" fill="var(--ink-2)">lưu got=7, giữ nguyên state ĐỌC_HEADER</text>
+  <text x="256" y="334" font-size="11" fill="var(--ink-2)"><tspan font-weight="700">→ QUAY LẠI VÒNG LẶP.</tspan> Không chờ, không ngủ, không gọi read lần nữa.</text>
+  <text x="256" y="352" font-size="11" fill="var(--ink-3)">Lần sau kernel báo fd 14 sẵn sàng, đọc tiếp 11 byte còn lại vào đúng chỗ cũ.</text>
+
+  <path d="M350 392 L866 392" stroke="var(--blue)" stroke-width="1.6" stroke-dasharray="3 3" marker-end="url(#arb)"/>
+  <text class="m" x="360" y="386" font-size="10.5" fill="var(--blue)">(khi đủ gói) đẩy vào hàng đợi — KHÔNG chờ kết quả</text>
+  <path d="M866 424 L354 424" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+  <text class="m" x="380" y="418" font-size="10.5" fill="var(--ok)">thợ xong → đánh thức loop qua eventfd, loop ghi hồi đáp</text>
+  <text x="480" y="456" font-size="11.5" text-anchor="middle" fill="var(--accent)">Luồng sự kiện KHÔNG BAO GIỜ chặn. Chặn một lần = 10.000 client đứng hình.</text>
+</svg>
+<figcaption>Mỗi kết nối là một máy trạng thái. Loop chạm vào nó, cập nhật, rồi bỏ đi ngay.</figcaption>
+</figure>
+
+<!-- S6 -->
+<h3 id="s6"><span class="tagn">S6</span>PUT qua Raft — ba node</h3>
+<p>So sánh với <a href="#s1">S1</a>: cùng một lệnh <code>PUT</code>, nhưng giờ phải qua đa số trước khi được coi là xong.</p>
+
+<figure>
+<svg viewBox="0 0 960 580" role="img" aria-label="Trình tự ghi qua Raft với leader và hai follower">
+  <g font-size="11" text-anchor="middle">
+    <rect x="10" y="10" width="130" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="75" y="31" fill="var(--ink)">client</text>
+    <rect x="200" y="10" width="170" height="32" rx="7" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/><text class="m" x="285" y="31" fill="var(--ink)">LEADER (A)</text>
+    <rect x="430" y="10" width="150" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="505" y="31" fill="var(--ink)">follower B</text>
+    <rect x="640" y="10" width="150" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="715" y="31" fill="var(--ink)">follower C</text>
+    <rect x="840" y="10" width="110" height="32" rx="7" fill="var(--warn-soft)" stroke="var(--warn)"/><text class="m" x="895" y="31" fill="var(--ink)">store A</text>
+  </g>
+  <g stroke="var(--border)" stroke-width="1.2" stroke-dasharray="4 4">
+    <path d="M75 42 L75 548"/><path d="M285 42 L285 548"/><path d="M505 42 L505 548"/><path d="M715 42 L715 548"/><path d="M895 42 L895 548"/>
+  </g>
+
+  <path d="M75 72 L281 72" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text class="m" x="81" y="66" font-size="10.5" fill="var(--ink-2)">PUT user:1 = "Quan"</text>
+
+  <rect x="200" y="86" width="240" height="30" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+  <text class="m" x="212" y="106" font-size="10.5" fill="var(--ink)">① nối vào raft.log: {term 5, idx 42}</text>
+  <path d="M285 122 L285 138" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text class="m" x="298" y="136" font-size="10" fill="var(--accent)">fsync(raft.log) — leader ghi bền TRƯỚC khi gửi đi</text>
+
+  <path d="M285 162 L501 162" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text class="m" x="295" y="156" font-size="10" fill="var(--ink-2)">② AppendEntries(term5, prev41, [42])</text>
+  <path d="M285 186 L711 186" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text class="m" x="295" y="180" font-size="10" fill="var(--ink-2)">② AppendEntries — gửi song song, không chờ nhau</text>
+
+  <rect x="420" y="202" width="180" height="46" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text class="m" x="432" y="220" font-size="10" fill="var(--ink-2)">kiểm prev idx 41 khớp?</text>
+  <text class="m" x="432" y="238" font-size="10" fill="var(--ink-2)">ghi + fsync raft.log</text>
+  <rect x="630" y="202" width="180" height="46" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text class="m" x="642" y="220" font-size="10" fill="var(--ink-2)">kiểm prev idx 41 khớp?</text>
+  <text class="m" x="642" y="238" font-size="10" fill="var(--ink-2)">ghi + fsync raft.log</text>
+
+  <path d="M501 272 L289 272" stroke="var(--ok)" stroke-width="1.5" marker-end="url(#arok)"/>
+  <text class="m" x="310" y="266" font-size="10" fill="var(--ok)">③ ok, matchIndex=42</text>
+  <path d="M711 300 L289 300" stroke="var(--ok)" stroke-width="1.5" marker-end="url(#arok)"/>
+  <text class="m" x="310" y="294" font-size="10" fill="var(--ok)">③ ok, matchIndex=42  (có thể tới muộn hơn)</text>
+
+  <rect x="20" y="318" width="930" height="46" rx="9" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.8"/>
+  <text x="485" y="338" font-size="12" text-anchor="middle" font-weight="700" fill="var(--ok)">★ ĐA SỐ ĐẠT ĐƯỢC — 2/3 đã ghi bền (chỉ cần A + một trong B, C)</text>
+  <text x="485" y="356" font-size="11" text-anchor="middle" fill="var(--ink-2)">leader đặt commitIndex = 42. Từ giờ entry 42 không bao giờ mất được nữa.</text>
+
+  <path d="M285 388 L891 388" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text class="m" x="295" y="382" font-size="10.5" fill="var(--accent)">④ fsm.Apply(entry 42) → store_put("user:1","Quan")</text>
+  <path d="M891 414 L289 414" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+
+  <path d="M281 442 L79 442" stroke="var(--ok)" stroke-width="1.6" marker-end="url(#arok)"/>
+  <text class="m" x="95" y="436" font-size="10.5" fill="var(--ok)">⑤ OK — giờ mới báo client</text>
+
+  <path d="M285 478 L501 478" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arb)"/>
+  <path d="M285 502 L711 502" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arb)"/>
+  <text class="m" x="295" y="472" font-size="10" fill="var(--blue)">⑥ nhịp tim sau mang theo commitIndex=42 — follower tự Apply vào store của mình</text>
+  <text x="480" y="534" font-size="11" text-anchor="middle" fill="var(--ink-3)">Follower luôn chậm hơn leader một nhịp. Đó là lý do đọc từ follower có thể ra dữ liệu cũ.</text>
+</svg>
+<figcaption>Ba lần <code>fsync</code> (A, B, C) chạy song song. Độ trễ = <code>fsync</code> chậm thứ hai, không phải tổng ba cái.</figcaption>
+</figure>
+
+<div class="box b-key"><span class="bh">Vì sao 3 node chứ không phải 2</span>
+<p>Với 2 node, "đa số" là 2/2 — một máy chết là đứng cả hệ thống, tệ hơn một máy. Với 3 node, đa số là 2/3: chịu được 1 máy chết. Với 5 node: chịu được 2. Công thức: <code>chịu được = (N-1)/2</code>, và <strong>N phải lẻ</strong>.</p></div>
+
+<!-- S7 -->
+<h3 id="s7"><span class="tagn">S7</span>Leader chết — bầu lại</h3>
+
+<figure>
+<svg viewBox="0 0 960 500" role="img" aria-label="Trình tự bầu leader mới sau khi leader cũ chết">
+  <g font-size="11" text-anchor="middle">
+    <rect x="30" y="10" width="170" height="32" rx="7" fill="var(--surface-3)" stroke="var(--border)"/><text class="m" x="115" y="31" fill="var(--ink-3)">A (leader cũ)</text>
+    <rect x="300" y="10" width="170" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="385" y="31" fill="var(--ink)">B</text>
+    <rect x="570" y="10" width="170" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="655" y="31" fill="var(--ink)">C</text>
+    <rect x="820" y="10" width="120" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="880" y="31" fill="var(--ink)">client</text>
+  </g>
+  <g stroke="var(--border)" stroke-width="1.2" stroke-dasharray="4 4">
+    <path d="M115 42 L115 90"/><path d="M385 42 L385 470"/><path d="M655 42 L655 470"/><path d="M880 42 L880 470"/>
+  </g>
+
+  <path d="M115 66 L381 66" stroke="var(--ink-3)" stroke-width="1.3" marker-end="url(#argr)"/>
+  <path d="M115 84 L651 84" stroke="var(--ink-3)" stroke-width="1.3" marker-end="url(#argr)"/>
+  <text class="m" x="125" y="60" font-size="10" fill="var(--ink-3)">heartbeat (term 5) … đều đặn 50ms một lần</text>
+
+  <g stroke="var(--warn)" stroke-width="2.5"><path d="M95 100 L135 140"/><path d="M135 100 L95 140"/></g>
+  <text x="115" y="164" font-size="12" text-anchor="middle" font-weight="700" fill="var(--warn)">A CHẾT</text>
+  <text x="115" y="182" font-size="10.5" text-anchor="middle" fill="var(--ink-3)">rút điện / kill -9</text>
+
+  <rect x="300" y="196" width="440" height="34" rx="7" fill="var(--warn-soft)" stroke="var(--warn)"/>
+  <text x="318" y="218" font-size="11" fill="var(--ink-2)">① B và C hết election timeout (150–300ms ngẫu nhiên) — không nghe heartbeat nữa</text>
+  <text class="m" x="748" y="218" font-size="10" fill="var(--ink-3)">ngẫu nhiên để 2 thằng</text>
+  <text class="m" x="748" y="232" font-size="10" fill="var(--ink-3)">không cùng ứng cử</text>
+
+  <rect x="300" y="244" width="170" height="30" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+  <text class="m" x="385" y="264" font-size="10.5" text-anchor="middle" fill="var(--ink)">② B timeout TRƯỚC</text>
+  <text class="m" x="490" y="264" font-size="10.5" fill="var(--accent)">→ B thành CANDIDATE, term 5 → 6, tự bỏ phiếu cho mình</text>
+
+  <path d="M385 300 L651 300" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text class="m" x="395" y="294" font-size="10.5" fill="var(--accent)">③ RequestVote(term 6, lastLogIdx 42)</text>
+
+  <rect x="570" y="316" width="330" height="48" rx="7" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text x="586" y="334" font-size="10.5" fill="var(--ink-2)">C kiểm: term 6 &gt; term 5 của mình? ✓</text>
+  <text x="586" y="352" font-size="10.5" fill="var(--ink-2)">log của B ít nhất phải mới bằng log của C? ✓</text>
+
+  <path d="M651 382 L389 382" stroke="var(--ok)" stroke-width="1.6" marker-end="url(#arok)"/>
+  <text class="m" x="410" y="376" font-size="10.5" fill="var(--ok)">④ voteGranted = true</text>
+
+  <rect x="20" y="398" width="930" height="34" rx="7" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+  <text x="485" y="420" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--ok)">★ B có 2/3 phiếu (của mình + của C) → B LÀ LEADER MỚI, term 6</text>
+
+  <path d="M385 454 L876 454" stroke="var(--accent)" stroke-width="1.6" marker-end="url(#arhot)"/>
+  <text class="m" x="395" y="448" font-size="10.5" fill="var(--accent)">⑤ heartbeat term 6 · client retry và tìm ra leader mới — toàn bộ mất &lt; 1 giây</text>
+</svg>
+<figcaption>Điều kiện "log phải mới ít nhất bằng" ở bước ③ là thứ bảo đảm entry đã commit không bao giờ bị mất.</figcaption>
+</figure>
+
+<!-- S8 -->
+<h3 id="s8"><span class="tagn">S8</span>Khởi động một container — từng syscall</h3>
+
+<figure>
+<svg viewBox="0 0 960 560" role="img" aria-label="Trình tự syscall để dựng và chạy một container">
+  <g font-size="11" text-anchor="middle">
+    <rect x="10" y="10" width="150" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="85" y="31" fill="var(--ink)">node-agent</text>
+    <rect x="240" y="10" width="150" height="32" rx="7" fill="var(--ok-soft)" stroke="var(--ok)"/><text class="m" x="315" y="31" fill="var(--ink)">ouro-run</text>
+    <rect x="470" y="10" width="170" height="32" rx="7" fill="var(--surface-3)" stroke="var(--border)"/><text class="m" x="555" y="31" fill="var(--ink)">KERNEL</text>
+    <rect x="730" y="10" width="220" height="32" rx="7" fill="var(--accent-soft)" stroke="var(--accent)"/><text class="m" x="840" y="31" fill="var(--ink)">tiến trình con</text>
+  </g>
+  <g stroke="var(--border)" stroke-width="1.2" stroke-dasharray="4 4">
+    <path d="M85 42 L85 530"/><path d="M315 42 L315 530"/><path d="M555 42 L555 530"/>
+  </g>
+  <path d="M840 196 L840 530" stroke="var(--accent-line)" stroke-width="1.2" stroke-dasharray="4 4"/>
+
+  <path d="M85 70 L311 70" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text class="m" x="91" y="64" font-size="10.5" fill="var(--ink-2)">run(image: ouro-store:v1, mem: 256M)</text>
+
+  <path d="M315 102 L551 102" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="325" y="96" font-size="10" fill="var(--ink-2)">① mount overlayfs: lower=layers, upper=rw, → /run/ouro/rootfs</text>
+
+  <path d="M315 130 L551 130" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="325" y="124" font-size="10" fill="var(--ink-2)">② mkdir /sys/fs/cgroup/ouro-1 · write memory.max = 268435456</text>
+
+  <path d="M315 162 L551 162" stroke="var(--accent)" stroke-width="2" marker-end="url(#arhot)"/>
+  <text class="m" x="325" y="156" font-size="10.5" fill="var(--accent)">③ clone(CLONE_NEWPID|NEWNS|NEWNET|NEWUTS|NEWIPC|NEWUSER)</text>
+  <path d="M555 194 L836 194" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text class="m" x="600" y="188" font-size="10.5" fill="var(--accent)">kernel đẻ tiến trình con với task_struct trỏ sang bảng MỚI</text>
+  <path d="M551 220 L319 220" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+  <text class="m" x="340" y="214" font-size="10" fill="var(--ok)">trả về pid = 8821 (nhìn từ host)</text>
+
+  <rect x="240" y="236" width="700" height="32" rx="7" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+  <text x="256" y="257" font-size="11" fill="var(--ink-2)"><tspan font-weight="700">⚠ con đang BỊ CHẶN</tspan> ở một pipe, chờ cha nói "xong rồi" — vì cha còn phải gán cgroup và mạng</text>
+
+  <path d="M315 292 L551 292" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="325" y="286" font-size="10" fill="var(--ink-2)">④ echo 8821 &gt; cgroup.procs   ← PHẢI trước khi con chạy thật</text>
+  <path d="M315 320 L551 320" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="325" y="314" font-size="10" fill="var(--ink-2)">⑤ tạo veth pair, đẩy một đầu vào netns của 8821, cắm đầu kia vào br-ouro</text>
+  <path d="M315 348 L551 348" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="325" y="342" font-size="10" fill="var(--ink-2)">⑥ ghi uid_map / gid_map cho user namespace</text>
+
+  <path d="M319 380 L836 380" stroke="var(--ok)" stroke-width="1.5" marker-end="url(#arok)"/>
+  <text class="m" x="400" y="374" font-size="10.5" fill="var(--ok)">⑦ đóng pipe → con được thả ra chạy tiếp</text>
+
+  <rect x="720" y="396" width="230" height="90" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+  <text class="m" x="734" y="414" font-size="10" fill="var(--ink-2)">⑧ pivot_root(/rootfs, old)</text>
+  <text class="m" x="734" y="430" font-size="10" fill="var(--ink-2)">⑨ umount2(old, MNT_DETACH)</text>
+  <text class="m" x="734" y="446" font-size="10" fill="var(--ink-2)">⑩ mount /proc, /sys, /dev</text>
+  <text class="m" x="734" y="462" font-size="10" fill="var(--ink-2)">⑪ capset() drop · seccomp()</text>
+  <text class="m" x="734" y="478" font-size="10" font-weight="700" fill="var(--accent)">⑫ execve("/ouro-store")</text>
+
+  <rect x="20" y="500" width="930" height="46" rx="9" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+  <text x="40" y="520" font-size="11.5" font-weight="700" fill="var(--ok)">Container đang chạy. Bên trong: nó là PID 1, thấy rootfs riêng, IP riêng, tối đa 256MB.</text>
+  <text x="40" y="538" font-size="11" fill="var(--ink-2)">Nhìn từ host: chỉ là tiến trình 8821. <tspan class="m">ps aux</tspan> thấy nó bình thường. Không có máy ảo nào cả.</text>
+</svg>
+<figcaption>Bước ⑦ và cái pipe chặn ở bước sau ③ là chi tiết mà mọi hướng dẫn "viết container trong 100 dòng" đều bỏ qua — và đó là lý do chúng rò rỉ.</figcaption>
+</figure>
+
+<!-- S9 -->
+<h3 id="s9"><span class="tagn">S9</span><code>ouroctl apply</code> — xuyên cả 5 thành phần</h3>
+<p>Sơ đồ khép vòng. Đây là thứ bạn quay video ở tuần 75.</p>
+
+<figure>
+<svg viewBox="0 0 960 580" role="img" aria-label="Trình tự đầy đủ từ lệnh apply tới container chạy">
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="8" y="10" width="112" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="64" y="31" fill="var(--ink)">ouroctl</text>
+    <rect x="150" y="10" width="112" height="32" rx="7" fill="var(--accent-soft)" stroke="var(--accent)"/><text class="m" x="206" y="31" fill="var(--ink)">api/</text>
+    <rect x="292" y="10" width="126" height="32" rx="7" fill="var(--warn-soft)" stroke="var(--warn)"/><text class="m" x="355" y="31" fill="var(--ink)">KHO (store)</text>
+    <rect x="448" y="10" width="126" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="511" y="31" fill="var(--ink)">scheduler</text>
+    <rect x="604" y="10" width="126" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="667" y="31" fill="var(--ink)">controller</text>
+    <rect x="760" y="10" width="96" height="32" rx="7" fill="var(--ok-soft)" stroke="var(--ok)"/><text class="m" x="808" y="31" fill="var(--ink)">agent</text>
+    <rect x="884" y="10" width="70" height="32" rx="7" fill="var(--ok-soft)" stroke="var(--ok)"/><text class="m" x="919" y="31" fill="var(--ink)">run</text>
+  </g>
+  <g stroke="var(--border)" stroke-width="1.2" stroke-dasharray="4 4">
+    <path d="M64 42 L64 548"/><path d="M206 42 L206 548"/><path d="M355 42 L355 548"/><path d="M511 42 L511 548"/>
+    <path d="M667 42 L667 548"/><path d="M808 42 L808 548"/><path d="M919 42 L919 548"/>
+  </g>
+
+  <path d="M64 70 L202 70" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text class="m" x="70" y="64" font-size="10" fill="var(--ink-2)">apply -f cluster.yaml (replicas: 3)</text>
+  <path d="M206 100 L351 100" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text class="m" x="212" y="94" font-size="10" fill="var(--accent)">① validate → Put /services/ouro-db</text>
+  <path d="M351 126 L68 126" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+  <text class="m" x="90" y="120" font-size="10" fill="var(--ok)">"đã nhận" — ouroctl thoát. Phần còn lại chạy nền.</text>
+
+  <text x="40" y="152" font-size="10.5" fill="var(--ink-3)">↓ bất đồng bộ từ đây</text>
+  <path d="M355 176 L507 176" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arb)"/>
+  <text class="m" x="361" y="170" font-size="10" fill="var(--blue)">② Watch nổ: có service mới</text>
+  <path d="M511 202 L359 202" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="372" y="196" font-size="10" fill="var(--ink-2)">③ đọc /nodes/* — ai còn chỗ?</text>
+
+  <rect x="430" y="216" width="330" height="46" rx="7" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text x="444" y="234" font-size="10" fill="var(--ink-2)">④ LỌC: node đủ RAM, đang sống, không cordon</text>
+  <text x="444" y="250" font-size="10" fill="var(--ink-2)">CHẤM ĐIỂM: trải đều, ưu tiên node ít tải → chọn 1,2,3</text>
+
+  <path d="M511 286 L359 286" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text class="m" x="372" y="280" font-size="10" fill="var(--accent)">⑤ Put /assign/ouro-db-0 → node1 (và -1→node2, -2→node3)</text>
+
+  <path d="M355 318 L663 318" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arb)"/>
+  <text class="m" x="361" y="312" font-size="10" fill="var(--blue)">⑥ Watch nổ ở controller</text>
+  <path d="M667 344 L812 344" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <text class="m" x="673" y="338" font-size="10" fill="var(--ink-2)">⑦ agent của node1: hãy chạy ouro-db-0</text>
+
+  <path d="M808 374 L915 374" stroke="var(--ok)" stroke-width="1.6" marker-end="url(#arok)"/>
+  <text class="m" x="700" y="368" font-size="10" fill="var(--ok)">⑧ ouro-run: 12 syscall của sơ đồ S8</text>
+  <path d="M915 404 L812 404" stroke="var(--ok)" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arok)"/>
+  <text class="m" x="700" y="398" font-size="10" fill="var(--ok)">⑨ pid 8821, đang chạy</text>
+
+  <path d="M808 436 L359 436" stroke="var(--ok)" stroke-width="1.5" marker-end="url(#arok)"/>
+  <text class="m" x="400" y="430" font-size="10" fill="var(--ok)">⑩ Put /status/ouro-db-0 = Running  ← THỰC TẾ được ghi về kho</text>
+
+  <rect x="20" y="452" width="930" height="42" rx="9" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.8"/>
+  <text x="485" y="472" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--accent)">🐍 KHÉP VÒNG — bước ⑩ ghi vào cụm ouro-store đang chạy trong container do chính bước ⑧ tạo ra</text>
+  <text x="485" y="488" font-size="10.5" text-anchor="middle" fill="var(--ink-2)">Và lệnh Put đó tự nó đi qua toàn bộ sơ đồ S6 (Raft) rồi S1 (WAL + fsync)</text>
+
+  <path d="M355 518 L663 518" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arb)"/>
+  <text class="m" x="361" y="512" font-size="10" fill="var(--blue)">⑪ controller thấy mong muốn 3 = thực tế 3 → không làm gì, ngủ, lặp lại</text>
+  <text x="485" y="544" font-size="11" text-anchor="middle" fill="var(--ink-3)">Trạng thái ổn định không có nghĩa là hệ thống đứng yên — vòng lặp vẫn chạy mãi mãi.</text>
+</svg>
+<figcaption>Từ lệnh tới container chạy: 11 bước, 7 thành phần, và một vòng khép kín ở bước ⑩.</figcaption>
+</figure>
+
+<!-- S10 -->
+<h3 id="s10"><span class="tagn">S10</span>Container chết lúc 3 giờ sáng — không ai đụng vào</h3>
+<p>Đây là sơ đồ chứng minh hệ thống của bạn thật sự tự lành.</p>
+
+<figure>
+<svg viewBox="0 0 960 440" role="img" aria-label="Trình tự tự phục hồi khi một container chết">
+  <g font-size="10.5" text-anchor="middle">
+    <rect x="10" y="10" width="140" height="32" rx="7" fill="var(--warn-soft)" stroke="var(--warn)"/><text class="m" x="80" y="31" fill="var(--ink)">container -1</text>
+    <rect x="200" y="10" width="120" height="32" rx="7" fill="var(--ok-soft)" stroke="var(--ok)"/><text class="m" x="260" y="31" fill="var(--ink)">shim</text>
+    <rect x="370" y="10" width="120" height="32" rx="7" fill="var(--ok-soft)" stroke="var(--ok)"/><text class="m" x="430" y="31" fill="var(--ink)">agent n2</text>
+    <rect x="540" y="10" width="140" height="32" rx="7" fill="var(--warn-soft)" stroke="var(--warn)"/><text class="m" x="610" y="31" fill="var(--ink)">KHO</text>
+    <rect x="730" y="10" width="130" height="32" rx="7" fill="var(--surface-2)" stroke="var(--border)"/><text class="m" x="795" y="31" fill="var(--ink)">controller</text>
+  </g>
+  <g stroke="var(--border)" stroke-width="1.2" stroke-dasharray="4 4">
+    <path d="M80 42 L80 88"/><path d="M260 42 L260 410"/><path d="M430 42 L430 410"/><path d="M610 42 L610 410"/><path d="M795 42 L795 410"/>
+  </g>
+
+  <g stroke="var(--warn)" stroke-width="2.5"><path d="M62 92 L98 128"/><path d="M98 92 L62 128"/></g>
+  <text x="80" y="150" font-size="11" text-anchor="middle" font-weight="700" fill="var(--warn)">OOM kill</text>
+
+  <path d="M96 172 L256 172" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="106" y="166" font-size="10" fill="var(--ink-2)">① waitpid() trả về: exit 137 (SIGKILL)</text>
+  <path d="M260 200 L426 200" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="268" y="194" font-size="10" fill="var(--ink-2)">② báo chết + dọn cgroup, veth</text>
+  <path d="M430 230 L606 230" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arhot)"/>
+  <text class="m" x="438" y="224" font-size="10" fill="var(--accent)">③ Put /status/ouro-db-1 = Failed</text>
+
+  <path d="M610 262 L791 262" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arb)"/>
+  <text class="m" x="618" y="256" font-size="10" fill="var(--blue)">④ Watch nổ</text>
+
+  <rect x="480" y="278" width="470" height="48" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+  <text x="494" y="296" font-size="10.5" fill="var(--ink-2)">⑤ reconcile: mong muốn = 3 · thực tế = 2 (một cái Failed)</text>
+  <text x="494" y="313" font-size="10.5" fill="var(--ink-2)">→ khác biệt = thiếu 1 → hành động: xếp lại một bản mới</text>
+
+  <path d="M791 350 L614 350" stroke="var(--ink-2)" stroke-width="1.4" marker-end="url(#ar)"/>
+  <text class="m" x="626" y="344" font-size="10" fill="var(--ink-2)">⑥ Put /assign/ouro-db-3 → node2  (scheduler chọn lại)</text>
+  <path d="M606 380 L434 380" stroke="var(--ok)" stroke-width="1.5" marker-end="url(#arok)"/>
+  <text class="m" x="446" y="374" font-size="10" fill="var(--ok)">⑦ agent nhận việc → quay lại sơ đồ S8, container mới chạy</text>
+
+  <rect x="20" y="398" width="930" height="34" rx="8" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+  <text x="485" y="420" font-size="11.5" text-anchor="middle" font-weight="700" fill="var(--ok)">Tổng thời gian: ~8 giây. Không ai được đánh thức. Sáng ra chỉ thấy một dòng log.</text>
+</svg>
+<figcaption>Không có "xử lý sự cố" nào được viết riêng. Hệ thống tự lành vì vòng reconcile không quan tâm <b>vì sao</b> lệch — nó chỉ sửa cho hết lệch.</figcaption>
+</figure>
+
+<h2>Dùng mấy sơ đồ này thế nào</h2>
+<div class="tw"><table>
+<thead><tr><th>Khi nào</th><th>Mở sơ đồ nào</th></tr></thead>
+<tbody>
+<tr><td>Bắt đầu Phase 1, không biết file nào gọi file nào</td><td><a href="#a3">A3</a> — dán lên tường suốt 9 tuần</td></tr>
+<tr><td>Viết <code>wal.c</code> mà không chắc thứ tự</td><td><a href="#s1">S1</a> — làm đúng thứ tự từng mũi tên</td></tr>
+<tr><td>Viết <code>recovery.c</code></td><td><a href="#s3">S3</a></td></tr>
+<tr><td>Kẹt ở <code>split()</code></td><td><a href="#s4">S4</a></td></tr>
+<tr><td>Thiết kế <code>ouro-net</code> sau khi đọc UNP Ch30</td><td><a href="#a4">A4</a> + <a href="#s5">S5</a></td></tr>
+<tr><td>Bắt đầu Raft, hoang mang</td><td><a href="#s6">S6</a> rồi <a href="#s7">S7</a> — hai cái này là toàn bộ Raft</td></tr>
+<tr><td>Viết <code>ouro-run</code></td><td><a href="#a6">A6</a> (thứ tự) + <a href="#s8">S8</a> (syscall cụ thể)</td></tr>
+<tr><td>Thiết kế <code>ouro-ctl</code></td><td><a href="#a7">A7</a> — hiểu "không ai gọi ai" là hiểu Kubernetes</td></tr>
+<tr><td>Phỏng vấn hỏi "hệ thống của em hoạt động thế nào?"</td><td><a href="#a1">A1</a> → <a href="#s9">S9</a> → <a href="#s10">S10</a>, đúng thứ tự đó</td></tr>
+</tbody></table></div>
+
+<footer>
+  <p>🐍 <b>Ouroboros</b> · Sơ đồ chi tiết · Đọc kèm <a href="kien-truc.html">kien-truc.html</a> (kiến trúc &amp; 11 nấc) · <a href="lo-trinh.html">lo-trinh.html</a> (tiến độ)</p>
+</footer>
+</main>
+</div>
+
+<script>
+function tog(){
+  const d=document.documentElement;
+  const cur=d.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");
+  d.dataset.theme=cur==="dark"?"light":"dark";
+}
+const links=[...document.querySelectorAll('nav a')];
+const targets=links.map(a=>document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(!e.isIntersecting)return;
+    links.forEach(a=>a.classList.toggle('act', a.getAttribute('href')==='#'+e.target.id));
+  });
+},{rootMargin:'-8% 0px -80% 0px'});
+targets.forEach(t=>io.observe(t));
+</script>
+</body>
+</html>
