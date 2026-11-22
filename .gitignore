@@ -1,4 +1,4 @@
-# Danh sách cho phép: bỏ qua mọi thứ, chỉ nhận các loại tệp nhỏ do mình viết.
+# Nhận: các tệp chữ do mình viết và sách PDF của các thư mục được chọn.
 *
 !*/
 !.gitignore
@@ -8,13 +8,12 @@
 !*.json
 !*.ino
 !*.txt
-# Không bao giờ nhận: kho sách của bên thứ ba và các thư mục chứa sách/tệp lỗi
+!*.pdf
+# Giữ trên máy nhưng KHÔNG đẩy lên GitHub
 _repo-technical-books/
 _Trung-lap/
 _File-loi/
-# Giữ trên máy nhưng không đưa lên GitHub
 Java/
 C-Cpp/
-Database/
 Software-Engineering/
 Math/

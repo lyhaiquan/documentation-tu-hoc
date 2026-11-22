@@ -20,8 +20,8 @@ for code in sorted(pages, key=lambda k: -pages[k]):
     m = META[code]
     rows.append('| %s | %s | %s · %s | `%s` | %d | %d |' % (code, m[0], m[1], m[2], TOC[code]['path'], TOC[code]['pages'], pages[code]))
 lib = ('# Danh mục sách mà giáo án cần\n\n'
-       'Repo này **không chứa sách** (bản quyền và dung lượng). Giáo án `giao-an-theo-mon.html` trỏ tới các PDF theo đường dẫn tương đối ở bảng dưới.\n'
-       'Muốn link mở được: đặt PDF đúng đường dẫn này **cạnh** file HTML (cùng thư mục gốc với `giao-an-theo-mon.html`). Số trang là số trang PDF (khớp thanh trang của trình xem). '
+       'Repo này **có kèm bản sao các sách PDF** mà giáo án dùng (để dùng cá nhân; repo để PRIVATE, đừng công khai vì bản quyền). Giáo án `giao-an-theo-mon.html` trỏ tới các PDF theo đường dẫn tương đối ở bảng dưới.\n'
+       'Clone repo về là link mở được ngay. Nếu bạn chỉ có HTML: đặt PDF đúng đường dẫn này **cạnh** file HTML. Số trang là số trang PDF (khớp thanh trang của trình xem). '
        'Nếu file của bạn là bản khác (khác số trang), chạy lại `_src-giao-an/mktoc.py` rồi `build.py` để sinh lại trang.\n\n'
        '| Mã | Sách | Tác giả · năm | Đường dẫn | Số trang PDF | Trang đã xếp vào lịch |\n|---|---|---|---|---|---|\n' + '\n'.join(rows) + '\n')
 open('D:/Documentation/LIBRARY.md', 'w', encoding='utf-8').write(lib)

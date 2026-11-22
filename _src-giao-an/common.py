@@ -21,7 +21,7 @@ META = {
  'LKD': ('Linux Kernel Development, 3rd Ed (kernel 2.6.34)', 'Robert Love', '2010', 'OS-Linux-Networking'),
  'HPBN': ('High Performance Browser Networking', 'Ilya Grigorik', '2013', 'OS-Linux-Networking'),
  'STEVENS': ('TCP/IP Illustrated Vol.1, 1st Ed', 'W. Richard Stevens', '1994', 'OS-Linux-Networking'),
- 'UNP': ('UNIX Network Programming Vol.1, 3rd Ed', 'Stevens, Fenner, Rudoff', '2003', '_repo-technical-books'),
+ 'UNP': ('UNIX Network Programming Vol.1, 3rd Ed', 'Stevens, Fenner, Rudoff', '2003', 'OS-Linux-Networking'),
  'LGO2': ('Learning Go, 2nd Ed', 'Jon Bodner', '2024', 'Go'),
  'MGO': ('Mastering Go, 3rd Ed', 'Mihalis Tsoukalos', '2024', 'Go'),
  'NETGO': ('Network Programming with Go', 'Adam Woodbeck', '2021', 'Go'),

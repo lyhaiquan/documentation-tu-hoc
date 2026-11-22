@@ -14,9 +14,13 @@ Kho các lộ trình và giáo án tự học bằng tiếng Việt, mỗi tệp
 | `IoT-Bai1/` | Bài thực hành IoT (Wokwi): mã nguồn, mô phỏng, phiếu lab |
 | `ouroboros/` | Tài liệu dự án ouroboros |
 
-## Sách PDF không nằm trong repo
+## Sách PDF
 
-Các trang HTML có link mở PDF theo đường dẫn tương đối. Xem `LIBRARY.md` để biết cần đặt sách nào ở đâu. Không có sách thì phần còn lại vẫn đọc được, chỉ các link "mở trang sách" không hoạt động.
+Repo **có kèm bản sao các sách PDF** mà giáo án dùng (thư mục `OS-Linux-Networking`, `Go`, `Kubernetes`, `System-Design-Architecture`, `AI-ML`, `Giao-trinh-Tieng-Viet`, `Database`), để clone về là các link "mở đúng trang sách" hoạt động ngay. Danh mục và đường dẫn xem `LIBRARY.md`.
+
+**Repo này để private, dùng cá nhân.** Sách có bản quyền, đừng đổi sang public.
+
+Không đưa lên: `Java/`, `C-Cpp/`, `Software-Engineering/`, `Math/` (giữ trên máy), `_Trung-lap/` (bản trùng, có file 1,25 GB vượt giới hạn 100 MB của GitHub), `_File-loi/`, `_repo-technical-books/` (repo của bên thứ ba).
 
 ## Sinh lại giáo án
 
