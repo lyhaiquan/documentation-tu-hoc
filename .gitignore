@@ -1,19 +1,4 @@
-# Nhận: các tệp chữ do mình viết và sách PDF của các thư mục được chọn.
-*
-!*/
-!.gitignore
-!*.html
-!*.md
-!*.py
-!*.json
-!*.ino
-!*.txt
-!*.pdf
-# Giữ trên máy nhưng KHÔNG đẩy lên GitHub
-_repo-technical-books/
-_Trung-lap/
-_File-loi/
-Java/
-C-Cpp/
-Software-Engineering/
-Math/
+*.zip
+*.epub
+*.docx
+__pycache__/

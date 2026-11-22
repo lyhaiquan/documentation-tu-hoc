@@ -7,8 +7,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import common
 from common import TOC
 
-PATH = 'D:/Documentation/giao-an-theo-mon.html'
-DOC = 'D:/Documentation/'
+FLAT = os.environ.get('GA_FLAT_OUT')
+DOC = (FLAT.rstrip('/') + '/') if FLAT else 'D:/Documentation/'
+PATH = DOC + 'giao-an-theo-mon.html'
 t = open(PATH, encoding='utf-8').read()
 err = []
 

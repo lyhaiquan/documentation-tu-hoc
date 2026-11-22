@@ -6,7 +6,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import common
 from common import TOC, META, DENSE, SPECIAL
 
-OUT = 'D:/Documentation/giao-an-theo-mon.html'
+FLAT = os.environ.get('GA_FLAT_OUT')  # thư mục xuất kiểu phẳng cho repo; để trống = bố cục thư mục trên máy
+OUT = (FLAT.rstrip('/') + '/giao-an-theo-mon.html') if FLAT else 'D:/Documentation/giao-an-theo-mon.html'
 subj, days = common.all_data()
 weeks, ptr = common.schedule(days)
 SUB = common.SUBJECTS
@@ -41,6 +42,8 @@ def md(s):
 
 def pdf_href(code, page=None):
     rel = TOC[code]['path']
+    if FLAT:
+        rel = 'sach/' + rel.split('/')[-1]
     h = '/'.join(quote(p, safe='') for p in rel.split('/'))
     return h + ('#page=%d' % page if page else '')
 

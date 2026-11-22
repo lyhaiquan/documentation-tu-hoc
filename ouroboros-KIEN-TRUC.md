@@ -1186,4 +1186,4 @@ tuần 6. Nấc 5 chạy được ở tuần 13. Không bao giờ có giai đo�
 "đang xây, chưa chạy được". Đó là lý do lộ trình chia theo nấc chứ không chia
 theo mô-đun.
 
-Mở [PROGRESS.md](PROGRESS.md), tick ô đầu tiên, bắt đầu.
+Mở [PROGRESS.md](ouroboros-PROGRESS.md), tick ô đầu tiên, bắt đầu.
