@@ -15,6 +15,7 @@ COL = {  # sáng / tối
     'LIN': ('#1b6b4a', '#5fcf9f'), 'SYS': ('#7a3fb5', '#c39bf0'), 'KER': ('#b4530a', '#f0a860'),
     'NET': ('#0c6e9c', '#6cc4ee'), 'GOL': ('#7a7a00', '#d8d85a'), 'CON': ('#a8324a', '#f08a9e'),
     'K8S': ('#3a54b4', '#8fa4f5'), 'DIS': ('#107a7a', '#5fd0d0'),
+    'DBS': ('#8a5a00', '#e0b040'), 'AIS': ('#9b2d86', '#e08ad0'),
 }
 TAGTXT = {
     'root': ('cần sudo', 'Cần quyền root (sudo). Chỉ làm trong máy của bạn.'),
@@ -25,6 +26,7 @@ TAGTXT = {
     'go': ('cần Go', 'Dùng Go: đã học ở môn GOL.'),
     'k8s': ('cần K8S', 'Dùng cụm kind (môn K8S).'),
     'kiểm-máy': ('kiểm máy', 'Ngày kiểm tra cấu hình máy.'),
+    'gpu': ('cần GPU', 'Cần GPU NVIDIA và driver chạy (kiểm ở LIN-01: nvidia-smi). Máy bạn: RTX 3050 Ti 4 GB.'),
 }
 
 
@@ -278,7 +280,7 @@ details.wk>summary .pc{margin-left:auto;color:var(--mute);font-weight:400;font-s
 <body>
 <div class="wrap">
 <h1>Giáo án tự học theo môn</h1>
-<p class="sub">Linux · mạng · Go · container · Kubernetes · hệ phân tán. __ND__ ngày học trong __NW__ tuần, 8 môn, khoảng __NP__ trang đọc có chỉ rõ chương và trang. Lập ngày 22/11/2026 cho máy cài Linux thật (dual-boot, SSD 500 GB riêng, RAM 16 GB).</p>
+<p class="sub">Linux · mạng · Go · container · Kubernetes · database internals · hệ phân tán · AI infrastructure. __ND__ ngày học trong __NW__ tuần, __NS__ môn, khoảng __NP__ trang đọc có chỉ rõ chương và trang. Lập ngày 22/11/2026 cho máy cài Linux thật (dual-boot, SSD 500 GB riêng, RAM 16 GB).</p>
 
 <div class="box">
 <p><b>Cách dùng.</b> Mỗi tuần 6 ngày học và Chủ nhật ôn. Mỗi ngày 2–3 giờ đọc và 1–2 giờ thực hành (nhịp giống <a href="lo-trinh-tong-52-tuan.html">lộ trình tổng 52 tuần</a>). Mỗi ngày ghi rõ: <b>môn</b>, <b>chủ đề</b>, <b>đọc sách nào, chương nào, trang nào</b> (bấm vào tên sách để mở đúng trang), <b>nắm được gì</b> khi đọc xong, <b>bài thực hành</b> với lệnh cụ thể, và <b>một câu tự kiểm</b> để trả lời miệng. Chọn ngày bắt đầu bên dưới, trang tự tính ngày cho từng buổi.</p>
@@ -298,14 +300,14 @@ details.wk>summary .pc{margin-left:auto;color:var(--mute);font-weight:400;font-s
 
 <h2>Quan hệ với các lộ trình khác</h2>
 <div class="box">
-<p>Tệp này <b>thay thế thứ tự</b> của <a href="lo-trinh-tong-52-tuan.html">lộ trình tổng 52 tuần</a> cho sáu mảng: Linux, mạng, Go, container/Docker, Kubernetes, hệ phân tán. Tệp 52 tuần chưa bị sửa; nếu dùng tệp này làm lịch chính, bỏ qua các giai đoạn tương ứng bên đó. <a href="lo-trinh-aws.html">AWS</a>, <a href="lo-trinh-ai-infrastructure.html">AI infrastructure</a> và <a href="ke-hoach-vdt.html">kế hoạch VDT</a> vẫn theo tệp riêng của chúng, làm sau hoặc song song tuỳ mục tiêu.</p>
-<p>Các bài thực hành C tham chiếu thẳng vào đơn vị của <a href="lo-trinh-c.html">lộ trình C</a> (ví dụ G3, H2, J4) thay vì làm lại. <a href="ke-hoach-he-thong.html">Kế hoạch 71 buổi</a> dùng khi bạn muốn thêm chiều sâu hoặc số trang bổ sung cho cơ sở dữ liệu.</p>
-<p><b>Không có trong giáo án này:</b> cơ sở dữ liệu quan hệ (ngoài phần lưu trữ và giao dịch trong môn DIS), bảo mật ứng dụng web, an ninh mạng chuyên sâu, hạ tầng cloud cụ thể, GPU và AI infra.</p>
+<p>Tệp này <b>thay thế thứ tự</b> của <a href="lo-trinh-tong-52-tuan.html">lộ trình tổng 52 tuần</a> cho các mảng: Linux, mạng, Go, container/Docker, Kubernetes, database internals, hệ phân tán, AI infrastructure. Tệp 52 tuần chưa bị sửa; nếu dùng tệp này làm lịch chính, bỏ qua các giai đoạn tương ứng bên đó. <a href="lo-trinh-aws.html">AWS</a> và <a href="ke-hoach-vdt.html">kế hoạch VDT</a> vẫn theo tệp riêng của chúng, làm sau hoặc song song tuỳ mục tiêu. <a href="lo-trinh-ai-infrastructure.html">Lộ trình AI infrastructure chi tiết</a> (60 đơn vị) là phần đào sâu của môn AIS: dùng khi muốn thêm bài, không thay lịch.</p>
+<p>Các bài thực hành C tham chiếu thẳng vào đơn vị của <a href="lo-trinh-c.html">lộ trình C</a> (ví dụ G3, H2, J4) thay vì làm lại. <a href="ke-hoach-he-thong.html">Kế hoạch 71 buổi</a> dùng khi bạn muốn thêm chiều sâu hoặc số trang bổ sung.</p>
+<p><b>Không có trong giáo án này:</b> học máy nền tảng (mô hình, toán, huấn luyện mô hình từ đầu), lập trình SQL và ứng dụng CSDL, bảo mật ứng dụng web, an ninh mạng chuyên sâu, hạ tầng cloud cụ thể (AWS có lộ trình riêng), lập trình CUDA. Môn AIS chỉ dạy hạ tầng của AI.</p>
 </div>
 
-<h2>Tám môn học</h2>
+<h2>__NS__ môn học</h2>
 <div class="cards">__CARDS__</div>
-<p class="sub">Thứ tự môn đi theo phụ thuộc: Linux → lập trình hệ thống → kernel; Linux → mạng (cùng lúc, mạng dùng namespace cho môn container); Go đi sớm vì mọi môn sau đều viết mã Go; container cần mạng và hệ thống; Kubernetes cần container, Go và mạng; hệ phân tán cần Go, mạng và kernel (khoá, nhật ký, fsync), và kết thúc bằng một hệ thống chạy trên Kubernetes.</p>
+<p class="sub">Thứ tự môn đi theo phụ thuộc: Linux → lập trình hệ thống → kernel; Linux → mạng (cùng lúc, mạng dùng namespace cho môn container); Go đi sớm vì mọi môn sau đều viết mã Go; container cần mạng và hệ thống; Kubernetes cần container, Go và mạng; database internals cần hệ thống, kernel (page cache, fsync) và Go, và đứng trước hệ phân tán vì các ngày cuối của hệ phân tán dùng lại kho khoá-giá trị, WAL và giao dịch bạn dựng ở DBS; hệ phân tán cần Go, mạng và kernel, và kết thúc bằng một hệ thống chạy trên Kubernetes; AI infrastructure đứng cuối vì dùng mọi thứ trước (bộ nhớ, mạng, chịu lỗi, lập lịch, container).</p>
 
 <h2>Thời khoá biểu theo tuần</h2>
 <p class="sub">Mỗi ô là số ngày học của môn đó trong tuần (tối đa 6). Mỗi tuần chạy song song hai môn xen kẽ để đổi không khí và để môn này củng cố môn kia.</p>
@@ -326,6 +328,8 @@ __LIB__
 <li><b>Docker Deep Dive (2020):</b> sách theo công cụ, chỉ để tham khảo; lệnh hiện hành tra tài liệu chính thức.</li>
 <li><b>Kubernetes Up and Running (bản Early Release):</b> thiếu một số chương (ConfigMap/Secret, StatefulSet): bài K8S-07 và K8S-10 trỏ sang tài liệu chính thức và sách khác.</li>
 <li><b>Mạng máy tính (giáo trình tiếng Việt)</b> trong kho: file chỉ có 9 trang, nên giáo án không dùng.</li>
+<li><b>PostgreSQL 14 Internals:</b> viết cho PostgreSQL 14; cấu trúc và khái niệm (MVCC, WAL, khoá, kế hoạch truy vấn) vẫn đúng ở bản mới; tên cột/hàm và mặc định có thể đổi, đối chiếu <a href="https://www.postgresql.org/docs/current/" target="_blank" rel="noopener">tài liệu hiện hành</a>. Bài DBS chạy PostgreSQL bằng Docker, nên phiên bản bạn kéo về có thể mới hơn 14.</li>
+<li><b>Machine Learning Systems Vol 1/2 (mlsysbook)</b> và <b>Understanding AI Infra (Bojie Li, v1.0 EN)</b>: các bản PDF trong kho (Bojie Li ghi ngày 1/10/2026). Sách mở nguồn cập nhật liên tục nên số trang có thể khác bản hiện hành; kiểm tên chương trước khi tin số trang nếu bạn dùng bản khác.</li>
 </ul>
 </div>
 
@@ -354,7 +358,7 @@ __WEEKS__
 
 <h2>Nếu trễ lịch thì cắt ở đâu</h2>
 <div class="box">
-<p>Không cắt các nền: LIN, SYS, KER-01…KER-17, KER-22…KER-23, NET-01…NET-15, NET-19…NET-23, DIS-04…DIS-14. Khi buộc phải cắt, theo thứ tự: bài tham khảo Docker (CON-05, CON-10) → NET-16…NET-18 (HTTP) → KER-18 (thời gian) và KER-21 (đĩa cứng) → DIS-15 và DIS-20. Không cắt các ngày tổng kết cuối môn (có bài làm ghép nhiều môn).</p>
+<p>Không cắt các nền: LIN, SYS, KER-01…KER-17, KER-22…KER-23, NET-01…NET-15, NET-19…NET-23, DBS-01…DBS-10, DIS-04…DIS-14, AIS-01…AIS-09. Khi buộc phải cắt, theo thứ tự: bài tham khảo Docker (CON-05, CON-10) → NET-16…NET-18 (HTTP) → KER-18 (thời gian) và KER-21 (đĩa cứng) → AIS-24 và AIS-25 → DBS-17…DBS-19 (một phần truy vấn) → DIS-15 và DIS-17. Không cắt các ngày tổng kết cuối môn (có bài làm ghép nhiều môn).</p>
 </div>
 
 <p class="foot">Dữ liệu và trang kiểm tự động từ mục lục PDF; chưa chạy lab trên máy bạn. Khi sách và máy khác nhau, lấy máy làm chuẩn rồi ghi lại sự khác biệt vào sổ ghi (đó cũng là kiến thức).</p>
@@ -442,7 +446,7 @@ if(location.hash){var h=document.getElementById(location.hash.slice(1));if(h){va
 
 flt = ''.join('<button type="button" data-s="%s" class="s-%s">%s</button>' % (c, c, esc(c)) for c in SUB)
 page = (PAGE.replace('__COLL__', CSS_COL).replace('__COLD__', CSS_COL_D)
-        .replace('__AVG__', str(round(total_pages/total_days))).replace('__ND__', str(total_days)).replace('__NW__', str(nweeks)).replace('__NP__', '{:,}'.format(total_pages).replace(',', '.'))
+        .replace('__AVG__', str(round(total_pages/total_days))).replace('__ND__', str(total_days)).replace('__NW__', str(nweeks)).replace('__NS__', str(len(SUB))).replace('__NP__', '{:,}'.format(total_pages).replace(',', '.'))
         .replace('__CARDS__', ''.join(cards)).replace('__MATRIX__', ''.join(mat)).replace('__LIB__', ''.join(lib))
         .replace('__FLT__', flt).replace('__WEEKS__', ''.join(week_html)))
 open(OUT, 'w', encoding='utf-8').write(page)

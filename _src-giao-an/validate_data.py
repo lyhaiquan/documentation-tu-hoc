@@ -10,7 +10,7 @@ weeks, ptr = common.schedule(days)
 err = []
 warn = []
 KEYS = ['t', 'why', 'r', 'g', 'lab', 'q']
-TAGS = {'root', 'kvm', 'cgroup-v2', 'perf', 'cẩn-thận', 'go', 'k8s', 'kiểm-máy'}
+TAGS = {'root', 'kvm', 'cgroup-v2', 'perf', 'cẩn-thận', 'go', 'k8s', 'kiểm-máy', 'gpu'}
 
 for c in common.SUBJECTS:
     for i, d in enumerate(days[c], 1):
@@ -75,7 +75,9 @@ PRE = {
     'NET': [('LIN', L(days['LIN']))],
     'CON': [('NET', L(days['NET'])), ('SYS', L(days['SYS']))],
     'K8S': [('CON', L(days['CON'])), ('GOL', L(days['GOL'])), ('NET', L(days['NET']))],
+    'DBS': [('SYS', L(days['SYS'])), ('GOL', L(days['GOL'])), ('KER', 23)],
     'DIS': [('GOL', L(days['GOL'])), ('NET', L(days['NET'])), ('KER', 23)],
+    'AIS': [('KER', L(days['KER'])), ('NET', L(days['NET']))],
 }
 for c, lst in PRE.items():
     for (p, k) in lst:
@@ -85,13 +87,20 @@ before(pos('SYS', 13), pos('NET', 19), 'NET-19 (socket) cần SYS-13 (tín hiệ
 before(pos('GOL', L(days['GOL'])), pos('NET', 24), 'NET-24 (Go) cần GOL xong')
 before(pos('NET', 6), pos('CON', 3), 'CON-03 cần NET-06 (netns)')
 before(pos('GOL', L(days['GOL'])), pos('CON', 12), 'CON-12 cần GOL xong')
-before(pos('K8S', L(days['K8S'])), pos('DIS', L(days['DIS'])), 'DIS-22 cần K8S xong')
+before(pos('K8S', L(days['K8S'])), pos('DIS', L(days['DIS'])), 'DIS-cuối cần K8S xong')
+before(pos('DBS', 2), pos('DIS', 16), 'DIS-16 cần DBS-02 (kho Bitcask)')
+before(pos('DBS', 6), pos('DIS', 17), 'DIS-17 cần DBS-06 (WAL)')
+before(pos('DBS', 10), pos('DIS', 17), 'DIS-17 cần DBS-09/10 (giao dịch)')
+before(pos('DIS', 15), pos('AIS', 23), 'AIS-23 cần DIS-15 (chịu lỗi)')
+before(pos('NET', 6), pos('AIS', 16), 'AIS-16 cần NET-06 (netns)')
+before(pos('AIS', 15), pos('AIS', 16), 'AIS-16 cần AIS-15 (mô hình α–β)')
+before(pos('AIS', 19), pos('AIS', 21), 'AIS-21 cần AIS-19 (chi phí mỗi token)')
 before(pos('NET', 25), pos('K8S', 5), 'K8S-05 cần NET-25 (nft/NAT)')
 before(pos('NET', 6), pos('DIS', 4), 'DIS-04 cần NET-06')
 
 
 # --- khoảng hở nhỏ giữa các lần đọc liên tiếp của cùng một sách (thường là sơ suất)
-GAP_OK = {('LIN', 5, 'TLCL'), ('KER', 1, 'OSTEP'), ('SYS', 2, 'CSAPP')}  # trang chia phần / đối thoại, bỏ có chủ đích
+GAP_OK = {('LIN', 5, 'TLCL'), ('KER', 1, 'OSTEP'), ('SYS', 2, 'CSAPP'), ('DBS', 9, 'PG14'), ('DBS', 15, 'PG14'), ('DBS', 19, 'PG14')}  # trang chia phần / đối thoại, bỏ có chủ đích
 for c in common.SUBJECTS:
     last = {}
     for i, d in enumerate(days[c], 1):

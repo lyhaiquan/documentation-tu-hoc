@@ -6,7 +6,7 @@ Kho các lộ trình và giáo án tự học bằng tiếng Việt, mỗi tệp
 
 | Tệp | Nội dung |
 |---|---|
-| `giao-an-theo-mon.html` | **Giáo án chính**: 152 ngày, 8 môn (Linux, lập trình hệ thống, kernel, mạng, Go, container, Kubernetes, hệ phân tán), 26 tuần. Mỗi ngày: đọc sách nào chương nào trang nào, nắm được gì, bài thực hành, câu tự kiểm |
+| `giao-an-theo-mon.html` | **Giáo án chính**: 197 ngày, 10 môn (Linux, lập trình hệ thống, kernel, mạng, Go, container, Kubernetes, database internals, hệ phân tán, AI infrastructure), 33 tuần. Mỗi ngày: đọc sách nào chương nào trang nào, nắm được gì, bài thực hành, câu tự kiểm |
 | `lo-trinh-tong-52-tuan.html` | Lộ trình tổng 52 tuần (cloud, AI infra, hệ phân tán) |
 | `lo-trinh-c.html` | 55 đơn vị lập trình C từ cơ bản tới hệ thống và mạng |
 | `lo-trinh-aws.html`, `lo-trinh-ai-infrastructure.html` | Lộ trình AWS và AI infrastructure |

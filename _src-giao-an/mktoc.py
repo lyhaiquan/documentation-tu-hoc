@@ -26,6 +26,10 @@ BOOKS = [
     ('DS', 'System-Design-Architecture/Distributed Systems Principles and Paradigms 2nd Ed (Tanenbaum, van Steen).pdf'),
     ('DDIA', 'System-Design-Architecture/Designing Data-Intensive Applications (Kleppmann).pdf'),
     ('DBI', 'Database/Database Internals - A Deep Dive (Alex Petrov).pdf'),
+    ('PG14', 'Database/PostgreSQL 14 Internals (Egor Rogov).pdf'),
+    ('MLS1', 'AI-ML/Machine Learning Systems Vol 1.pdf'),
+    ('MLS2', 'AI-ML/Machine Learning Systems Vol 2.pdf'),
+    ('BOJIE', 'AI-ML/Understanding AI Infra v1.0 EN (Bojie Li).pdf'),
 ]
 out = {}
 for code, rel in BOOKS:

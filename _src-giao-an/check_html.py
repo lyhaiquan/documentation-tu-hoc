@@ -66,11 +66,14 @@ if p.stack:
 dup = {i for i in p.ids if p.ids.count(i) > 1}
 if dup:
     err.append('id trùng: %s' % list(dup)[:10])
-if len(p.cb) != 152 or len(set(p.cb)) != 152:
-    err.append('checkbox: %d (duy nhất %d), mong 152' % (len(p.cb), len(set(p.cb))))
+_s, _d = common.all_data()
+_wk, _ = common.schedule(_d)
+NDAY = sum(len(x) for x in _d.values())
+if len(p.cb) != NDAY or len(set(p.cb)) != NDAY:
+    err.append('checkbox: %d (duy nhất %d), mong %d' % (len(p.cb), len(set(p.cb)), NDAY))
 for k in ('details', 'div', 'ul', 'ol', 'li', 'table', 'p'):
     pass
-if p.counts.get('details') != 26:
+if p.counts.get('details') != len(_wk):
     err.append('số tuần (details) = %s' % p.counts.get('details'))
 
 # --- liên kết
@@ -82,6 +85,7 @@ EXT_OK = {
     'https://www.rfc-editor.org/rfc/rfc9293', 'https://www.rfc-editor.org/rfc/rfc9000', 'https://www.rfc-editor.org/rfc/rfc9114',
     'https://www.rfc-editor.org/rfc/rfc8446', 'https://www.kernel.org/doc/html/latest/networking/index.html',
     'https://raft.github.io/raft.pdf', 'https://pdos.csail.mit.edu/6.824/',
+    'https://www.postgresql.org/docs/current/',
 }
 import html as H
 ext = set()

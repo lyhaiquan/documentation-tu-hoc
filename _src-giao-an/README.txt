@@ -1,6 +1,6 @@
-Nguon sinh ra giao-an-theo-mon.html (giao an 152 ngay, 8 mon).
+Nguon sinh ra giao-an-theo-mon.html (giao an 197 ngay, 10 mon (LIN SYS KER NET GOL CON K8S DBS DIS AIS)).
 
-Du lieu: moi mon mot file s_*.py (s_lin, s_sys, s_ker, s_net, s_gol, s_con, s_k8s, s_dis).
+Du lieu: moi mon mot file s_*.py (s_lin, s_sys, s_ker, s_net, s_gol, s_con, s_k8s, s_dbs, s_dis, s_ais).
   Moi ngay la mot dict: t (chu de), why (noi tu bai truoc), r (doc: ma sach, nhan, trang dau, trang cuoi),
   g (nam duoc), lab (thuc hanh), q (tu kiem), tags, x (lien quan).
 Muc luc sach: toc.json (tao bang mktoc.py tu cac PDF trong D:\Documentation; xem BOOKS trong mktoc.py).

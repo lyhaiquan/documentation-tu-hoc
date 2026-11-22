@@ -4,11 +4,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 SP = os.path.dirname(os.path.abspath(__file__))
 TOC = json.load(open(os.path.join(SP, 'toc.json'), encoding='utf-8'))
 
-SUBJECTS = ['LIN', 'SYS', 'KER', 'NET', 'GOL', 'CON', 'K8S', 'DIS']
-MODS = {'LIN': 's_lin', 'SYS': 's_sys', 'KER': 's_ker', 'NET': 's_net', 'GOL': 's_gol', 'CON': 's_con', 'K8S': 's_k8s', 'DIS': 's_dis'}
+SUBJECTS = ['LIN', 'SYS', 'KER', 'NET', 'GOL', 'CON', 'K8S', 'DBS', 'DIS', 'AIS']
+MODS = {'LIN': 's_lin', 'SYS': 's_sys', 'KER': 's_ker', 'NET': 's_net', 'GOL': 's_gol', 'CON': 's_con', 'K8S': 's_k8s', 'DBS': 's_dbs', 'DIS': 's_dis', 'AIS': 's_ais'}
 
 # nặng (đọc chậm) hay nhẹ
-DENSE = {'CSAPP', 'TLPI', 'STEVENS', 'UNP', 'DS', 'DDIA', 'DBI', 'LKD', 'APUE'}
+DENSE = {'CSAPP', 'TLPI', 'STEVENS', 'UNP', 'DS', 'DDIA', 'DBI', 'LKD', 'APUE', 'PG14', 'BOJIE'}
 SPECIAL = {'WEB', 'MAN', 'HW'}
 LOAD_CAP = 40.0
 
@@ -32,6 +32,10 @@ META = {
  'DS': ('Distributed Systems: Principles and Paradigms, 2nd Ed', 'Tanenbaum, van Steen', '2007', 'System-Design-Architecture'),
  'DDIA': ('Designing Data-Intensive Applications', 'Martin Kleppmann', '2017', 'System-Design-Architecture'),
  'DBI': ('Database Internals', 'Alex Petrov', '2019', 'Database'),
+ 'PG14': ('PostgreSQL 14 Internals', 'Egor Rogov', '2022', 'Database'),
+ 'MLS1': ('Machine Learning Systems Vol 1: Introduction to Machine Learning Systems (mlsysbook)', 'Vijay Janapa Reddi và cộng sự', '2025–2026', 'AI-ML'),
+ 'MLS2': ('Machine Learning Systems Vol 2: ML Systems at Scale (mlsysbook)', 'Vijay Janapa Reddi và cộng sự', '2025–2026', 'AI-ML'),
+ 'BOJIE': ('Understanding AI Infra: Quantitative Analysis and System Design, v1.0 EN', 'Bojie Li', '10/2026', 'AI-ML'),
 }
 
 
@@ -64,9 +68,12 @@ _w(1, 'KER', 2, 'NET', 4)
 _w(4, 'KER', 3, 'CON', 3)
 _w(1, 'KER', 3, 'K8S', 3)
 _w(1, 'KER', 1, 'K8S', 5)
-_w(1, 'K8S', 4, 'DIS', 2)
-_w(3, 'DIS', 6, None, 0)
-_w(1, 'DIS', 2, None, 0)
+_w(1, 'K8S', 4, 'DBS', 2)
+_w(5, 'DBS', 3, 'DIS', 3)
+_w(1, 'DBS', 5, 'DIS', 1)
+_w(1, 'DIS', 3, 'AIS', 3)
+_w(3, 'AIS', 6, None, 0)
+_w(1, 'AIS', 5, None, 0)
 
 
 def interleave(A, a, B, b):
